@@ -142,8 +142,11 @@ making sure that you maintain a proper JSON format.
 				"dependency": { 
 					"type": "and", 
 					"values": [{
-						"key": "required",
-						"value": false
+						"type": "not",
+						"values": {
+							"key": "required",
+							"value": true
+						}
 					}, {
 						"type": "not",
 						"values": {
@@ -509,8 +512,11 @@ making sure that you maintain a proper JSON format.
 				"dependency": { 
 					"type": "and", 
 					"values": [{
-						"key": "required",
-						"value": false
+						"type": "not",
+						"values": {
+							"key": "required",
+							"value": true
+						}
 					}, {
 						"type": "not",
 						"values": {
@@ -652,8 +658,11 @@ making sure that you maintain a proper JSON format.
 				"dependency": { 
 					"type": "and", 
 					"values": [{
-						"key": "required",
-						"value": false
+						"type": "not",
+						"values": {
+							"key": "required",
+							"value": true
+						}
 					}, {
 						"type": "not",
 						"values": {
@@ -784,8 +793,11 @@ making sure that you maintain a proper JSON format.
 				"dependency": { 
 					"type": "and", 
 					"values": [{
-						"key": "required",
-						"value": false
+						"type": "not",
+						"values": {
+							"key": "required",
+							"value": true
+						}
 					}, {
 						"type": "not",
 						"values": {
@@ -1176,8 +1188,11 @@ making sure that you maintain a proper JSON format.
 				"dependency": { 
 					"type": "and", 
 					"values": [{
-						"key": "required",
-						"value": false
+						"type": "not",
+						"values": {
+							"key": "required",
+							"value": true
+						}
 					}, {
 						"type": "not",
 						"values": {
