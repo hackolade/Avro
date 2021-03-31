@@ -3,5 +3,6 @@
   "name": "avro",
   "extensions": ["avsc", "avro"],
   "useCloudStorage": true,
-  "useMultipleFileReverse": true
+  "useMultipleFileReverse": true,
+  "useConfluent": true
 }
