@@ -33,38 +33,95 @@ const LOGICAL_TYPES_MAP = {
 	fixed: ['decimal', 'duration']
 };
 
+const getCommonEntitiesData=(data)=>{
+	const  {modelDefinitions, externalDefinitions}=data;
+	const options= {
+		targetScriptOptions: {
+		  keyword: "confluentSchemaRegistry",
+		},
+	  };
+
+	return {options, modelDefinitions, externalDefinitions}
+}
+
+const getEntityData=(container, entityId)=>{
+	const containerData=_.first(_.get(container, 'containerData', []));
+	const jsonSchema=container.jsonSchema[entityId];
+	const jsonData=container.jsonData[entityId];
+	const entityData=_.first(container.entityData[entityId]);
+	const internalDefinitions=container.internalDefinitions[entityId];
+
+	return {containerData, jsonSchema, jsonData, entityData, internalDefinitions}
+}
+
+const getScript = (data) => {
+	const name = getRecordName(data);
+	let avroSchema = { name };
+	let jsonSchema = JSON.parse(data.jsonSchema);
+	const udt = getUserDefinedTypes(data);
+
+	jsonSchema.type = 'root';
+	handleRecursiveSchema(jsonSchema, avroSchema, {}, udt);
+
+	if (data.containerData) {
+		avroSchema.namespace = data.containerData.name;
+	}
+	avroSchema.type = 'record';
+	avroSchema = reorderAvroSchema(avroSchema);
+	avroSchema = JSON.stringify(avroSchema, null, 4);
+	const options = data.options;
+	const additionalOptions = _.get(options, 'additionalOptions', []);
+	const targetScriptType = _.get(options, 'targetScriptOptions.keyword');
+	if (targetScriptType === 'schemaRegistry') {
+		avroSchema = JSON.stringify({ schema: JSON.stringify(JSON.parse(avroSchema)) }, null, 4);
+	}
+
+	if (targetScriptType === 'confluentSchemaRegistry') {
+		avroSchema = `POST /subjects/${name}/versions\n${JSON.stringify({ schemaType: "AVRO", schema: JSON.stringify(JSON.parse(avroSchema)) }, null, 4)}`
+	}
+
+	const needMinify = targetScriptType !== 'confluentSchemaRegistry' && (additionalOptions.find(option => option.id === 'minify') || {}).value;
+	if (needMinify) {
+		avroSchema = JSON.stringify(JSON.parse(avroSchema));
+	}
+
+	nameIndex = 0;
+	return avroSchema;
+}
+
 module.exports = {
+	generateModelScript(data, logger, cb){
+		logger.clear();
+		try{
+			const commonData=getCommonEntitiesData(data);
+			const containers=_.get(data, 'containers', []);
+			const script =containers.reduce((createdQueries, container)=>{
+				const containerEntities=container.entities.map(entityId=>{
+					return Object.assign({}, commonData, getEntityData(container, entityId))
+				})
+
+				const containerQueries=containerEntities.map(entity=>{
+					try{
+						return getScript(entity)
+					}catch(e){
+						logger.log('error', { message: err.message, stack: err.stack }, 'Avro Forward-Engineering Error');
+						return '';
+					}
+				})
+
+				return [...createdQueries, ...containerQueries];
+			}, [])
+			cb(null, script.join('\n\n'));
+		}catch(err){
+			logger.log('error', { message: err.message, stack: err.stack }, 'Avro model Forward-Engineering Error');
+			cb({ message: err.message, stack: err.stack });
+		}
+	},
 	generateScript(data, logger, cb) {
 		logger.clear();
 		try {
-			const name = getRecordName(data);
-			let avroSchema = { name };
-			let jsonSchema = JSON.parse(data.jsonSchema);
-			const udt = getUserDefinedTypes(data);
-
-			jsonSchema.type = 'root';
-			handleRecursiveSchema(jsonSchema, avroSchema, {}, udt);
-
-			if (data.containerData) {
-				avroSchema.namespace = data.containerData.name;
-			}
-			avroSchema.type = 'record';
-			avroSchema = reorderAvroSchema(avroSchema);
-			avroSchema = JSON.stringify(avroSchema, null, 4);
-			const options = data.options;
-			const additionalOptions = _.get(options, 'additionalOptions', []);
-			const targetScriptType = _.get(options, 'targetScriptOptions.keyword');
-			if (targetScriptType === 'schemaRegistry') {
-				avroSchema = JSON.stringify({ schema: JSON.stringify(JSON.parse(avroSchema))}, null, 4);
-			}
-
-			const needMinify = (additionalOptions.find(option => option.id === 'minify') || {}).value;
-			if (needMinify) {
-				avroSchema = JSON.stringify(JSON.parse(avroSchema));
-			}
-
-			nameIndex = 0;
-			return cb(null, avroSchema);
+			const script=getScript(data);
+			cb(null, script)
 		} catch(err) {
 			nameIndex = 0;
 			logger.log('error', { message: err.message, stack: err.stack }, 'Avro Forward-Engineering Error');
@@ -73,14 +130,19 @@ module.exports = {
 	},
 	validate(data, logger, cb) {
 		try {
-			let avroSchema = JSON.parse(data.script);
-			if (Object.keys(avroSchema).length === 1 && avroSchema.schema) {
-				const messages = validationHelper.validate(avroSchema.schema);
-				cb(null, messages);
-			} else {
-				const messages = validationHelper.validate(data.script);
-				cb(null, messages);
+			let targetScript=data.script;
+			if(data.targetScriptOptions.keyword === 'confluentSchemaRegistry'){
+				targetScript=targetScript.split('\n').slice(1).join('\n')
 			}
+			let avroSchema = JSON.parse(targetScript);
+
+			if(data.targetScriptOptions.keyword !== 'avroSchema'){
+				const messages = validationHelper.validate(avroSchema.schema);
+				return cb(null, messages);
+			}
+
+			const messages = validationHelper.validate(targetScript);
+			cb(null, messages);
 		} catch (e) {
 			logger.log('error', { error: e }, 'Avro Validation Error');
 			cb(null, [{
