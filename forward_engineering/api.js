@@ -33,25 +33,25 @@ const LOGICAL_TYPES_MAP = {
 	fixed: ['decimal', 'duration']
 };
 
-const getCommonEntitiesData=(data)=>{
-	const  {modelDefinitions, externalDefinitions}=data;
-	const options= {
+const getCommonEntitiesData = (data) => {
+	const { modelDefinitions, externalDefinitions } = data;
+	const options = {
 		targetScriptOptions: {
-		  keyword: "confluentSchemaRegistry",
+			keyword: "confluentSchemaRegistry",
 		},
-	  };
+	};
 
-	return {options, modelDefinitions, externalDefinitions}
+	return { options, modelDefinitions, externalDefinitions }
 }
 
-const getEntityData=(container, entityId)=>{
-	const containerData=_.first(_.get(container, 'containerData', []));
-	const jsonSchema=container.jsonSchema[entityId];
-	const jsonData=container.jsonData[entityId];
-	const entityData=_.first(container.entityData[entityId]);
-	const internalDefinitions=container.internalDefinitions[entityId];
+const getEntityData = (container, entityId) => {
+	const containerData = _.first(_.get(container, 'containerData', []));
+	const jsonSchema = container.jsonSchema[entityId];
+	const jsonData = container.jsonData[entityId];
+	const entityData = _.first(container.entityData[entityId]);
+	const internalDefinitions = container.internalDefinitions[entityId];
 
-	return {containerData, jsonSchema, jsonData, entityData, internalDefinitions}
+	return { containerData, jsonSchema, jsonData, entityData, internalDefinitions }
 }
 
 const getScript = (data) => {
@@ -90,20 +90,20 @@ const getScript = (data) => {
 }
 
 module.exports = {
-	generateModelScript(data, logger, cb){
+	generateModelScript(data, logger, cb) {
 		logger.clear();
-		try{
-			const commonData=getCommonEntitiesData(data);
-			const containers=_.get(data, 'containers', []);
-			const script =containers.reduce((createdQueries, container)=>{
-				const containerEntities=container.entities.map(entityId=>{
+		try {
+			const commonData = getCommonEntitiesData(data);
+			const containers = _.get(data, 'containers', []);
+			const script = containers.reduce((createdQueries, container) => {
+				const containerEntities = container.entities.map(entityId => {
 					return Object.assign({}, commonData, getEntityData(container, entityId))
 				})
 
-				const containerQueries=containerEntities.map(entity=>{
-					try{
+				const containerQueries = containerEntities.map(entity => {
+					try {
 						return getScript(entity)
-					}catch(e){
+					} catch (e) {
 						logger.log('error', { message: err.message, stack: err.stack }, 'Avro Forward-Engineering Error');
 						return '';
 					}
@@ -112,7 +112,7 @@ module.exports = {
 				return [...createdQueries, ...containerQueries];
 			}, [])
 			cb(null, script.join('\n\n'));
-		}catch(err){
+		} catch (err) {
 			logger.log('error', { message: err.message, stack: err.stack }, 'Avro model Forward-Engineering Error');
 			cb({ message: err.message, stack: err.stack });
 		}
@@ -120,9 +120,9 @@ module.exports = {
 	generateScript(data, logger, cb) {
 		logger.clear();
 		try {
-			const script=getScript(data);
+			const script = getScript(data);
 			cb(null, script)
-		} catch(err) {
+		} catch (err) {
 			nameIndex = 0;
 			logger.log('error', { message: err.message, stack: err.stack }, 'Avro Forward-Engineering Error');
 			cb({ message: err.message, stack: err.stack });
@@ -130,13 +130,13 @@ module.exports = {
 	},
 	validate(data, logger, cb) {
 		try {
-			let targetScript=data.script;
-			if(data.targetScriptOptions.keyword === 'confluentSchemaRegistry'){
-				targetScript=targetScript.split('\n').slice(1).join('\n')
+			let targetScript = data.script;
+			if (data.targetScriptOptions.keyword === 'confluentSchemaRegistry') {
+				targetScript = targetScript.split('\n').slice(1).join('\n')
 			}
 			let avroSchema = JSON.parse(targetScript);
 
-			if(data.targetScriptOptions.keyword !== 'avroSchema'){
+			if (data.targetScriptOptions.keyword !== 'avroSchema') {
 				const messages = validationHelper.validate(avroSchema.schema);
 				return cb(null, messages);
 			}
