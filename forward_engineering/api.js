@@ -134,25 +134,25 @@ const getScript = (data) => {
 	}
 	avroSchema.type = 'record';
 	avroSchema = reorderAvroSchema(avroSchema);
-	avroSchema = JSON.stringify(avroSchema, null, 4);
 	const options = data.options;
 	const additionalOptions = _.get(options, 'additionalOptions', []);
 	const targetScriptType = _.get(options, 'targetScriptOptions.keyword');
+	nameIndex = 0;
+
 	if (targetScriptType === 'schemaRegistry') {
-		avroSchema = JSON.stringify({ schema: JSON.stringify(JSON.parse(avroSchema)) }, null, 4);
+		return JSON.stringify({ schema: JSON.stringify(avroSchema) }, null, 4);
 	}
 
 	if (targetScriptType === 'confluentSchemaRegistry') {
-		avroSchema = `POST /subjects/${name}/versions\n${JSON.stringify({ schemaType: "AVRO", schema: JSON.stringify(JSON.parse(avroSchema)) }, null, 4)}`
+		return `POST /subjects/${name}/versions\n${JSON.stringify({ schemaType: "AVRO", schema: JSON.stringify(avroSchema) }, null, 4)}`
 	}
 
 	const needMinify = targetScriptType !== 'confluentSchemaRegistry' && (additionalOptions.find(option => option.id === 'minify') || {}).value;
 	if (needMinify) {
-		avroSchema = JSON.stringify(JSON.parse(avroSchema));
+		return JSON.stringify(avroSchema);
 	}
 
-	nameIndex = 0;
-	return avroSchema;
+	return JSON.stringify(avroSchema, null, 4);
 }
 
 const getUserDefinedTypes = ({ internalDefinitions, externalDefinitions, modelDefinitions }) => {
