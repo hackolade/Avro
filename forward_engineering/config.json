@@ -17,7 +17,7 @@
       "disableApplyScriptToInstance": false
     },
     {
-      "name": "Confluent Schema",
+      "name": "Confluent API Schema",
       "keyword": "confluentSchemaRegistry",
       "isApplicationHandler": true
     }
@@ -36,7 +36,7 @@
       "validation": false,
       "options": [
         {
-          "name": "Confluent Schema",
+          "name": "Confluent API Schema",
           "keyword": "confluentSchemaRegistry",
           "mode": "json",
           "isApplicationHandler": true
