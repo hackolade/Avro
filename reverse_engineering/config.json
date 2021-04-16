@@ -2,6 +2,8 @@
   "menu_label": "Avro schema or data file",
   "name": "avro",
   "extensions": ["avsc", "avro", "confluent-avro"],
+  "connectionList": [ "name", "connectionType", "path" ],
+  "widestColumn": "path",
   "useCloudStorage": true,
   "useMultipleFileReverse": true,
   "useConfluent": true

@@ -80,7 +80,7 @@ module.exports = {
 			}
 			let avroSchema = JSON.parse(targetScript);
 
-			if (data.targetScriptOptions.keyword !== 'avroSchema') {
+			if (data.targetScriptOptions.keyword === 'confluentSchemaRegistry' || data.targetScriptOptions.keyword === 'schemaRegistry') {
 				const messages = validationHelper.validate(avroSchema.schema);
 				return cb(null, messages);
 			}

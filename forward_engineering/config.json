@@ -17,7 +17,7 @@
       "disableApplyScriptToInstance": false
     },
     {
-      "name": "Confluent Schema",
+      "name": "Confluent API Schema",
       "keyword": "confluentSchemaRegistry",
       "isApplicationHandler": true
     }
@@ -31,17 +31,6 @@
     }
   ],
   "level": {
-    "entity": true,
-    "model": {
-      "validation": false,
-      "options": [
-        {
-          "name": "Confluent Schema",
-          "keyword": "confluentSchemaRegistry",
-          "mode": "json",
-          "isApplicationHandler": true
-        }
-      ]
-    }
+    "entity": true
   }
 }
