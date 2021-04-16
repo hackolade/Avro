@@ -31,17 +31,6 @@
     }
   ],
   "level": {
-    "entity": true,
-    "model": {
-      "validation": false,
-      "options": [
-        {
-          "name": "Confluent API Schema",
-          "keyword": "confluentSchemaRegistry",
-          "mode": "json",
-          "isApplicationHandler": true
-        }
-      ]
-    }
+    "entity": true
   }
 }
