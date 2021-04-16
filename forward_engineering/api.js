@@ -6,7 +6,7 @@ const _ = require('lodash');
 const validationHelper = require('./validationHelper');
 const mapJsonSchema = require('../reverse_engineering/helpers/mapJsonSchema');
 
-const ADDITIONAL_PROPS = ['doc', 'order', 'aliases', 'symbols', 'namespace', 'size', 'durationSize', 'default', 'precision', 'scale'];
+const ADDITIONAL_PROPS = ['description', 'order', 'aliases', 'symbols', 'namespace', 'size', 'durationSize', 'default', 'precision', 'scale'];
 const ADDITIONAL_CHOICE_META_PROPS = ADDITIONAL_PROPS.concat('index');
 const PRIMITIVE_FIELD_ATTRIBUTES = ['order', 'logicalType', 'precision', 'scale', 'aliases'];
 const DEFAULT_TYPE = 'string';
@@ -454,7 +454,7 @@ const handleType = (schema, avroSchema, udt) => {
 };
 
 const handleMultiple = (avroSchema, schema, prop, udt) => {
-	const commonAttributes = ["aliases", "doc", "default"];
+	const commonAttributes = ["aliases", "description", "default"];
 	avroSchema[prop] = schema[prop].map(type => {
 		if (type && typeof type === 'object') {
 			return type.type;
@@ -493,6 +493,13 @@ const handleMultiple = (avroSchema, schema, prop, udt) => {
 
 	const fieldProperties = commonAttributes.reduce((fieldProps, prop) => {
 		if (schema[prop]) {
+			if(prop === 'description') {
+				return {
+					...fieldProps,
+					doc: schema[prop],
+				}
+			}
+
 			return Object.assign({}, fieldProps, {
 				[prop]: schema[prop]
 			});
@@ -731,6 +738,13 @@ const handleOtherProps = (schema, prop, avroSchema, udt) => {
 	if (!allowedProperties.includes(prop)) {
 		return;
 	}
+
+	if(prop === 'description') {
+		avroSchema.doc = schema[prop];
+
+		return;
+	}
+
 	avroSchema[prop] = schema[prop];
 
 	if (prop === 'size' || prop === 'durationSize') {
@@ -871,7 +885,7 @@ const getAllowedPropertyNames = (type, data, udt) => {
 		return getAllowedPropertyNames(_.get(udt[type], 'type'), data, udt);
 	}
 	if(type === 'root') {
-		return ['aliases', 'doc'];
+		return ['aliases', 'description'];
 	}
 	if (!fieldLevelConfig.structure[type]) {
 		return [];
