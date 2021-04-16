@@ -1,7 +1,7 @@
 {
     "name": "Avro",
-    "version": "0.1.59",
-    "versionDate": "2021-04-09",
+    "version": "0.1.60",
+    "versionDate": "2021-04-16",
     "author": "hackolade",
     "engines": {
         "hackolade": "4.3.16",
