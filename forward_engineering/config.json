@@ -34,6 +34,7 @@
     "entity": true,
     "model": {
       "validation": false,
+      "isFEToFileEnabled":false,
       "options": [
         {
           "name": "Confluent API Schema",
