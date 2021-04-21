@@ -26,11 +26,22 @@
     {
       "id": "minify",
       "value": false,
-      "name": "Minify",
-      "targetFEKeywords": ["avroSchema", "schemaRegistry"]
+      "name": "Minify"
     }
   ],
   "level": {
-    "entity": true
+    "entity": true,
+    "model": {
+      "validation": false,
+      "isFEToFileEnabled":false,
+      "options": [
+        {
+          "name": "Confluent API Schema",
+          "keyword": "confluentSchemaRegistry",
+          "mode": "json",
+          "isApplicationHandler": true
+        }
+      ]
+    }
   }
 }

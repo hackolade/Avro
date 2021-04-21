@@ -105,6 +105,7 @@ const getCommonEntitiesData = (data) => {
 		targetScriptOptions: {
 			keyword: "confluentSchemaRegistry",
 		},
+		additionalOptions: data.options.additionalOptions
 	};
 
 	return { options, modelDefinitions, externalDefinitions }
@@ -143,11 +144,13 @@ const getScript = (data) => {
 		return JSON.stringify({ schema: JSON.stringify(avroSchema) }, null, 4);
 	}
 
+	const needMinify = (additionalOptions.find(option => option.id === 'minify') || {}).value;
 	if (targetScriptType === 'confluentSchemaRegistry') {
-		return `POST /subjects/${name}/versions\n${JSON.stringify({ schemaType: "AVRO", schema: JSON.stringify(avroSchema) }, null, 4)}`
+		const schema = needMinify?JSON.stringify(avroSchema):avroSchema;
+
+		return `POST /subjects/${name}/versions\n${JSON.stringify({ schema, schemaType: "AVRO" }, null, 4)}`
 	}
 
-	const needMinify = targetScriptType !== 'confluentSchemaRegistry' && (additionalOptions.find(option => option.id === 'minify') || {}).value;
 	if (needMinify) {
 		return JSON.stringify(avroSchema);
 	}
