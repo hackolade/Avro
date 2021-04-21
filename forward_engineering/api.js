@@ -105,7 +105,7 @@ const getCommonEntitiesData = (data) => {
 		targetScriptOptions: {
 			keyword: "confluentSchemaRegistry",
 		},
-		additionalOptions:data.options.additionalOptions
+		additionalOptions: data.options.additionalOptions
 	};
 
 	return { options, modelDefinitions, externalDefinitions }
