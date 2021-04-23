@@ -127,7 +127,7 @@ making sure that you maintain a proper JSON format.
 			},
 			{
 				"propertyName": "Doc",
-				"propertyKeyword": "doc",
+				"propertyKeyword": "description",
 				"propertyValidate": false,
 				"propertyTooltip": "Popup for multi-line text entry",
 				"propertyType": "details",
@@ -146,14 +146,6 @@ making sure that you maintain a proper JSON format.
 				"propertyTooltip": "Description",
 				"propertyType": "checkbox",
 				"template": "boolean"
-			},
-			{
-				"propertyName": "Description",
-				"propertyKeyword": "description",
-				"propertyValidate": false,
-				"propertyTooltip": "Description",
-				"propertyType": "details",
-				"template": "textarea"
 			},
 			{
 				"propertyName": "Comments",

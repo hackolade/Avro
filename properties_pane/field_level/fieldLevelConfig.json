@@ -120,10 +120,9 @@ making sure that you maintain a proper JSON format.
 		"string": [
 			"name",
 			"schemaId",
-			"description",
 			{
 				"propertyName": "Doc",
-				"propertyKeyword": "doc",
+				"propertyKeyword": "description",
 				"propertyValidate": false,
 				"propertyTooltip": "Popup for multi-line text entry",
 				"propertyType": "details",
@@ -286,10 +285,9 @@ making sure that you maintain a proper JSON format.
 		"bytes": [
 			"name",
 			"schemaId",
-			"description",
 			{
 				"propertyName": "Doc",
-				"propertyKeyword": "doc",
+				"propertyKeyword": "description",
 				"propertyValidate": false,
 				"propertyTooltip": "Popup for multi-line text entry",
 				"propertyType": "details",
@@ -425,10 +423,9 @@ making sure that you maintain a proper JSON format.
 		"number": [
 			"name",
 			"schemaId",
-			"description",
 			{
 				"propertyName": "Doc",
-				"propertyKeyword": "doc",
+				"propertyKeyword": "description",
 				"propertyValidate": false,
 				"propertyTooltip": "Popup for multi-line text entry",
 				"propertyType": "details",
@@ -644,10 +641,9 @@ making sure that you maintain a proper JSON format.
 		"boolean": [
 			"name",
 			"schemaId",
-			"description",
 			{
 				"propertyName": "Doc",
-				"propertyKeyword": "doc",
+				"propertyKeyword": "description",
 				"propertyValidate": false,
 				"propertyTooltip": "Popup for multi-line text entry",
 				"propertyType": "details",
@@ -785,10 +781,9 @@ making sure that you maintain a proper JSON format.
 		"null": [
 			"name",
 			"schemaId",
-			"description",
 			{
 				"propertyName": "Doc",
-				"propertyKeyword": "doc",
+				"propertyKeyword": "description",
 				"propertyValidate": false,
 				"propertyTooltip": "Popup for multi-line text entry",
 				"propertyType": "details",
@@ -843,10 +838,9 @@ making sure that you maintain a proper JSON format.
 			"name",
 			"code",
 			"schemaId",
-			"description",
 			{
 				"propertyName": "Doc",
-				"propertyKeyword": "doc",
+				"propertyKeyword": "description",
 				"propertyValidate": false,
 				"propertyTooltip": "Popup for multi-line text entry",
 				"propertyType": "details",
@@ -962,10 +956,9 @@ making sure that you maintain a proper JSON format.
 			"name",
 			"code",
 			"schemaId",
-			"description",
 			{
 				"propertyName": "Doc",
-				"propertyKeyword": "doc",
+				"propertyKeyword": "description",
 				"propertyValidate": false,
 				"propertyTooltip": "Popup for multi-line text entry",
 				"propertyType": "details",
@@ -1069,10 +1062,9 @@ making sure that you maintain a proper JSON format.
 			"name",
 			"code",
 			"schemaId",
-			"description",
 			{
 				"propertyName": "Doc",
-				"propertyKeyword": "doc",
+				"propertyKeyword": "description",
 				"propertyValidate": false,
 				"propertyTooltip": "Popup for multi-line text entry",
 				"propertyType": "details",
@@ -1191,10 +1183,9 @@ making sure that you maintain a proper JSON format.
 			"name",
 			"code",
 			"schemaId",
-			"description",
 			{
 				"propertyName": "Doc",
-				"propertyKeyword": "doc",
+				"propertyKeyword": "description",
 				"propertyValidate": false,
 				"propertyTooltip": "Popup for multi-line text entry",
 				"propertyType": "details",
@@ -1360,10 +1351,9 @@ making sure that you maintain a proper JSON format.
 			"name",
 			"code",
 			"schemaId",
-			"description",
 			{
 				"propertyName": "Doc",
-				"propertyKeyword": "doc",
+				"propertyKeyword": "description",
 				"propertyValidate": false,
 				"propertyTooltip": "Popup for multi-line text entry",
 				"propertyType": "details",
@@ -1541,10 +1531,9 @@ making sure that you maintain a proper JSON format.
 		"choice": [
 			"name",
 			"code",
-			"description",
 			{
 				"propertyName": "Doc",
-				"propertyKeyword": "doc",
+				"propertyKeyword": "description",
 				"propertyValidate": false,
 				"propertyTooltip": "Popup for multi-line text entry",
 				"propertyType": "details",

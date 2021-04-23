@@ -493,6 +493,11 @@ const handleOtherProps = (data, prop, schema) => {
 	if (!ADDITIONAL_PROPS.includes(prop)) {
 		return;
 	}
+	if (prop === 'doc') {
+        schema.description = data[prop];
+		
+		return;
+    }
 	if (prop === 'logicalType' && (data.type === 'bytes' || data.type === 'fixed')) {
 		schema['subtype'] = data.prop;
 	}
