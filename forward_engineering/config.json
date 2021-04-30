@@ -1,18 +1,47 @@
 {
-	"extension": "avsc",
-	"filterName": "Avro schema",
-	"namePrefix": "Avro Schema",
-	"resolvedDefinitions": false,
-	"validation": true,
-	"options": [
-		{ "name": "Avro Schema", "keyword": "avroSchema"},
-		{ "name": "Schema registry", "keyword": "schemaRegistry"}
-	],
-	"additionalOptions": [
-		{
-			"id": "minify",
-			"value": false,
-			"name": "Minify"
-		}
-	]
+  "extension": "avsc",
+  "filterName": "Avro schema",
+  "namePrefix": "Avro Schema",
+  "resolvedDefinitions": false,
+  "validation": true,
+  "applyScriptToInstance": true,
+  "options": [
+    {
+      "name": "Avro Schema",
+      "keyword": "avroSchema",
+      "disableApplyScriptToInstance": true
+    },
+    {
+      "name": "Schema registry",
+      "keyword": "schemaRegistry",
+      "disableApplyScriptToInstance": false
+    },
+    {
+      "name": "Confluent API Schema",
+      "keyword": "confluentSchemaRegistry",
+      "isApplicationHandler": true
+    }
+  ],
+  "additionalOptions": [
+    {
+      "id": "minify",
+      "value": false,
+      "name": "Minify"
+    }
+  ],
+  "level": {
+    "entity": true,
+    "model": {
+      "validation": false,
+      "file": false,
+      "options": [
+        {
+          "name": "Confluent API Schema",
+          "keyword": "confluentSchemaRegistry",
+          "mode": "json",
+          "isApplicationHandler": true
+        }
+      ]
+    }
+  }
 }
