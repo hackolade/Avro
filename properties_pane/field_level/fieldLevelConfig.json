@@ -1585,6 +1585,14 @@ making sure that you maintain a proper JSON format.
 					"exist": false
 				}]
 			},
+			{
+				"propertyName": "Doc",
+				"propertyKeyword": "description",
+				"propertyValidate": false,
+				"propertyTooltip": "Popup for multi-line text entry",
+				"propertyType": "details",
+				"template": "textarea"
+			},
 			"dynamic"
 		]
 	}
