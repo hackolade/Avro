@@ -111,7 +111,7 @@ const handleFileData = (filePath) => {
 
 		if (extension === '.avro') {
 			readAvroData(filePath, respond);
-		} else if (extension === '.avsc') {
+		} else if (extension === '.avsc' || extension==='.confluent-avro') {
 			fs.readFile(filePath, 'utf-8', respond);
 		} else {
 			const error = new Error(`The file ${filePath} is not recognized as Avro Schema or Data.`)
@@ -493,6 +493,11 @@ const handleOtherProps = (data, prop, schema) => {
 	if (!ADDITIONAL_PROPS.includes(prop)) {
 		return;
 	}
+	if (prop === 'doc') {
+        schema.description = data[prop];
+		
+		return;
+    }
 	if (prop === 'logicalType' && (data.type === 'bytes' || data.type === 'fixed')) {
 		schema['subtype'] = data.prop;
 	}

@@ -6,7 +6,7 @@ const _ = require('lodash');
 const validationHelper = require('./validationHelper');
 const mapJsonSchema = require('../reverse_engineering/helpers/mapJsonSchema');
 
-const ADDITIONAL_PROPS = ['doc', 'order', 'aliases', 'symbols', 'namespace', 'size', 'durationSize', 'default', 'precision', 'scale'];
+const ADDITIONAL_PROPS = ['description', 'order', 'aliases', 'symbols', 'namespace', 'size', 'durationSize', 'default', 'precision', 'scale'];
 const ADDITIONAL_CHOICE_META_PROPS = ADDITIONAL_PROPS.concat('index');
 const PRIMITIVE_FIELD_ATTRIBUTES = ['order', 'logicalType', 'precision', 'scale', 'aliases'];
 const DEFAULT_TYPE = 'string';
@@ -34,38 +34,39 @@ const LOGICAL_TYPES_MAP = {
 };
 
 module.exports = {
+	generateModelScript(data, logger, cb) {
+		logger.clear();
+		try {
+			const commonData = getCommonEntitiesData(data);
+			const containers = _.get(data, 'containers', []);
+			const script = containers.reduce((createdQueries, container) => {
+				const containerEntities = container.entities.map(entityId => {
+					return Object.assign({}, commonData, getEntityData(container, entityId))
+				})
+
+				const containerQueries = containerEntities.map(entity => {
+					try {
+						return getScript(entity)
+					} catch (e) {
+						logger.log('error', { message: err.message, stack: err.stack }, 'Avro Forward-Engineering Error');
+						return '';
+					}
+				})
+
+				return [...createdQueries, ...containerQueries];
+			}, [])
+			cb(null, script.join('\n\n'));
+		} catch (err) {
+			logger.log('error', { message: err.message, stack: err.stack }, 'Avro model Forward-Engineering Error');
+			cb({ message: err.message, stack: err.stack });
+		}
+	},
 	generateScript(data, logger, cb) {
 		logger.clear();
 		try {
-			const name = getRecordName(data);
-			let avroSchema = { name };
-			let jsonSchema = JSON.parse(data.jsonSchema);
-			const udt = getUserDefinedTypes(data);
-
-			jsonSchema.type = 'root';
-			handleRecursiveSchema(jsonSchema, avroSchema, {}, udt);
-
-			if (data.containerData) {
-				avroSchema.namespace = data.containerData.name;
-			}
-			avroSchema.type = 'record';
-			avroSchema = reorderAvroSchema(avroSchema);
-			avroSchema = JSON.stringify(avroSchema, null, 4);
-			const options = data.options;
-			const additionalOptions = _.get(options, 'additionalOptions', []);
-			const targetScriptType = _.get(options, 'targetScriptOptions.keyword');
-			if (targetScriptType === 'schemaRegistry') {
-				avroSchema = JSON.stringify({ schema: JSON.stringify(JSON.parse(avroSchema))}, null, 4);
-			}
-
-			const needMinify = (additionalOptions.find(option => option.id === 'minify') || {}).value;
-			if (needMinify) {
-				avroSchema = JSON.stringify(JSON.parse(avroSchema));
-			}
-
-			nameIndex = 0;
-			return cb(null, avroSchema);
-		} catch(err) {
+			const script = getScript(data);
+			cb(null, script)
+		} catch (err) {
 			nameIndex = 0;
 			logger.log('error', { message: err.message, stack: err.stack }, 'Avro Forward-Engineering Error');
 			cb({ message: err.message, stack: err.stack });
@@ -73,14 +74,19 @@ module.exports = {
 	},
 	validate(data, logger, cb) {
 		try {
-			let avroSchema = JSON.parse(data.script);
-			if (Object.keys(avroSchema).length === 1 && avroSchema.schema) {
-				const messages = validationHelper.validate(avroSchema.schema);
-				cb(null, messages);
-			} else {
-				const messages = validationHelper.validate(data.script);
-				cb(null, messages);
+			let targetScript = data.script;
+			if (data.targetScriptOptions.keyword === 'confluentSchemaRegistry') {
+				targetScript = targetScript.split('\n').slice(1).join('\n')
 			}
+			let avroSchema = JSON.parse(targetScript);
+
+			if (data.targetScriptOptions.keyword === 'confluentSchemaRegistry' || data.targetScriptOptions.keyword === 'schemaRegistry') {
+				const messages = validationHelper.validate(avroSchema.schema);
+				return cb(null, messages);
+			}
+
+			const messages = validationHelper.validate(targetScript);
+			cb(null, messages);
 		} catch (e) {
 			logger.log('error', { error: e }, 'Avro Validation Error');
 			cb(null, [{
@@ -92,6 +98,65 @@ module.exports = {
 		}
 	}
 };
+
+const getCommonEntitiesData = (data) => {
+	const { modelDefinitions, externalDefinitions } = data;
+	const options = {
+		targetScriptOptions: {
+			keyword: "confluentSchemaRegistry",
+		},
+		additionalOptions: data.options.additionalOptions
+	};
+
+	return { options, modelDefinitions, externalDefinitions }
+}
+
+const getEntityData = (container, entityId) => {
+	const containerData = _.first(_.get(container, 'containerData', []));
+	const jsonSchema = container.jsonSchema[entityId];
+	const jsonData = container.jsonData[entityId];
+	const entityData = _.first(container.entityData[entityId]);
+	const internalDefinitions = container.internalDefinitions[entityId];
+
+	return { containerData, jsonSchema, jsonData, entityData, internalDefinitions }
+}
+
+const getScript = (data) => {
+	const name = getRecordName(data);
+	let avroSchema = { name };
+	let jsonSchema = JSON.parse(data.jsonSchema);
+	const udt = getUserDefinedTypes(data);
+
+	jsonSchema.type = 'root';
+	handleRecursiveSchema(jsonSchema, avroSchema, {}, udt);
+
+	if (data.containerData) {
+		avroSchema.namespace = data.containerData.name;
+	}
+	avroSchema.type = 'record';
+	avroSchema = reorderAvroSchema(avroSchema);
+	const options = data.options;
+	const additionalOptions = _.get(options, 'additionalOptions', []);
+	const targetScriptType = _.get(options, 'targetScriptOptions.keyword');
+	nameIndex = 0;
+
+	if (targetScriptType === 'schemaRegistry') {
+		return JSON.stringify({ schema: JSON.stringify(avroSchema) }, null, 4);
+	}
+
+	const needMinify = (additionalOptions.find(option => option.id === 'minify') || {}).value;
+	if (targetScriptType === 'confluentSchemaRegistry') {
+		const schema = needMinify?JSON.stringify(avroSchema):avroSchema;
+
+		return `POST /subjects/${name}/versions\n${JSON.stringify({ schema, schemaType: "AVRO" }, null, 4)}`
+	}
+
+	if (needMinify) {
+		return JSON.stringify(avroSchema);
+	}
+
+	return JSON.stringify(avroSchema, null, 4);
+}
 
 const getUserDefinedTypes = ({ internalDefinitions, externalDefinitions, modelDefinitions }) => {
 	let udt = convertSchemaToUserDefinedTypes(JSON.parse(externalDefinitions), {});
@@ -454,7 +519,7 @@ const handleType = (schema, avroSchema, udt) => {
 };
 
 const handleMultiple = (avroSchema, schema, prop, udt) => {
-	const commonAttributes = ["aliases", "doc", "default"];
+	const commonAttributes = ["aliases", "description", "default"];
 	avroSchema[prop] = schema[prop].map(type => {
 		if (type && typeof type === 'object') {
 			return type.type;
@@ -493,6 +558,13 @@ const handleMultiple = (avroSchema, schema, prop, udt) => {
 
 	const fieldProperties = commonAttributes.reduce((fieldProps, prop) => {
 		if (schema[prop]) {
+			if(prop === 'description') {
+				return {
+					...fieldProps,
+					doc: schema[prop],
+				}
+			}
+
 			return Object.assign({}, fieldProps, {
 				[prop]: schema[prop]
 			});
@@ -731,6 +803,13 @@ const handleOtherProps = (schema, prop, avroSchema, udt) => {
 	if (!allowedProperties.includes(prop)) {
 		return;
 	}
+
+	if(prop === 'description') {
+		avroSchema.doc = schema[prop];
+
+		return;
+	}
+
 	avroSchema[prop] = schema[prop];
 
 	if (prop === 'size' || prop === 'durationSize') {
@@ -871,7 +950,7 @@ const getAllowedPropertyNames = (type, data, udt) => {
 		return getAllowedPropertyNames(_.get(udt[type], 'type'), data, udt);
 	}
 	if(type === 'root') {
-		return ['aliases', 'doc'];
+		return ['aliases', 'description'];
 	}
 	if (!fieldLevelConfig.structure[type]) {
 		return [];
