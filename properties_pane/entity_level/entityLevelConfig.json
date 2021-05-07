@@ -147,8 +147,8 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "select",
 				"options": [
 					"",
-					"value",
-					"key"
+					"key",
+					"value"
 				]
 			},
 			{
