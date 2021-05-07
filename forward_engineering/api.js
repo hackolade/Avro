@@ -33,6 +33,8 @@ const LOGICAL_TYPES_MAP = {
 	fixed: ['decimal', 'duration']
 };
 
+const RecordNameStrategy = 'RecordNameStrategy';
+const TopicRecordNameStrategy = 'TopicRecordNameStrategy';
 module.exports = {
 	generateModelScript(data, logger, cb) {
 		logger.clear();
@@ -107,8 +109,9 @@ const getCommonEntitiesData = (data) => {
 		},
 		additionalOptions: data.options.additionalOptions
 	};
+	const modelData = _.get(data, 'modelData[0]', {})
 
-	return { options, modelDefinitions, externalDefinitions }
+	return { options, modelDefinitions, externalDefinitions, modelData }
 }
 
 const getEntityData = (container, entityId) => {
@@ -120,6 +123,31 @@ const getEntityData = (container, entityId) => {
 
 	return { containerData, jsonSchema, jsonData, entityData, internalDefinitions }
 }
+
+const getConfluentPostQuery = ({ data, schema }) => {
+	const getName = ()=>{
+		const name = getRecordName(data);
+		const typePostfix = _.has(data, 'entityData.schemaType') ? `-${data.entityData.schemaType}` : '';
+		const containerPrefix = _.has(data, 'containerData.name') ? `${data.containerData.name}.`:'';
+		const topicPrefix = _.has(data, 'modelData.schemaTopic') ? `${data.modelData.schemaTopic}-`:'';
+
+		const schemaNameStrategy = _.get(data, 'modelData.schemaNameStrategy', '');
+		switch(schemaNameStrategy){
+			case RecordNameStrategy:
+				return `${containerPrefix}${name}${typePostfix}`
+			case TopicRecordNameStrategy:
+				return `${topicPrefix}${containerPrefix}${name}${typePostfix}`
+			default:
+				return `${name}${typePostfix}`;
+		}
+	}
+
+	return `POST /subjects/${getName()}/versions\n${JSON.stringify(
+		{ schema, schemaType: "AVRO" },
+		null,
+		4
+	)}`;
+};
 
 const getScript = (data) => {
 	const name = getRecordName(data);
@@ -146,9 +174,9 @@ const getScript = (data) => {
 
 	const needMinify = (additionalOptions.find(option => option.id === 'minify') || {}).value;
 	if (targetScriptType === 'confluentSchemaRegistry') {
-		const schema = needMinify?JSON.stringify(avroSchema):avroSchema;
+		const schema = needMinify ? JSON.stringify(avroSchema) : avroSchema;
 
-		return `POST /subjects/${name}/versions\n${JSON.stringify({ schema, schemaType: "AVRO" }, null, 4)}`
+		return getConfluentPostQuery({ data, schema});
 	}
 
 	if (needMinify) {

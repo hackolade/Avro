@@ -141,6 +141,17 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "selecthashed"
 			},
 			{
+				"propertyName": "Confluent schema type",
+				"propertyKeyword": "schemaType",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"",
+					"value",
+					"key"
+				]
+			},
+			{
 				"propertyName": "Additional properties",
 				"propertyKeyword": "additionalProperties",
 				"propertyTooltip": "Description",

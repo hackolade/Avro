@@ -2,7 +2,8 @@
 	"model": {
 		"modelName": "New model",
 		"dbVersion": "",
-		"dbVendor": "Avro"
+		"dbVendor": "Avro",
+		"schemaNameStrategy":"TopicNameStrategy"
 	},
 	"container": {
 		"name": "New_namespace",
