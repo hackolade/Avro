@@ -2,9 +2,9 @@
 
 const fs = require('fs');
 const path = require('path');
-const _ = require('lodash');
+let _;
 const validationHelper = require('./validationHelper');
-const mapJsonSchema = require('../reverse_engineering/helpers/mapJsonSchema');
+const { setDependencies, dependencies } = require('./appDependencies');
 
 const ADDITIONAL_PROPS = ['description', 'order', 'aliases', 'symbols', 'namespace', 'size', 'durationSize', 'default', 'precision', 'scale'];
 const ADDITIONAL_CHOICE_META_PROPS = ADDITIONAL_PROPS.concat('index');
@@ -36,11 +36,13 @@ const LOGICAL_TYPES_MAP = {
 const RecordNameStrategy = 'RecordNameStrategy';
 const TopicRecordNameStrategy = 'TopicRecordNameStrategy';
 module.exports = {
-	generateModelScript(data, logger, cb) {
+	generateModelScript(data, logger, cb, app) {
 		logger.clear();
 		try {
+			setDependencies(app);
+			_ = dependencies.lodash;
 			const commonData = getCommonEntitiesData(data);
-			const containers = _.get(data, 'containers', []);
+			const containers = dependencies.lodash.get(data, 'containers', []);
 			const script = containers.reduce((createdQueries, container) => {
 				const containerEntities = container.entities.map(entityId => {
 					return Object.assign({}, commonData, getEntityData(container, entityId))
@@ -63,9 +65,11 @@ module.exports = {
 			cb({ message: err.message, stack: err.stack });
 		}
 	},
-	generateScript(data, logger, cb) {
+	generateScript(data, logger, cb, app) {
 		logger.clear();
 		try {
+			setDependencies(app);
+			_ = dependencies.lodash;
 			const script = getScript(data);
 			cb(null, script)
 		} catch (err) {
@@ -74,8 +78,10 @@ module.exports = {
 			cb({ message: err.message, stack: err.stack });
 		}
 	},
-	validate(data, logger, cb) {
+	validate(data, logger, cb, app) {
 		try {
+			setDependencies(app);
+			_ = dependencies.lodash;
 			let targetScript = data.script;
 			if (data.targetScriptOptions.keyword === 'confluentSchemaRegistry') {
 				targetScript = targetScript.split('\n').slice(1).join('\n')
