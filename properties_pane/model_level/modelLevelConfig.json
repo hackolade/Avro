@@ -140,6 +140,29 @@ making sure that you maintain a proper JSON format.
 				"disabledOption": true
 			},
 			{
+				"propertyName": "Subject Name Strategy",
+				"propertyKeyword": "schemaNameStrategy",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"",
+					"TopicNameStrategy",
+					"RecordNameStrategy",
+					"TopicRecordNameStrategy"
+      			]
+			},
+			{
+				"propertyName": "Topic",
+				"propertyKeyword": "schemaTopic",
+				"shouldValidate": false,
+				"propertyTooltip": "",
+				"propertyType": "text",
+				"dependency": {
+					"key": "schemaNameStrategy",
+					"value": "TopicRecordNameStrategy"
+				}
+			},
+			{
 				"propertyName": "Comments",
 				"propertyKeyword": "comments",
 				"shouldValidate": false,
