@@ -19,7 +19,13 @@
     {
       "name": "Confluent API Schema",
       "keyword": "confluentSchemaRegistry",
-      "isApplicationHandler": true
+      "isApplicationHandler": true,
+			"fileExtensions": [
+				{
+					"value": "txt",
+					"label": "txt"
+				}
+			]
     }
   ],
   "additionalOptions": [
