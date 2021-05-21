@@ -4,7 +4,6 @@ const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
 const validationHelper = require('./validationHelper');
-const mapJsonSchema = require('../reverse_engineering/helpers/mapJsonSchema');
 
 const ADDITIONAL_PROPS = ['description', 'order', 'aliases', 'symbols', 'namespace', 'size', 'durationSize', 'default', 'precision', 'scale'];
 const ADDITIONAL_CHOICE_META_PROPS = ADDITIONAL_PROPS.concat('index');
@@ -75,12 +74,14 @@ module.exports = {
 	validate(data, logger, cb) {
 		try {
 			let targetScript = data.script;
-			if (data.targetScriptOptions.keyword === 'confluentSchemaRegistry') {
+			const isSchemaRegistry = ['confluentSchemaRegistry', 'azureSchemaRegistry'].includes(data.targetScriptOptions.keyword)
+			if (isSchemaRegistry) {
 				targetScript = targetScript.split('\n').slice(1).join('\n')
 			}
-			let avroSchema = JSON.parse(targetScript);
-
-			if (data.targetScriptOptions.keyword === 'confluentSchemaRegistry' || data.targetScriptOptions.keyword === 'schemaRegistry') {
+			
+			if (data.targetScriptOptions.keyword === 'confluentSchemaRegistry') {
+				let avroSchema = JSON.parse(targetScript);
+				
 				const messages = validationHelper.validate(avroSchema.schema);
 				return cb(null, messages);
 			}
@@ -103,7 +104,7 @@ const getCommonEntitiesData = (data) => {
 	const { modelDefinitions, externalDefinitions } = data;
 	const options = {
 		targetScriptOptions: {
-			keyword: "confluentSchemaRegistry",
+			keyword: _.get(data, 'targetScriptOptions.format', 'confluentSchemaRegistry'),
 		},
 		additionalOptions: data.options.additionalOptions
 	};
@@ -140,15 +141,17 @@ const getScript = (data) => {
 	const targetScriptType = _.get(options, 'targetScriptOptions.keyword');
 	nameIndex = 0;
 
-	if (targetScriptType === 'schemaRegistry') {
-		return JSON.stringify({ schema: JSON.stringify(avroSchema) }, null, 4);
-	}
-
 	const needMinify = (additionalOptions.find(option => option.id === 'minify') || {}).value;
 	if (targetScriptType === 'confluentSchemaRegistry') {
 		const schema = needMinify?JSON.stringify(avroSchema):avroSchema;
 
 		return `POST /subjects/${name}/versions\n${JSON.stringify({ schema, schemaType: "AVRO" }, null, 4)}`
+	}
+
+	if (targetScriptType === 'azureSchemaRegistry') {
+		const schema = needMinify ? JSON.stringify(avroSchema) : JSON.stringify(avroSchema, null, 4);
+		
+		return `PUT /schemas/${name}?api-version=2020-09-01-preview\n${schema}`
 	}
 
 	if (needMinify) {

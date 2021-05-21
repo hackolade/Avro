@@ -12,9 +12,9 @@
       "disableApplyScriptToInstance": true
     },
     {
-      "name": "Schema registry",
-      "keyword": "schemaRegistry",
-      "disableApplyScriptToInstance": false
+      "name": "Azure Schema registry",
+      "keyword": "azureSchemaRegistry",
+      "isApplicationHandler": true
     },
     {
       "name": "Confluent API Schema",
@@ -38,6 +38,12 @@
         {
           "name": "Confluent API Schema",
           "keyword": "confluentSchemaRegistry",
+          "mode": "json",
+          "isApplicationHandler": true
+        },
+        {
+          "name": "Azure Schema Registry",
+          "keyword": "azureSchemaRegistry",
           "mode": "json",
           "isApplicationHandler": true
         }
