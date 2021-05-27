@@ -1,5 +1,5 @@
+const { dependencies } = require('../appDependencies');
 const mapJsonSchema = require('./mapJsonSchema');
-const _ = require('lodash');
 
 const handleDate = field => {
 	return Object.assign({}, field, {
@@ -70,7 +70,7 @@ const adaptMultiple = field => {
 		};
 	}, { fieldData: field, types: field.type });
 
-	const uniqTypes =  _.uniq(types);
+	const uniqTypes =  dependencies.lodash.uniq(types);
 	if (uniqTypes.length === 1) {
 		return fieldData;
 	}
@@ -79,6 +79,7 @@ const adaptMultiple = field => {
 };
 
 const handleEmptyDefault = field => {
+	const _ = dependencies.lodash;
 	const hasDefault = !_.isUndefined(field.default) && field.default !== '';
 	const isMultiple = _.isArray(field.type);
 	const types = isMultiple ? field.type : [ field.type ];
@@ -97,6 +98,7 @@ const handleEmptyDefault = field => {
 const isComplexType = type => ['object', 'record', 'array', 'map'].includes(type)
 
 const handleEmptyDefaultInProperties = field => {
+	const _ = dependencies.lodash;
 	let required = _.get(field, 'required', []);
 
 	if (!_.isPlainObject(field.properties)) {
@@ -162,7 +164,7 @@ const handleEmptyDefaultInProperties = field => {
 const adaptType = field => {
 	const type = field.type;
 
-	if (_.isArray(type)) {
+	if (dependencies.lodash.isArray(type)) {
 		return adaptMultiple(field);
 	}
 
@@ -182,6 +184,7 @@ const adaptType = field => {
 };
 
 const populateDefaultNullValuesForMultiple = field => {
+	const _ = dependencies.lodash;
 	if (!_.isArray(field.type))	{
 		return field;
 	}
@@ -203,7 +206,7 @@ const adaptTitle = jsonSchema => {
 };
 
 const adaptRequiredNames = jsonSchema => {
-	if (!_.isArray(jsonSchema.required)) {
+	if (!dependencies.lodash.isArray(jsonSchema.required)) {
 		return jsonSchema;
 	}
 
@@ -213,6 +216,7 @@ const adaptRequiredNames = jsonSchema => {
 };
 
 const adaptPropertiesNames = jsonSchema => {
+	const _ = dependencies.lodash;
 	if (!_.isPlainObject(jsonSchema)) {
 		return jsonSchema;
 	}
@@ -248,12 +252,13 @@ const adaptPropertiesNames = jsonSchema => {
 	}, adaptedSchema);
 };
 
-const adaptNames = _.flow([
+const adaptNames = schema => dependencies.lodash.flow([
 	adaptTitle,
 	adaptPropertiesNames
-]);
+])(schema);
 
 const convertReferenceName = ref => {
+	const _ = dependencies.lodash;
 	if (!_.isString(ref)) {
 		return ref;
 	}
@@ -266,6 +271,7 @@ const convertReferenceName = ref => {
 };
 
 const convertToValidAvroName = name => {
+	const _ = dependencies.lodash;
 	if (!_.isString(name)) {
 		return name;
 	}
@@ -276,7 +282,7 @@ const convertToValidAvroName = name => {
 const adaptJsonSchema = jsonSchema => {
 	const adaptedJsonSchema = adaptNames(jsonSchema);
 
-	return mapJsonSchema(adaptedJsonSchema, _.flow([
+	return mapJsonSchema(adaptedJsonSchema, dependencies.lodash.flow([
 		adaptType,
 		populateDefaultNullValuesForMultiple,
 		handleEmptyDefaultInProperties

@@ -2,14 +2,15 @@
 
 const fs = require('fs');
 const path = require('path');
-const _ = require('lodash');
+let _;
 const avro = require('avsc');
 const snappy = require('snappyjs');
 const jsonSchemaAdapter = require('./helpers/adaptJsonSchema');
 const DEFAULT_FIELD_NAME = 'New_field';
 let stateExtension = null;
+const { setDependencies, dependencies } = require('./appDependencies');
 
-const ADDITIONAL_PROPS = ['logicalType', 'scale', 'precision', 'name', 'arrayItemName', 'doc', 'order', 'aliases', 'symbols', 'namespace', 'size', 'default', 'pattern', 'choice'];
+const ADDITIONAL_PROPS = ['schemaType', 'logicalType', 'scale', 'precision', 'name', 'arrayItemName', 'doc', 'order', 'aliases', 'symbols', 'namespace', 'size', 'default', 'pattern', 'choice'];
 const DATA_TYPES = [
 	'string',
 	'bytes',
@@ -36,7 +37,9 @@ const META_PROPERTIES = [
 const COMPLEX_TYPES = ['map', 'array', 'record'];
 
 module.exports = {
-	reFromFile(data, logger, callback) {
+	reFromFile(data, logger, callback, app) {
+		setDependencies(app);
+		_ = dependencies.lodash;
 		handleFileData(data.filePath)
 			.then(fileData => {
 				return parseData(fileData);
@@ -65,7 +68,9 @@ module.exports = {
 			});
 	},
 
-	adaptJsonSchema(data, logger, callback) {
+	adaptJsonSchema(data, logger, callback, app) {
+		setDependencies(app);
+		_ = dependencies.lodash;
 		const formatError = error => {
 			return Object.assign({ title: 'Adapt JSON Schema' }, Object.getOwnPropertyNames(error).reduce((accumulator, key) => {
 				return Object.assign(accumulator, {

@@ -1,8 +1,9 @@
-const _ = require('lodash');
+const { dependencies } = require("../appDependencies");
 
 const add = (obj, properties) => Object.assign({}, obj, properties);
 
 const mapJsonSchema = (jsonSchema, callback) => {
+	const _ = dependencies.lodash;
 	const mapProperties = (properties, mapper) => Object.keys(properties).reduce((newProperties, propertyName) => {
 		return add(newProperties, {
 			[propertyName]: mapper(properties[propertyName])
