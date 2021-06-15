@@ -88,9 +88,11 @@ module.exports = {
 				targetScript = targetScript.split('\n').slice(1).join('\n')
 			}
 			
-			if (data.targetScriptOptions.keyword === 'confluentSchemaRegistry') {
+			if (
+				data.targetScriptOptions.keyword === "confluentSchemaRegistry" ||
+				data.targetScriptOptions.keyword === "schemaRegistry"
+			) {
 				let avroSchema = JSON.parse(targetScript);
-				
 				const messages = validationHelper.validate(avroSchema.schema);
 				return cb(null, messages);
 			}
@@ -175,6 +177,10 @@ const getScript = (data) => {
 	const additionalOptions = _.get(options, 'additionalOptions', []);
 	const targetScriptType = _.get(options, 'targetScriptOptions.keyword');
 	nameIndex = 0;
+
+	if (targetScriptType === "schemaRegistry") {
+    	return JSON.stringify({ schema: JSON.stringify(avroSchema) }, null, 4);
+ 	}
 
 	const needMinify = (additionalOptions.find(option => option.id === 'minify') || {}).value;
 	if (targetScriptType === 'confluentSchemaRegistry') {

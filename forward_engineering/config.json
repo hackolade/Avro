@@ -12,6 +12,12 @@
       "disableApplyScriptToInstance": true
     },
     {
+      "name": "Schema Registry",
+      "keyword": "schemaRegistry",
+      "disableApplyScriptToInstance": true,
+      "isCLIOption": true
+    },
+    {
       "name": "Azure Schema registry",
       "keyword": "azureSchemaRegistry",
       "isApplicationHandler": true
@@ -20,12 +26,12 @@
       "name": "Confluent API Schema",
       "keyword": "confluentSchemaRegistry",
       "isApplicationHandler": true,
-			"fileExtensions": [
-				{
-					"value": "txt",
-					"label": "txt"
-				}
-			]
+      "fileExtensions": [
+        {
+          "value": "txt",
+          "label": "txt"
+        }
+      ]
     }
   ],
   "additionalOptions": [
