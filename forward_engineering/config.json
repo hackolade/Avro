@@ -15,7 +15,7 @@
       "name": "Schema Registry",
       "keyword": "schemaRegistry",
       "disableApplyScriptToInstance": true,
-      "isCLIOption": true
+      "cliOnly": true
     },
     {
       "name": "Azure Schema registry",

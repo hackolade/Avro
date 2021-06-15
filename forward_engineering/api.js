@@ -178,15 +178,15 @@ const getScript = (data) => {
 	const targetScriptType = _.get(options, 'targetScriptOptions.keyword');
 	nameIndex = 0;
 
-	if (targetScriptType === "schemaRegistry") {
-    	return JSON.stringify({ schema: JSON.stringify(avroSchema) }, null, 4);
- 	}
-
 	const needMinify = (additionalOptions.find(option => option.id === 'minify') || {}).value;
 	if (targetScriptType === 'confluentSchemaRegistry') {
 		const schema = needMinify ? JSON.stringify(avroSchema) : avroSchema;
 
 		return getConfluentPostQuery({ data, schema});
+	}
+
+	if (targetScriptType === "schemaRegistry") {
+		return JSON.stringify({ schema: JSON.stringify(avroSchema) }, null, needMinify ? 0 : 4);
 	}
 
 	if (targetScriptType === 'azureSchemaRegistry') {
