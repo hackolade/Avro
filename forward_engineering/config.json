@@ -5,6 +5,7 @@
   "resolvedDefinitions": false,
   "validation": true,
   "applyScriptToInstance": true,
+  "useScriptFormatDropdown": true,
   "options": [
     {
       "name": "Avro Schema",
