@@ -45,7 +45,6 @@
   "level": {
     "entity": true,
     "model": {
-      "validation": false,
       "file": false,
       "options": [
         {

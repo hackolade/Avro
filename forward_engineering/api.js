@@ -79,37 +79,91 @@ module.exports = {
 		}
 	},
 	validate(data, logger, cb, app) {
-		try {
-			setDependencies(app);
-			_ = dependencies.lodash;
-			let targetScript = data.script;
-			const isSchemaRegistry = ['confluentSchemaRegistry', 'azureSchemaRegistry'].includes(data.targetScriptOptions.keyword)
-			if (isSchemaRegistry) {
-				targetScript = targetScript.split('\n').slice(1).join('\n')
-			}
-			
-			if (
-				data.targetScriptOptions.keyword === "confluentSchemaRegistry" ||
-				data.targetScriptOptions.keyword === "schemaRegistry"
-			) {
-				let avroSchema = JSON.parse(targetScript);
-				const messages = validationHelper.validate(avroSchema.schema);
-				return cb(null, messages);
-			}
+		setDependencies(app);
+		_ = dependencies.lodash;
 
-			const messages = validationHelper.validate(targetScript);
-			cb(null, messages);
-		} catch (e) {
-			logger.log('error', { error: e }, 'Avro Validation Error');
-			cb(null, [{
-				type: 'error',
-				label: e.fieldName || e.name,
-				title: e.message,
-				context: ''
-			}]);
+		const targetScript = data.script;
+		const targetScriptOptions = data.targetScriptOptions.keyword || data.targetScriptOptions.format;
+		const parsedScripts = parseScript(targetScript,targetScriptOptions);
+
+		if(parsedScripts.length === 1){
+			return cb(null, validateScript(_.first(parsedScripts), logger))
 		}
+
+		const validationMessages = parsedScripts.reduce((messages, script) => messages.concat(validateScript(script, logger)), [])
+		return cb(null, getMessageForMultipleSchemaValidation(validationMessages))
 	}
 };
+
+const getMessageForMultipleSchemaValidation = (validationMessages)=>{
+	const isError = validationMessages.some(({ type }) => type !== 'success');
+
+	if(isError){
+		return validationMessages.filter(({ type }) => type !== 'success')
+	}
+
+	return [{
+		type: "success",
+		label: "",
+		title: "Avro schemas are valid",
+		context: "",
+	}]
+}
+
+const parseScript = (script, targetScriptOption) =>{
+	switch(targetScriptOption){
+		case 'confluentSchemaRegistry':
+			return parseConfluentScript(script);
+		case 'azureSchemaRegistry':
+			return parseAzureScript(script);
+		case 'schemaRegistry':
+			return [JSON.parse(script).schema]
+		default:
+			return [script]
+	}
+}
+
+const parseAzureScript = script => {
+	const getScripts = script => {
+		const defaultScripts = [...script.matchAll(/^PUT \/(.*)$\n(^\{[\s\S]*?^\})/gm)];
+
+		if (defaultScripts.length) {
+			return defaultScripts;
+		}
+
+		return [...script.matchAll(/^PUT \/(.*)\n(\{[\s\S]*?}$)/gm)];
+	};
+	const scripts = getScripts(script);
+
+	return scripts.map(([data, queryPath, stringifiedBody]) => stringifiedBody);
+};
+
+const parseConfluentScript = script => {
+	const scripts = [...script.matchAll(/^POST \/(.*)$\n(^\{[\s\S]*?^\})/gm)];
+
+	return scripts.map(([data, queryPath, stringifiedBody]) => {
+		const jsonBody = JSON.parse(stringifiedBody);
+		if (_.isPlainObject(jsonBody.schema)) {
+			return JSON.stringify(jsonBody.schema)
+		}
+
+		return jsonBody.schema
+	});
+};
+
+const validateScript = (targetScript, logger) => {
+	try {
+		return validationHelper.validate(targetScript);
+	} catch (e) {
+		logger.log('error', { error: e }, 'Avro Validation Error');
+		return [{
+			type: 'error',
+			label: e.fieldName || e.name,
+			title: e.message,
+			context: ''
+		}];
+	}
+}
 
 const getCommonEntitiesData = (data) => {
 	const { modelDefinitions, externalDefinitions } = data;
