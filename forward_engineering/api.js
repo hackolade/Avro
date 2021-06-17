@@ -86,7 +86,7 @@ module.exports = {
 		const targetScriptOptions = data.targetScriptOptions.keyword || data.targetScriptOptions.format;
 		const parsedScripts = parseScript(targetScript,targetScriptOptions);
 
-		if(parsedScripts.length === 1){
+		if (parsedScripts.length === 1) {
 			return cb(null, validateScript(_.first(parsedScripts), logger))
 		}
 
@@ -98,7 +98,7 @@ module.exports = {
 const getMessageForMultipleSchemaValidation = (validationMessages)=>{
 	const isError = validationMessages.some(({ type }) => type !== 'success');
 
-	if(isError){
+	if (isError) {
 		return validationMessages.filter(({ type }) => type !== 'success')
 	}
 
