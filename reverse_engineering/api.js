@@ -10,7 +10,25 @@ const DEFAULT_FIELD_NAME = 'New_field';
 let stateExtension = null;
 const { setDependencies, dependencies } = require('./appDependencies');
 
-const ADDITIONAL_PROPS = ['schemaType', 'logicalType', 'scale', 'precision', 'name', 'arrayItemName', 'doc', 'order', 'aliases', 'symbols', 'namespace', 'size', 'default', 'pattern', 'choice'];
+const ADDITIONAL_PROPS = [
+	'schemaGroupName',
+	'schemaType',
+	'logicalType',
+	'scale',
+	'precision',
+	'name',
+	'arrayItemName',
+	'doc',
+	'order',
+	'aliases',
+	'symbols',
+	'namespace',
+	'size',
+	'default',
+	'pattern',
+	'choice',
+];
+
 const DATA_TYPES = [
 	'string',
 	'bytes',

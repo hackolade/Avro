@@ -152,6 +152,11 @@ making sure that you maintain a proper JSON format.
 				]
 			},
 			{
+				"propertyName": "Schema group name",
+				"propertyKeyword": "schemaGroupName",
+				"propertyType": "text"
+			},
+			{
 				"propertyName": "Additional properties",
 				"propertyKeyword": "additionalProperties",
 				"propertyTooltip": "Description",
