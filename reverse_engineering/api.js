@@ -11,7 +11,6 @@ let stateExtension = null;
 const { setDependencies, dependencies } = require('./appDependencies');
 
 const ADDITIONAL_PROPS = [
-	'schemaGroupName',
 	'schemaType',
 	'logicalType',
 	'scale',
@@ -74,7 +73,7 @@ module.exports = {
 					delete jsonSchema.namespace;
 					delete jsonSchema.name;
 					const strJsonSchema = JSON.stringify(jsonSchema, null, 4);
-					return callback(null, { jsonSchema: strJsonSchema, extension: stateExtension, containerName: namespace });
+					return callback(null, { jsonSchema: strJsonSchema, extension: stateExtension, containerName: namespace, containerAdditionalData: { schemaGroupName: schema.schemaGroupName} });
 				} catch (err) {
 					logger.log('error', { message: err.message, stack: err.stack }, 'Parsing Avro Schema Error');
 					return callback(handleErrorObject(err))

@@ -86,6 +86,7 @@ module.exports = {
 		const targetScriptOptions = data.targetScriptOptions.keyword || data.targetScriptOptions.format;
 		const parsedScripts = parseScript(targetScript,targetScriptOptions);
 
+		const validateScript = targetScriptOptions === 'azureSchemaRegistry' ? validateAzureScript : validateScriptGeneral;
 		if (parsedScripts.length === 1) {
 			return cb(null, validateScript(_.first(parsedScripts), logger))
 		}
@@ -94,6 +95,34 @@ module.exports = {
 		return cb(null, getMessageForMultipleSchemaValidation(validationMessages))
 	}
 };
+
+const validateScriptGeneral = ({ script }, logger) => validateScript(script, logger);
+
+const validateAzureScript = ({ script, query }, logger) => {
+	const schemaGroupExist = /.+\/schemas/.test(query);
+	if (schemaGroupExist) {
+		return validateScript(script, logger)
+	}
+
+	const title = 'Schema Group is missing';
+	try {
+		const { namespace = '' } = JSON.parse(script);
+
+		return [{
+			title,
+			type: 'error',
+			label: namespace,
+			context: ''
+		}]
+	} catch (e) {
+		return [{
+			title,
+			type: 'error',
+			label: '',
+			context: ''
+		}]
+	}
+}
 
 const getMessageForMultipleSchemaValidation = (validationMessages)=>{
 	const isError = validationMessages.some(({ type }) => type !== 'success');
@@ -117,9 +146,9 @@ const parseScript = (script, targetScriptOption) =>{
 		case 'azureSchemaRegistry':
 			return parseAzureScript(script);
 		case 'schemaRegistry':
-			return [JSON.parse(script).schema]
+			return [{ script: JSON.parse(script).schema }]
 		default:
-			return [script]
+			return [{ script }]
 	}
 }
 
@@ -135,7 +164,7 @@ const parseAzureScript = script => {
 	};
 	const scripts = getScripts(script);
 
-	return scripts.map(([data, queryPath, stringifiedBody]) => stringifiedBody);
+	return scripts.map(([data, query, script]) => ({ script, query }));
 };
 
 const parseConfluentScript = script => {
@@ -144,10 +173,10 @@ const parseConfluentScript = script => {
 	return scripts.map(([data, queryPath, stringifiedBody]) => {
 		const jsonBody = JSON.parse(stringifiedBody);
 		if (_.isPlainObject(jsonBody.schema)) {
-			return JSON.stringify(jsonBody.schema)
+			return { script: JSON.stringify(jsonBody.schema) }
 		}
 
-		return jsonBody.schema
+		return { script: jsonBody.schema }
 	});
 };
 
@@ -190,7 +219,8 @@ const getEntityData = (container, entityId) => {
 
 const getConfluentPostQuery = ({ data, schema }) => {
 	const getName = ()=>{
-		const name = getRecordName(data);
+		const name = _.get(data, 'containerData.schemaGroupName', getRecordName(data));
+
 		const typePostfix = _.has(data, 'entityData.schemaType') ? `-${data.entityData.schemaType}` : '';
 		const containerPrefix = _.has(data, 'containerData.name') ? `${data.containerData.name}.`:'';
 		const topicPrefix = _.has(data, 'modelData.schemaTopic') ? `${data.modelData.schemaTopic}-`:'';
@@ -245,8 +275,9 @@ const getScript = (data) => {
 
 	if (targetScriptType === 'azureSchemaRegistry') {
 		const schema = needMinify ? JSON.stringify(avroSchema) : JSON.stringify(avroSchema, null, 4);
-		
-		return `PUT /schemas/${name}?api-version=2020-09-01-preview\n${schema}`
+		const schemaGroupName = _.get(data, 'containerData.schemaGroupName', '');
+
+		return `PUT /${schemaGroupName}/schemas/${name}?api-version=2020-09-01-preview\n${schema}`
 	}
 
 	if (needMinify) {
