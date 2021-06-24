@@ -219,8 +219,7 @@ const getEntityData = (container, entityId) => {
 
 const getConfluentPostQuery = ({ data, schema }) => {
 	const getName = ()=>{
-		const name = _.get(data, 'containerData.schemaGroupName', getRecordName(data));
-
+		const name = getRecordName(data);
 		const typePostfix = _.has(data, 'entityData.schemaType') ? `-${data.entityData.schemaType}` : '';
 		const containerPrefix = _.has(data, 'containerData.name') ? `${data.containerData.name}.`:'';
 		const topicPrefix = _.has(data, 'modelData.schemaTopic') ? `${data.modelData.schemaTopic}-`:'';
