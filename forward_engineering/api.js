@@ -81,12 +81,18 @@ module.exports = {
 	validate(data, logger, cb, app) {
 		setDependencies(app);
 		_ = dependencies.lodash;
-
 		const targetScript = data.script;
 		const targetScriptOptions = data.targetScriptOptions.keyword || data.targetScriptOptions.format;
 		const parsedScripts = parseScript(targetScript,targetScriptOptions);
+		let validateScript;
+		if(targetScriptOptions === 'azureSchemaRegistry'){
+			validateScript = validateAzureScript;
+		} else if(targetScriptOptions === 'pulsarSchemaRegistry'){
+			validateScript = validatePulsarScript;
+		} else {
+			validateScript = validateScriptGeneral;
+		}
 
-		const validateScript = targetScriptOptions === 'azureSchemaRegistry' ? validateAzureScript : validateScriptGeneral;
 		if (parsedScripts.length === 1) {
 			return cb(null, validateScript(_.first(parsedScripts), logger))
 		}
@@ -97,6 +103,37 @@ module.exports = {
 };
 
 const validateScriptGeneral = ({ script }, logger) => validateScript(script, logger);
+
+const validatePulsarScript = ({ script, query }, logger) => {
+	const queryIsCorrect = /\/.+\/.+\/schema/.test(query);
+
+	if (queryIsCorrect) {
+		return validateScript(script, logger)
+	}
+
+	let validationErrors = [];
+	const namespaceExists = /.+\/.*\/schema/.test(query);
+	const topicExists = /.*\/.+\/schema/.test(query);
+
+	if(!namespaceExists){
+		validationErrors = [...validationErrors, {
+			title: 'Pulsar namespace is missing',
+			type: 'error',
+			label: '',
+			context: ''
+		}]
+	}
+	if(!topicExists){
+		validationErrors = [...validationErrors, {
+			title: 'Pulsar topic is missing',
+			type: 'error',
+			label: '',
+			context: ''
+		}]	
+	}
+
+	return validationErrors;
+}
 
 const validateAzureScript = ({ script, query }, logger) => {
 	const schemaGroupExist = /.+\/schemas/.test(query);
@@ -145,6 +182,8 @@ const parseScript = (script, targetScriptOption) =>{
 			return parseConfluentScript(script);
 		case 'azureSchemaRegistry':
 			return parseAzureScript(script);
+		case 'pulsarSchemaRegistry':
+			return parsePulsarScript(script);
 		case 'schemaRegistry':
 			return [{ script: JSON.parse(script).schema }]
 		default:
@@ -161,6 +200,21 @@ const parseAzureScript = script => {
 		}
 
 		return [...script.matchAll(/^PUT \/(.*)\n(\{[\s\S]*?}$)/gm)];
+	};
+	const scripts = getScripts(script);
+
+	return scripts.map(([data, query, script]) => ({ script, query }));
+};
+
+const parsePulsarScript = script => {
+	const getScripts = script => {
+		const defaultScripts = [...script.matchAll(/^POST \/(.*)$\n(^\{[\s\S]*?^\})/gm)];
+
+		if (defaultScripts.length) {
+			return defaultScripts;
+		}
+
+		return [...script.matchAll(/^POST \/(.*)\n(\{[\s\S]*?}$)/gm)];
 	};
 	const scripts = getScripts(script);
 
@@ -277,6 +331,18 @@ const getScript = (data) => {
 		const schemaGroupName = _.get(data, 'containerData.schemaGroupName', '');
 
 		return `PUT /${schemaGroupName}/schemas/${name}?api-version=2020-09-01-preview\n${schema}`
+	}
+
+	if (targetScriptType === 'pulsarSchemaRegistry') {
+		const bodyObject = {
+			type: "AVRO",
+			data: avroSchema,
+			properties: {}
+		}
+		const schema = needMinify ? JSON.stringify(bodyObject) : JSON.stringify(bodyObject, null, 4);
+		const namespace = _.get(data, 'containerData.pulsarNamespaceName', '');
+		const topic = _.get(data, 'entityData.pulsarTopicName', '');
+		return `POST /${namespace}/${topic}/schema\n${schema}`
 	}
 
 	if (needMinify) {

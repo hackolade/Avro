@@ -33,6 +33,11 @@
           "label": "txt"
         }
       ]
+    },
+    {
+      "name": "Pulsar Schema registry",
+      "keyword": "pulsarSchemaRegistry",
+      "isApplicationHandler": true
     }
   ],
   "additionalOptions": [
@@ -56,6 +61,12 @@
         {
           "name": "Azure Schema Registry",
           "keyword": "azureSchemaRegistry",
+          "mode": "json",
+          "isApplicationHandler": true
+        },
+        {
+          "name": "Pulsar Schema Registry",
+          "keyword": "pulsarSchemaRegistry",
           "mode": "json",
           "isApplicationHandler": true
         }

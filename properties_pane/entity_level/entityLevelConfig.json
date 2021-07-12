@@ -159,6 +159,11 @@ making sure that you maintain a proper JSON format.
 				"template": "boolean"
 			},
 			{
+				"propertyName": "Pulsar topic name",
+				"propertyKeyword": "pulsarTopicName",
+				"propertyType": "text"
+			},
+			{
 				"propertyName": "Comments",
 				"propertyKeyword": "comments",
 				"shouldValidate": false,
