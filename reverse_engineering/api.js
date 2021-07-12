@@ -133,7 +133,7 @@ const handleFileData = (filePath) => {
 
 		if (extension === '.avro') {
 			readAvroData(filePath, respond);
-		} else if (['.confluent-avro', '.avsc', '.azureSchemaRegistry-avro'].includes(extension)) {
+		} else if (['.confluent-avro', '.avsc', '.azureSchemaRegistry-avro','.pulsarSchemaRegistry-avro'].includes(extension)) {
 			fs.readFile(filePath, 'utf-8', respond);
 		} else {
 			const error = new Error(`The file ${filePath} is not recognized as Avro Schema or Data.`)
