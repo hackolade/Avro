@@ -164,6 +164,12 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "text"
 			},
 			{
+				"propertyName": "Is persistent Pulsar topic",
+				"propertyKeyword": "isPersistentTopic",
+				"propertyType": "checkbox",
+				"template": "boolean"
+			},
+			{
 				"propertyName": "Comments",
 				"propertyKeyword": "comments",
 				"shouldValidate": false,

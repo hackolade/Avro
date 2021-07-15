@@ -105,15 +105,14 @@ module.exports = {
 const validateScriptGeneral = ({ script }, logger) => validateScript(script, logger);
 
 const validatePulsarScript = ({ script, query }, logger) => {
-	const queryIsCorrect = /\/.+\/.+\/schema/.test(query);
-
+	const queryIsCorrect = /\/.+\/.+\/.+\/schema/.test(query);
 	if (queryIsCorrect) {
 		return validateScript(script, logger)
 	}
 
 	let validationErrors = [];
-	const namespaceExists = /.+\/.*\/schema/.test(query);
-	const topicExists = /.*\/.+\/schema/.test(query);
+	const namespaceExists = /.+\/.+\/.*\/schema/.test(query);
+	const topicExists = /.+\/.*\/.+\/schema/.test(query);
 
 	if(!namespaceExists){
 		validationErrors = [...validationErrors, {
@@ -342,7 +341,8 @@ const getScript = (data) => {
 		const schema = needMinify ? JSON.stringify(bodyObject) : JSON.stringify(bodyObject, null, 4);
 		const namespace = _.get(data, 'containerData.pulsarNamespaceName', '');
 		const topic = _.get(data, 'entityData.pulsarTopicName', '');
-		return `POST /${namespace}/${topic}/schema\n${schema}`
+		const persistence = _.get(data, 'entityData.isPersistentTopic', false) ? 'persistent' : 'non-persistent';
+		return `POST /${persistence}/${namespace}/${topic}/schema\n${schema}`
 	}
 
 	if (needMinify) {
