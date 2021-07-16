@@ -339,9 +339,10 @@ const getScript = (data) => {
 			properties: {}
 		}
 		const schema = needMinify ? JSON.stringify(bodyObject) : JSON.stringify(bodyObject, null, 4);
-		const namespace = _.get(data, 'containerData.pulsarNamespaceName', '');
+
+		const namespace = _.get(data, 'containerData.name', '');
 		const topic = _.get(data, 'entityData.pulsarTopicName', '');
-		const persistence = _.get(data, 'entityData.isPersistentTopic', false) ? 'persistent' : 'non-persistent';
+		const persistence = _.get(data, 'entityData.isNonPersistentTopic', false) ? 'non-persistent' : 'persistent';
 		return `POST /${persistence}/${namespace}/${topic}/schema\n${schema}`
 	}
 

@@ -139,11 +139,6 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "text"
 			},
 			{
-				"propertyName": "Pulsar namespace name",
-				"propertyKeyword": "pulsarNamespaceName",
-				"propertyType": "text"
-			},
-			{
 				"propertyName": "Description",
 				"propertyKeyword": "description",
 				"shouldValidate": false,

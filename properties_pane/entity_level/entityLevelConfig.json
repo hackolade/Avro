@@ -164,8 +164,8 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "text"
 			},
 			{
-				"propertyName": "Is persistent Pulsar topic",
-				"propertyKeyword": "isPersistentTopic",
+				"propertyName": "Is non-persistent Pulsar topic",
+				"propertyKeyword": "isNonPersistentTopic",
 				"propertyType": "checkbox",
 				"template": "boolean"
 			},
