@@ -19,7 +19,7 @@
       "cliOnly": true
     },
     {
-      "name": "Azure Schema registry",
+      "name": "Azure Schema Registry",
       "keyword": "azureSchemaRegistry",
       "isApplicationHandler": true
     },
@@ -35,7 +35,7 @@
       ]
     },
     {
-      "name": "Pulsar Schema registry",
+      "name": "Pulsar Schema Registry",
       "keyword": "pulsarSchemaRegistry",
       "isApplicationHandler": true
     }
