@@ -420,7 +420,9 @@ const handleRecursiveSchema = (schema, avroSchema, parentSchema = {}, udt) => {
 	if (schema.oneOf) {
 		handleChoice(schema, 'oneOf', udt);
 	}
-
+	if (schema.anyOf) {
+		handleChoice(schema, 'anyOf', udt);
+	}
 	if (schema.allOf) {
 		handleChoice(schema, 'allOf', udt);
 	}
@@ -539,10 +541,13 @@ const handleChoice = (schema, choice, udt) => {
 	
 	schema[choice].forEach((subSchema) => {
     	if (subSchema.oneOf) {
-    	  handleChoice(subSchema, "oneOf", udt);
+    		handleChoice(subSchema, "oneOf", udt);
     	}
+		if (subSchema.anyOf) {
+			handleChoice(subSchema, "anyOf", udt);
+		}
     	if (subSchema.allOf) {
-    	  handleChoice(subSchema, "allOf", udt);
+    	  	handleChoice(subSchema, "allOf", udt);
     	}
 
     	if (subSchema.type === "array") {
