@@ -551,8 +551,9 @@ const handleChoice = (schema, choice, udt) => {
     	}
 
     	if (subSchema.type === "array") {
+			const arrayItems = Array.isArray(subSchema.items) ? subSchema.items : [subSchema.items];
     		allSubSchemaFields = allSubSchemaFields.concat(
-    		  	subSchema.items.reduce((items, item) => {
+    		  	arrayItems.reduce((items, item) => {
 					if(!_.isEmpty(item)) {
 						return [...items, {...item}]
 					}
@@ -577,7 +578,7 @@ const handleChoice = (schema, choice, udt) => {
 
 	let multipleFieldsHash = {};
 
-	if (schema.type !== "array") {
+	if ((schema.type !== "array") || (schema.type === "array" && !schema.items)) {
 		allSubSchemaFields.forEach(field => {
 			const fieldName = choiceMeta.name || field.name;
 			if (!multipleFieldsHash[fieldName]) {
@@ -632,7 +633,7 @@ const handleChoice = (schema, choice, udt) => {
 	}
 
 	if(schema.type === 'array') {
-		schema.items = schema.items.filter(item => !_.isEmpty(item)).concat(allSubSchemaFields);
+		schema.items = (schema.items || []).filter(item => !_.isEmpty(item)).concat(allSubSchemaFields);
 	} else {
 		schema.properties = addPropertiesFromChoices(schema.properties, multipleFieldsHash);
 	}
@@ -937,6 +938,9 @@ const handleFields = (schema, avroSchema, udt) => {
 };
 
 const handleItems = (schema, avroSchema, udt) => {
+	if (!schema.items) {
+		schema.items = [];
+	}
 	schema.items = !Array.isArray(schema.items) ? [schema.items] : schema.items;
 
 	const items = schema.items
@@ -960,7 +964,14 @@ const handleItems = (schema, avroSchema, udt) => {
 
 			return itemData;
 		});
-	avroSchema.items = getUniqueItemsInArray(items);
+
+	const mappedItems = items.map(item => {
+		if (item.type === 'null') {
+			return 'null';
+		}
+		return item;
+	});
+	avroSchema.items = getUniqueItemsInArray(mappedItems);
 	if(avroSchema.items.length === 1) {
 		if (schema.items[0].$ref && !avroSchema.items[0].name) {
 			avroSchema.items = avroSchema.items[0].type;
@@ -972,6 +983,12 @@ const handleItems = (schema, avroSchema, udt) => {
 
 const getUniqueItemsInArray = (items) => {
 	return items.reduce((allItems, item) => {
+		if (typeof item === 'string') {
+			if (!allItems.includes(item)) {
+				return [ ...allItems, item];
+			}
+			return allItems;
+		}
 		if(!isComplexType(item.type)){
 			if(!allItems.some(addedItem => addedItem.type === item.type)) {
 				return [ ...allItems, item];
