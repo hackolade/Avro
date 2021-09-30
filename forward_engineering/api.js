@@ -368,35 +368,36 @@ const convertSchemaToUserDefinedTypes = (definitionsSchema, udt) => {
 	handleRecursiveSchema(jsonSchema, avroSchema, {}, udt);
 
 	return (avroSchema.fields || []).reduce((result, field) => {
-		if (typeof field.type !== 'object') {
-			return Object.assign({}, result, {
-				[field.name]: field.logicalType ? { type: field.type, logicalType: field.logicalType } : field.type
-			});
-		}
-		if (_.isArray(field.type)) {
-			return Object.assign({}, result, {
-				[field.name]: Object.assign({}, filterProperties(field), {
+		if (_.isPlainObject(field.type)) {
+			return {
+				...result,
+				[field.name]: {
+					...field,
+					...field.type, 
 					name: field.name,
-					type: field.type,
-				})
-			});
+				},
+			};
 		}
 
-		return Object.assign({}, result, {
-			[field.name]: Object.assign({}, filterProperties(field), field.type, {
-				name: field.name
-			})
-		});
+		if (_.isArray(field.type)) {
+			return { ...result, [field.name]: field	};
+		}
+
+		const props = Object.keys(field);
+		const needToSimplify = (props.length === 1 || (props.length === 2 && props.includes('name')));
+		if (needToSimplify) {
+			return {
+				...result,
+				[field.name]: field.type,
+			};
+		}
+
+		return {
+			...result,
+			[field.name]: { ..._.omit(field, 'name') }
+		};
 	}, udt);
 };
-
-const filterProperties = field => {
-	const redundantFieldProperties = getRedundantProperties(field);
-
-	return _.omit(field, redundantFieldProperties);
-};
-
-const getRedundantProperties = field => Object.keys(field).filter(key => !ADDITIONAL_PROPS.includes(key));
 
 const getRecordName = (data) => {
 	return (
