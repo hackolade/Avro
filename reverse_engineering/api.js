@@ -10,7 +10,24 @@ const DEFAULT_FIELD_NAME = 'New_field';
 let stateExtension = null;
 const { setDependencies, dependencies } = require('./appDependencies');
 
-const ADDITIONAL_PROPS = ['schemaType', 'logicalType', 'scale', 'precision', 'name', 'arrayItemName', 'doc', 'order', 'aliases', 'symbols', 'namespace', 'size', 'default', 'pattern', 'choice'];
+const ADDITIONAL_PROPS = [
+	'schemaType',
+	'logicalType',
+	'scale',
+	'precision',
+	'name',
+	'arrayItemName',
+	'doc',
+	'order',
+	'aliases',
+	'symbols',
+	'namespace',
+	'size',
+	'default',
+	'pattern',
+	'choice',
+];
+
 const DATA_TYPES = [
 	'string',
 	'bytes',
@@ -56,7 +73,7 @@ module.exports = {
 					delete jsonSchema.namespace;
 					delete jsonSchema.name;
 					const strJsonSchema = JSON.stringify(jsonSchema, null, 4);
-					return callback(null, { jsonSchema: strJsonSchema, extension: stateExtension, containerName: namespace });
+					return callback(null, { jsonSchema: strJsonSchema, extension: stateExtension, containerName: namespace, containerAdditionalData: { schemaGroupName: schema.schemaGroupName} });
 				} catch (err) {
 					logger.log('error', { message: err.message, stack: err.stack }, 'Parsing Avro Schema Error');
 					return callback(handleErrorObject(err))
@@ -116,7 +133,7 @@ const handleFileData = (filePath) => {
 
 		if (extension === '.avro') {
 			readAvroData(filePath, respond);
-		} else if (extension === '.avsc' || extension==='.confluent-avro') {
+		} else if (['.confluent-avro', '.avsc', '.azureSchemaRegistry-avro','.pulsarSchemaRegistry-avro'].includes(extension)) {
 			fs.readFile(filePath, 'utf-8', respond);
 		} else {
 			const error = new Error(`The file ${filePath} is not recognized as Avro Schema or Data.`)

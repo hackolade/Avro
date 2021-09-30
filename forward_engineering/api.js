@@ -79,39 +79,179 @@ module.exports = {
 		}
 	},
 	validate(data, logger, cb, app) {
-		try {
-			setDependencies(app);
-			_ = dependencies.lodash;
-			let targetScript = data.script;
-			if (data.targetScriptOptions.keyword === 'confluentSchemaRegistry') {
-				targetScript = targetScript.split('\n').slice(1).join('\n')
-			}
-			let avroSchema = JSON.parse(targetScript);
-
-			if (data.targetScriptOptions.keyword === 'confluentSchemaRegistry' || data.targetScriptOptions.keyword === 'schemaRegistry') {
-				const messages = validationHelper.validate(avroSchema.schema);
-				return cb(null, messages);
-			}
-
-			const messages = validationHelper.validate(targetScript);
-			cb(null, messages);
-		} catch (e) {
-			logger.log('error', { error: e }, 'Avro Validation Error');
-			cb(null, [{
-				type: 'error',
-				label: e.fieldName || e.name,
-				title: e.message,
-				context: ''
-			}]);
+		setDependencies(app);
+		_ = dependencies.lodash;
+		const targetScript = data.script;
+		const targetScriptOptions = data.targetScriptOptions.keyword || data.targetScriptOptions.format;
+		const parsedScripts = parseScript(targetScript,targetScriptOptions);
+		let validateScript;
+		if(targetScriptOptions === 'azureSchemaRegistry'){
+			validateScript = validateAzureScript;
+		} else if(targetScriptOptions === 'pulsarSchemaRegistry'){
+			validateScript = validatePulsarScript;
+		} else {
+			validateScript = validateScriptGeneral;
 		}
+
+		if (parsedScripts.length === 1) {
+			return cb(null, validateScript(_.first(parsedScripts), logger))
+		}
+
+		const validationMessages = parsedScripts.reduce((messages, script) => messages.concat(validateScript(script, logger)), [])
+		return cb(null, getMessageForMultipleSchemaValidation(validationMessages))
 	}
 };
+
+const validateScriptGeneral = ({ script }, logger) => validateScript(script, logger);
+
+const validatePulsarScript = ({ script, query }, logger) => {
+	const queryIsCorrect = /\/.+\/.+\/.+\/schema/.test(query);
+	if (queryIsCorrect) {
+		return validateScript(script, logger)
+	}
+
+	let validationErrors = [];
+	const namespaceExists = /.+\/.+\/.*\/schema/.test(query);
+	const topicExists = /.+\/.*\/.+\/schema/.test(query);
+
+	if(!namespaceExists){
+		validationErrors = [...validationErrors, {
+			title: 'Pulsar namespace is missing',
+			type: 'error',
+			label: '',
+			context: ''
+		}]
+	}
+	if(!topicExists){
+		validationErrors = [...validationErrors, {
+			title: 'Pulsar topic is missing',
+			type: 'error',
+			label: '',
+			context: ''
+		}]	
+	}
+
+	return validationErrors;
+}
+
+const validateAzureScript = ({ script, query }, logger) => {
+	const schemaGroupExist = /.+\/schemas/.test(query);
+	if (schemaGroupExist) {
+		return validateScript(script, logger)
+	}
+
+	const title = 'Schema Group is missing';
+	try {
+		const { namespace = '' } = JSON.parse(script);
+
+		return [{
+			title,
+			type: 'error',
+			label: namespace,
+			context: ''
+		}]
+	} catch (e) {
+		return [{
+			title,
+			type: 'error',
+			label: '',
+			context: ''
+		}]
+	}
+}
+
+const getMessageForMultipleSchemaValidation = (validationMessages)=>{
+	const isError = validationMessages.some(({ type }) => type !== 'success');
+
+	if (isError) {
+		return validationMessages.filter(({ type }) => type !== 'success')
+	}
+
+	return [{
+		type: "success",
+		label: "",
+		title: "Avro schemas are valid",
+		context: "",
+	}]
+}
+
+const parseScript = (script, targetScriptOption) =>{
+	switch(targetScriptOption){
+		case 'confluentSchemaRegistry':
+			return parseConfluentScript(script);
+		case 'azureSchemaRegistry':
+			return parseAzureScript(script);
+		case 'pulsarSchemaRegistry':
+			return parsePulsarScript(script);
+		case 'schemaRegistry':
+			return [{ script: JSON.parse(script).schema }]
+		default:
+			return [{ script }]
+	}
+}
+
+const parseAzureScript = script => {
+	const getScripts = script => {
+		const defaultScripts = [...script.matchAll(/^PUT \/(.*)$\n(^\{[\s\S]*?^\})/gm)];
+
+		if (defaultScripts.length) {
+			return defaultScripts;
+		}
+
+		return [...script.matchAll(/^PUT \/(.*)\n(\{[\s\S]*?}$)/gm)];
+	};
+	const scripts = getScripts(script);
+
+	return scripts.map(([data, query, script]) => ({ script, query }));
+};
+
+const parsePulsarScript = script => {
+	const getScripts = script => {
+		const defaultScripts = [...script.matchAll(/^POST \/(.*)$\n(^\{[\s\S]*?^\})/gm)];
+
+		if (defaultScripts.length) {
+			return defaultScripts;
+		}
+
+		return [...script.matchAll(/^POST \/(.*)\n(\{[\s\S]*?}$)/gm)];
+	};
+	const scripts = getScripts(script);
+
+	return scripts.map(([data, query, script]) => ({ script, query }));
+};
+
+const parseConfluentScript = script => {
+	const scripts = [...script.matchAll(/^POST \/(.*)$\n(^\{[\s\S]*?^\})/gm)];
+
+	return scripts.map(([data, queryPath, stringifiedBody]) => {
+		const jsonBody = JSON.parse(stringifiedBody);
+		if (_.isPlainObject(jsonBody.schema)) {
+			return { script: JSON.stringify(jsonBody.schema) }
+		}
+
+		return { script: jsonBody.schema }
+	});
+};
+
+const validateScript = (targetScript, logger) => {
+	try {
+		return validationHelper.validate(targetScript);
+	} catch (e) {
+		logger.log('error', { error: e }, 'Avro Validation Error');
+		return [{
+			type: 'error',
+			label: e.fieldName || e.name,
+			title: e.message,
+			context: ''
+		}];
+	}
+}
 
 const getCommonEntitiesData = (data) => {
 	const { modelDefinitions, externalDefinitions } = data;
 	const options = {
 		targetScriptOptions: {
-			keyword: "confluentSchemaRegistry",
+			keyword: _.get(data, 'targetScriptOptions.format', 'confluentSchemaRegistry'),
 		},
 		additionalOptions: data.options.additionalOptions
 	};
@@ -174,15 +314,36 @@ const getScript = (data) => {
 	const targetScriptType = _.get(options, 'targetScriptOptions.keyword');
 	nameIndex = 0;
 
-	if (targetScriptType === 'schemaRegistry') {
-		return JSON.stringify({ schema: JSON.stringify(avroSchema) }, null, 4);
-	}
-
 	const needMinify = (additionalOptions.find(option => option.id === 'minify') || {}).value;
 	if (targetScriptType === 'confluentSchemaRegistry') {
 		const schema = needMinify ? JSON.stringify(avroSchema) : avroSchema;
 
 		return getConfluentPostQuery({ data, schema});
+	}
+
+	if (targetScriptType === "schemaRegistry") {
+		return JSON.stringify({ schema: JSON.stringify(avroSchema) }, null, needMinify ? 0 : 4);
+	}
+
+	if (targetScriptType === 'azureSchemaRegistry') {
+		const schema = needMinify ? JSON.stringify(avroSchema) : JSON.stringify(avroSchema, null, 4);
+		const schemaGroupName = _.get(data, 'containerData.schemaGroupName', '');
+
+		return `PUT /${schemaGroupName}/schemas/${name}?api-version=2020-09-01-preview\n${schema}`
+	}
+
+	if (targetScriptType === 'pulsarSchemaRegistry') {
+		const bodyObject = {
+			type: "AVRO",
+			data: avroSchema,
+			properties: {}
+		}
+		const schema = needMinify ? JSON.stringify(bodyObject) : JSON.stringify(bodyObject, null, 4);
+
+		const namespace = _.get(data, 'containerData.name', '');
+		const topic = _.get(data, 'entityData.pulsarTopicName', '');
+		const persistence = _.get(data, 'entityData.isNonPersistentTopic', false) ? 'non-persistent' : 'persistent';
+		return `POST /${persistence}/${namespace}/${topic}/schema\n${schema}`
 	}
 
 	if (needMinify) {
@@ -259,7 +420,9 @@ const handleRecursiveSchema = (schema, avroSchema, parentSchema = {}, udt) => {
 	if (schema.oneOf) {
 		handleChoice(schema, 'oneOf', udt);
 	}
-
+	if (schema.anyOf) {
+		handleChoice(schema, 'anyOf', udt);
+	}
 	if (schema.allOf) {
 		handleChoice(schema, 'allOf', udt);
 	}
@@ -378,15 +541,19 @@ const handleChoice = (schema, choice, udt) => {
 	
 	schema[choice].forEach((subSchema) => {
     	if (subSchema.oneOf) {
-    	  handleChoice(subSchema, "oneOf", udt);
+    		handleChoice(subSchema, "oneOf", udt);
     	}
+		if (subSchema.anyOf) {
+			handleChoice(subSchema, "anyOf", udt);
+		}
     	if (subSchema.allOf) {
-    	  handleChoice(subSchema, "allOf", udt);
+    	  	handleChoice(subSchema, "allOf", udt);
     	}
 
     	if (subSchema.type === "array") {
+			const arrayItems = Array.isArray(subSchema.items) ? subSchema.items : [subSchema.items];
     		allSubSchemaFields = allSubSchemaFields.concat(
-    		  	subSchema.items.reduce((items, item) => {
+    		  	arrayItems.reduce((items, item) => {
 					if(!_.isEmpty(item)) {
 						return [...items, {...item}]
 					}
@@ -411,7 +578,7 @@ const handleChoice = (schema, choice, udt) => {
 
 	let multipleFieldsHash = {};
 
-	if (schema.type !== "array") {
+	if ((schema.type !== "array") || (schema.type === "array" && !schema.items)) {
 		allSubSchemaFields.forEach(field => {
 			const fieldName = choiceMeta.name || field.name;
 			if (!multipleFieldsHash[fieldName]) {
@@ -466,7 +633,7 @@ const handleChoice = (schema, choice, udt) => {
 	}
 
 	if(schema.type === 'array') {
-		schema.items = schema.items.filter(item => !_.isEmpty(item)).concat(allSubSchemaFields);
+		schema.items = (schema.items || []).filter(item => !_.isEmpty(item)).concat(allSubSchemaFields);
 	} else {
 		schema.properties = addPropertiesFromChoices(schema.properties, multipleFieldsHash);
 	}
@@ -476,7 +643,7 @@ const getChoiceIndex = choice => _.get(choice, 'choiceMeta.index');
 
 const addPropertiesFromChoices = (properties, choiceProperties) => {
 	if (_.isEmpty(choiceProperties)) {
-		return properties;
+		return properties || {};
 	}
 
 	const sortedKeys = Object.keys(choiceProperties).sort((a, b) => {
@@ -771,6 +938,9 @@ const handleFields = (schema, avroSchema, udt) => {
 };
 
 const handleItems = (schema, avroSchema, udt) => {
+	if (!schema.items) {
+		schema.items = [];
+	}
 	schema.items = !Array.isArray(schema.items) ? [schema.items] : schema.items;
 
 	const items = schema.items
@@ -794,7 +964,14 @@ const handleItems = (schema, avroSchema, udt) => {
 
 			return itemData;
 		});
-	avroSchema.items = getUniqueItemsInArray(items);
+
+	const mappedItems = items.map(item => {
+		if (item.type === 'null') {
+			return 'null';
+		}
+		return item;
+	});
+	avroSchema.items = getUniqueItemsInArray(mappedItems);
 	if(avroSchema.items.length === 1) {
 		if (schema.items[0].$ref && !avroSchema.items[0].name) {
 			avroSchema.items = avroSchema.items[0].type;
@@ -806,6 +983,12 @@ const handleItems = (schema, avroSchema, udt) => {
 
 const getUniqueItemsInArray = (items) => {
 	return items.reduce((allItems, item) => {
+		if (typeof item === 'string') {
+			if (!allItems.includes(item)) {
+				return [ ...allItems, item];
+			}
+			return allItems;
+		}
 		if(!isComplexType(item.type)){
 			if(!allItems.some(addedItem => addedItem.type === item.type)) {
 				return [ ...allItems, item];

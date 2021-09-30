@@ -134,6 +134,11 @@ making sure that you maintain a proper JSON format.
 				"regex": "^[A-Za-z_][A-Za-z0-9_.]*$"
 			},
 			{
+				"propertyName": "Schema group name",
+				"propertyKeyword": "schemaGroupName",
+				"propertyType": "text"
+			},
+			{
 				"propertyName": "Description",
 				"propertyKeyword": "description",
 				"shouldValidate": false,
