@@ -864,7 +864,7 @@ const getMultipleComplexTypeProperties = (schema, type) => {
 	return fieldProperties;
 }
 
-const getFieldWithConvertedType = (schema, field, type, udt) => {
+const getFieldWithConvertedType = (schema, field, type) => {
 	switch(type) {
 		case 'string':
 		case 'boolean':
@@ -886,7 +886,7 @@ const getFieldWithConvertedType = (schema, field, type, udt) => {
 				values: getValues(type, field.subtype)
 			});
 		default:
-			return Object.assign(schema, prepareTypeFromUDT(type));
+			return Object.assign(schema, { type });
 	}
 };
 
