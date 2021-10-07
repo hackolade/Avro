@@ -13,6 +13,18 @@ const DEFAULT_TYPE = 'string';
 const DEFAULT_NAME = 'New_field';
 const VALID_FULL_NAME_REGEX = /[^A-Za-z0-9_]/g;
 const VALID_FIRST_NAME_LETTER_REGEX = /^[0-9]/;
+const AVRO_TYPES = [
+	'string',
+	'boolean',
+	'bytes',
+	'null',
+	'array',
+	'record',
+	'enum',
+	'fixed',
+	'number',
+	'map',
+]
 const readConfig = (pathToConfig) => {
 	return JSON.parse(fs.readFileSync(path.join(__dirname, pathToConfig)).toString().replace(/(\/\*[.\s\S]*?\*\/|\/\/.*)/ig, ""));
 };
@@ -309,6 +321,7 @@ const getScript = (data) => {
 	}
 	avroSchema.type = 'record';
 	avroSchema = reorderAvroSchema(avroSchema);
+	avroSchema = resolveUdt(avroSchema, udt);
 	const options = data.options;
 	const additionalOptions = _.get(options, 'additionalOptions', []);
 	const targetScriptType = _.get(options, 'targetScriptOptions.keyword');
@@ -359,6 +372,46 @@ const getUserDefinedTypes = ({ internalDefinitions, externalDefinitions, modelDe
 	 udt = convertSchemaToUserDefinedTypes(JSON.parse(internalDefinitions), udt);
 
 	return udt;
+};
+
+const resolveUdt = (avroSchema, udt) => {
+	return mapAvroSchema(avroSchema, schema => {
+		if (_.isString(schema.items)) {
+			schema = {
+				...schema,
+				items: getTypeFromUdt(schema.items, udt),
+			};
+		}
+		if (_.isArray(schema.items)) {
+			schema = {
+				...schema,
+				items: schema.items.map(type => getTypeFromUdt(type, udt))
+			};
+		}
+
+		if (_.isPlainObject(schema.items) && schema.items.type) {
+			const typeFromUdt = getTypeFromUdt(schema.items.type, udt);
+			if (_.isPlainObject(typeFromUdt)) {
+				schema = {
+					...schema,
+					items: { ...schema.items, ...typeFromUdt }
+				};
+			}
+		}
+		if (_.isArray(schema.type)) {
+			return {
+				...schema,
+				type: schema.type.map(type => getTypeFromUdt(type, udt))
+			}
+		}
+
+		const typeFromUdt = getTypeFromUdt(schema.type, udt);
+		if (_.isArray(_.get(typeFromUdt, 'type'))) {
+			return { ...schema, ...typeFromUdt, name: schema.name };
+		}
+
+		return { ...schema, ...prepareTypeFromUDT(typeFromUdt) };
+	});
 };
 
 const convertSchemaToUserDefinedTypes = (definitionsSchema, udt) => {
@@ -811,7 +864,7 @@ const getMultipleComplexTypeProperties = (schema, type) => {
 	return fieldProperties;
 }
 
-const getFieldWithConvertedType = (schema, field, type, udt) => {
+const getFieldWithConvertedType = (schema, field, type) => {
 	switch(type) {
 		case 'string':
 		case 'boolean':
@@ -833,17 +886,14 @@ const getFieldWithConvertedType = (schema, field, type, udt) => {
 				values: getValues(type, field.subtype)
 			});
 		default:
-			const typeFromUdt = getTypeFromUdt(type, udt);
-			if (_.isArray(_.get(typeFromUdt, 'type'))) {
-				return Object.assign(schema, typeFromUdt, {
-					name: schema.name
-				} );
-			}
-			return Object.assign(schema, prepareTypeFromUDT(typeFromUdt));
+			return Object.assign(schema, { type });
 	}
 };
 
 const getTypeFromUdt = (type, udt) => {
+	if (AVRO_TYPES.includes(type)) {
+		return type;
+	}
 	if (isUdtUsed(type, udt)) {
 		return getTypeWithNamespace(type, udt);
 	}
@@ -1275,7 +1325,7 @@ const replaceUdt = (avroSchema, udt) => {
 				items: getTypeFromUdt(schema.items, udt),
 			};
 		}
-		const items = convertType(schema.items);
+		const items = schema.items ? convertType(schema.items) : [];
 		const previousType = _.get(schema, 'items.type', items.type);
 		const convertedType = items.type;
 
