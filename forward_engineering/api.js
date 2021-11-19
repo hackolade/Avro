@@ -63,7 +63,7 @@ module.exports = {
 				const containerQueries = containerEntities.map(entity => {
 					try {
 						return getScript(entity)
-					} catch (e) {
+					} catch (err) {
 						logger.log('error', { message: err.message, stack: err.stack }, 'Avro Forward-Engineering Error');
 						return '';
 					}
