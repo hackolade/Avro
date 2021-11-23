@@ -969,9 +969,11 @@ const getTypeFromReference = (schema) => {
 		return;
 	}
 
-	const typeName = prepareName(schema.$ref.split('/').pop() || '');
+	if(_.includes(schema.$ref, '#')) {
+		return prepareName(schema.$ref.split('/').pop() || '');
+	}
 
-	return typeName;
+	return schema.$ref
 };
 
 const getValues = (type, subtype) => {
