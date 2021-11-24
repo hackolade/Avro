@@ -372,21 +372,21 @@ const getType = (schema, field, type, definitions) => {
 				subtype: `map<${field.values}>`
 			});
 		default:
-			return Object.assign(schema, { $ref:  getDefinitionPath(type, definitions) });
+			return Object.assign(schema, getReference(type, definitions));
 	}
 };
 
-const getDefinitionPath = (type, definitions) => {
+const getReference = (type, definitions) => {
 	if (typeof type !== 'string') {
-		return `#/definitions/${type}`;
+		return { $ref: `#/definitions/${type}` };
 	}
 
 	const typeName = type.split('.').pop();
 	if (definitions[typeName]) {
-		return `#/definitions/${typeName}`;
+		return { $ref: `#/definitions/${typeName}` };
 	}
 
-	return type;
+	return { $ref: type, hackoladeMeta: { restrictExternalReferenceCreation: true }, type: 'reference' };
 };
 
 const getNameAndNamespace = name => {
