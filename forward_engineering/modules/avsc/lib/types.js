@@ -175,6 +175,8 @@ Type.forSchema = function (schema, opts) {
       return opts.registry[schema] = Type.forSchema({type: schema}, opts);
     }
     Type.addError(new Error(f('undefined type name: %s', schema)));
+
+    return '';
   }
 
   if (schema.logicalType && opts.logicalTypes && !LOGICAL_TYPE) {
