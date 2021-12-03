@@ -6,7 +6,7 @@ let _;
 const validationHelper = require('./validationHelper');
 const { setDependencies, dependencies } = require('./appDependencies');
 
-const ADDITIONAL_PROPS = ['description', 'order', 'aliases', 'symbols', 'namespace', 'size', 'durationSize', 'default', 'precision', 'scale'];
+const ADDITIONAL_PROPS = ['description', 'order', 'aliases', 'symbols', 'namespace', 'default'];
 const ADDITIONAL_CHOICE_META_PROPS = ADDITIONAL_PROPS.concat('index');
 const PRIMITIVE_FIELD_ATTRIBUTES = ['order', 'logicalType', 'precision', 'scale', 'aliases'];
 const DEFAULT_TYPE = 'string';
@@ -403,6 +403,10 @@ const resolveUdt = (avroSchema, udt) => {
 				...schema,
 				type: schema.type.map(type => getTypeFromUdt(type, udt, schema))
 			}
+		}
+
+		if (schema?.type?.type) {
+			return schema;
 		}
 
 		const typeFromUdt = getTypeFromUdt(schema.type, udt, schema);
@@ -1089,10 +1093,6 @@ const handleOtherProps = (schema, prop, avroSchema, udt) => {
 	}
 
 	avroSchema[prop] = schema[prop];
-
-	if (prop === 'size' || prop === 'durationSize') {
-		avroSchema[prop] = Number(avroSchema[prop]);
-	}
 };
 
 const getDefault = (type, value) => {
@@ -1111,7 +1111,6 @@ const getDefault = (type, value) => {
 const handleComplexTypeStructure = (avroSchema, parentSchema) => {
 	const rootComplexProps = ['doc', 'default'];
 	const isParentArray = parentSchema && parentSchema.type && parentSchema.type === 'array';
-	avroSchema = setDurationSize(avroSchema);
 
 	if (!isParentArray && isComplexType(avroSchema.type)) {
 		const name = avroSchema.name;
@@ -1237,7 +1236,7 @@ const getAllowedPropertyNames = (type, data, udt) => {
 		if (typeof property === 'string') {
 			return ADDITIONAL_PROPS.includes(property)
 		} else if (Object(property) === property) {
-			return ADDITIONAL_PROPS.includes(property.propertyKeyword) || property.isTargetProperty;
+			return ADDITIONAL_PROPS.includes(property.propertyKeyword);
 		} else {
 			return false;
 		}
@@ -1286,32 +1285,31 @@ const getNumberField = field => {
 	return getField(field, type);
 };
 
-const setDurationSize = field => {
-	const size = field.durationSize;
-	delete field.durationSize;
-
-	if (field.type !== 'fixed' || field.logicalType !== 'duration' || !size) {
-		return field;
-	}
-
-	return Object.assign(field, { size });
-};
-
 const getField = (field, type) => {
 	const logicalType = field.logicalType;
 	const correctLogicalTypes = _.get(LOGICAL_TYPES_MAP, type, []);
 	const logicalTypeIsCorrect = correctLogicalTypes.includes(logicalType);
-	const fieldWithType = Object.assign({}, field, { type });
+	const fieldWithType = { ...field, type };
 	let filteredField = {};
 	handleTargetProperties(fieldWithType, filteredField);
 
 	if (!logicalTypeIsCorrect) {
-		return Object.assign({ type }, filteredField);
+		return { type, ...filteredField };
 	}
 
-	return Object.assign({ type }, filteredField, {
-		logicalType
-	});
+	const isDuration = field.type === 'fixed' && field.logicalType === 'duration';
+	const size = isDuration ? field.durationSize : field.size;
+
+	return {
+		type: {
+			type,
+			logicalType,
+			...(filteredField.precision && { precision: filteredField.precision }),
+			...(filteredField.scale && { scale: filteredField.scale }),
+			...(!_.isUndefined(size) && { size }),
+		},
+		..._.omit(filteredField, ['scale', 'precision', 'size', 'durationSize',]),
+	};
 };
 
 const replaceUdt = (avroSchema, udt) => {
