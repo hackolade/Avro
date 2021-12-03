@@ -1594,6 +1594,124 @@ making sure that you maintain a proper JSON format.
 				"template": "textarea"
 			},
 			"dynamic"
+		],
+		"reference": [
+			"name",
+			"schemaId",
+			{
+				"propertyName": "Doc",
+				"propertyKeyword": "description",
+				"propertyValidate": false,
+				"propertyTooltip": "Popup for multi-line text entry",
+				"enableForReference": true,
+				"propertyType": "details",
+				"template": "textarea"
+			},
+			{
+				"propertyKeyword": "refDescription",
+				"hidden": true
+			},
+			{
+				"propertyKeyword": "refType",
+				"hidden": true
+			},
+			"required",
+			{
+				"propertyName": "$ref",
+				"propertyKeyword": "$ref",
+				"propertyValidate": false,
+				"propertyType": "text",
+				"enableForReference": true,
+				"readonly": false
+			},
+			{
+				"propertyName": "Aliases",
+				"propertyType": "text",
+				"propertyKeyword": "aliases",
+				"enableForReference": true,
+				"multi": true,
+				"valueType": "array"
+			},
+			{
+				"propertyName": "Meta properties",
+				"propertyType": "group",
+				"propertyKeyword": "metaProps",
+				"enableForReference": true,
+				"structure": [
+					{
+						"propertyName": "Key",
+						"propertyKeyword": "metaKey",
+						"propertyType": "select",
+						"options": [
+							"java-element",
+							"java-element-class",
+							"java-class",
+							"java-key-class"
+						]
+					},
+					{
+						"propertyName": "Value",
+						"propertyKeyword": "metaValue",
+						"propertyTooltip": "",
+						"propertyType": "text",
+						"dependency": { 
+							"key": "metaKey",
+							"value": ""
+						}
+					},
+					{
+						"propertyName": "Value",
+						"propertyKeyword": "metaValueElement",
+						"propertyNameFull": "Meta value for element",
+						"propertyTooltip": "",
+						"propertyType": "text",
+						"dependency": { 
+							"key": "metaKey",
+							"value": "java-element"
+						}
+					},
+					{
+						"propertyName": "Value",
+						"propertyKeyword": "metaValueElementClass",
+						"propertyNameFull": "Meta value for element class",
+						"propertyTooltip": "",
+						"propertyType": "text",
+						"dependency": { 
+							"key": "metaKey",
+							"value": "java-element-class"
+						}
+					},
+					{
+						"propertyName": "Value",
+						"propertyKeyword": "metaValueClass",
+						"propertyNameFull": "Meta value for class",
+						"propertyTooltip": "",
+						"propertyType": "text",
+						"dependency": { 
+							"key": "metaKey",
+							"value": "java-class"
+						}
+					},
+					{
+						"propertyName": "Value",
+						"propertyKeyword": "metaValueKeyClass",
+						"propertyNameFull": "Meta value for key class",
+						"propertyTooltip": "",
+						"propertyType": "text",
+						"dependency": { 
+							"key": "metaKey",
+							"value": "java-key-class"
+						}
+					}
+				]
+			},
+			"dependencies",
+			"foreignCollection",
+			"foreignField",
+			"relationshipType",
+			"relationshipName",
+			"cardinality",
+			"comments"
 		]
 	}
 }

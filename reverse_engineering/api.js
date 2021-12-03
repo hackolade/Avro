@@ -230,7 +230,7 @@ const handleType = (data, schema, parentSchema, definitions) => {
 			handleRecursiveSchema(data.type, schema, {}, definitions);
 		}
 	} else {
-		schema = getType(schema, data, data.type);
+		schema = getType(schema, data, data.type, definitions);
 	}
 };
 
@@ -268,7 +268,7 @@ const handleMultipleTypes = (data, schema, parentSchema, definitions) => {
 		data.type = addDefinitions(data.type, definitions);
 		parentSchema = getChoice(data, parentSchema, definitions);
 	} else {
-		const typeObjects = data.type.map(type => getType({}, data, type));
+		const typeObjects = data.type.map(type => getType({}, data, type, definitions));
 		schema = Object.assign(schema, ...typeObjects);
 		schema.type = typeObjects.map(item => item.type);
 	}
@@ -333,7 +333,7 @@ const getTypeProperties = (type) => {
 	}, {});
 };
 
-const getType = (schema, field, type) => {
+const getType = (schema, field, type, definitions) => {
 	if (Object(type) === type) {
 		if (type.name) {
 			schema.typeName = type.name;
@@ -343,7 +343,7 @@ const getType = (schema, field, type) => {
 			{},
 			schema,
 			getTypeProperties(type),
-			getType(schema, field, type.type)
+			getType(schema, field, type.type, definitions)
 		);
 	}
 
@@ -372,16 +372,21 @@ const getType = (schema, field, type) => {
 				subtype: `map<${field.values}>`
 			});
 		default:
-			return Object.assign(schema, { $ref: '#/definitions/' + getDefinitionTypeName(type) });
+			return Object.assign(schema, getReference(type, definitions));
 	}
 };
 
-const getDefinitionTypeName = (type) => {
+const getReference = (type, definitions) => {
 	if (typeof type !== 'string') {
-		return type;
+		return { $ref: `#/definitions/${type}` };
 	}
 
-	return type.split('.').pop();
+	const typeName = type.split('.').pop();
+	if (definitions[typeName]) {
+		return { $ref: `#/definitions/${typeName}` };
+	}
+
+	return { $ref: type, hackoladeMeta: { restrictExternalReferenceCreation: true }, type: 'reference' };
 };
 
 const getNameAndNamespace = name => {
@@ -465,7 +470,7 @@ const handleItems = (data, prop, schema, definitions) => {
 		schema.items = items.map(item => {
 			let schemaItem = {};
 			if (_.isString(item)) {
-				return getType({}, schemaItem, item);
+				return getType({}, schemaItem, item, definitions);
 			}
 			handleRecursiveSchema(item, schemaItem, {}, definitions);
 
@@ -475,7 +480,7 @@ const handleItems = (data, prop, schema, definitions) => {
 		schema.items = {};
 		handleRecursiveSchema(items, schema.items, schema, definitions);
 	} else if (typeof items === 'string') {
-		schema.items = getType({}, data, items)
+		schema.items = getType({}, data, items, definitions)
 	} else {
 		schema.items = {
 			type: items
