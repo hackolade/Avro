@@ -40,7 +40,9 @@ const LOGICAL_TYPES_MAP = {
 	long: [
 		'time-micros',
 		'timestamp-millis',
-		'timestamp-micros'
+		'timestamp-micros',
+		'local-timestamp-millis',
+		'local-timestamp-micros',
 	],
 	fixed: ['decimal', 'duration']
 };
