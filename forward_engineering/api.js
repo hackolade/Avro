@@ -1293,12 +1293,16 @@ const getField = (field, type) => {
 	let filteredField = {};
 	handleTargetProperties(fieldWithType, filteredField);
 
-	if (!logicalTypeIsCorrect) {
-		return { type, ...filteredField };
-	}
-
 	const isDuration = field.type === 'fixed' && field.logicalType === 'duration';
 	const size = isDuration ? field.durationSize : field.size;
+
+	if (!logicalTypeIsCorrect) {
+		return {
+			type,
+			...filteredField,
+			...(!_.isUndefined(size) && { size: Number(size) }),
+		};
+	}
 
 	return {
 		type: {
@@ -1306,7 +1310,7 @@ const getField = (field, type) => {
 			logicalType,
 			...(filteredField.precision && { precision: filteredField.precision }),
 			...(filteredField.scale && { scale: filteredField.scale }),
-			...(!_.isUndefined(size) && { size }),
+			...(!_.isUndefined(size) && { size: Number(size) }),
 		},
 		..._.omit(filteredField, ['scale', 'precision', 'size', 'durationSize',]),
 	};
