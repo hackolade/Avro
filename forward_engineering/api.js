@@ -416,7 +416,7 @@ const resolveUdt = (avroSchema, udt) => {
 			return { ...schema, ...typeFromUdt, name: schema.name };
 		}
 
-		return { ...schema, ...prepareTypeFromUDT(typeFromUdt) };
+		return { ...schema, ...prepareTypeFromUDT(typeFromUdt), name: schema.name };
 	});
 };
 
@@ -926,8 +926,23 @@ const getTypeFromUdt = (type, udt, schema) => {
     return result;
 };
 
+const hasLogicalTypeSpecificProperties = field => {
+	if (field.logicalType) {
+		return true;
+	}
+
+	if (field.type === 'fixed' && field.logicalType === 'duration') {
+		return !_.isUndefined(field.durationSize);
+	}
+	if (field.type === 'fixed' || field.type === 'bytes' && field.logicalType === 'decimal') {
+		return field.precision || field.scale || field.size
+	}
+
+	return false;
+}
+
 const prepareTypeFromUDT = (typeFromUdt) => {
-	if (_.isObject(typeFromUdt) && typeFromUdt.logicalType) {
+	if (_.isObject(typeFromUdt) && Object.keys(LOGICAL_TYPES_MAP).includes(typeFromUdt.type) && !hasLogicalTypeSpecificProperties(typeFromUdt)) {
 		return { ...typeFromUdt };
 	}
 	return { type: typeFromUdt || DEFAULT_TYPE };
