@@ -416,7 +416,7 @@ const resolveUdt = (avroSchema, udt) => {
 			return { ...schema, ...typeFromUdt, name: schema.name };
 		}
 
-		return { ...schema, ...prepareTypeFromUDT(typeFromUdt) };
+		return { ...schema, ...prepareTypeFromUDT(typeFromUdt), name: schema.name };
 	});
 };
 
@@ -927,7 +927,7 @@ const getTypeFromUdt = (type, udt, schema) => {
 };
 
 const prepareTypeFromUDT = (typeFromUdt) => {
-	if (_.isObject(typeFromUdt) && typeFromUdt.logicalType) {
+	if (_.isObject(typeFromUdt) && typeFromUdt?.type.logicalType) {
 		return { ...typeFromUdt };
 	}
 	return { type: typeFromUdt || DEFAULT_TYPE };
