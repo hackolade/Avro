@@ -322,6 +322,7 @@ const getScript = (data) => {
 		avroSchema.namespace = data.containerData.name;
 	}
 	avroSchema.type = 'record';
+	avroSchema = filterArrayItems(avroSchema);
 	avroSchema = reorderAvroSchema(avroSchema);
 	avroSchema = resolveUdt(avroSchema, udt);
 	const options = data.options;
@@ -377,54 +378,71 @@ const getUserDefinedTypes = ({ internalDefinitions, externalDefinitions, modelDe
 };
 
 const resolveUdt = (avroSchema, udt) => {
-	return mapAvroSchema(avroSchema, schema => {
-		if (_.isString(schema.items)) {
-			schema = {
-				...schema,
-				items: getTypeFromUdt(schema.items, udt, schema),
-			};
-		}
-		if (_.isArray(schema.items)) {
-			schema = {
-				...schema,
-				items: schema.items.map(type => getTypeFromUdt(type, udt, schema))
-			};
-		}
-
-		if (_.isPlainObject(schema.items) && schema.items.type) {
-			const typeFromUdt = getTypeFromUdt(schema.items.type, udt, schema);
-			if (_.isPlainObject(typeFromUdt)) {
-				schema = {
-					...schema,
-					items: { ...schema.items, ...typeFromUdt }
-				};
-			}
-		}
-		if (_.isArray(schema.type)) {
-			return {
-				...schema,
-				type: schema.type.map(type => getTypeFromUdt(type, udt, schema))
-			}
-		}
-
-		if (schema?.type?.type) {
-			return schema;
-		}
-
-		const typeFromUdt = getTypeFromUdt(schema.type, udt, schema);
-		if (_.isArray(_.get(typeFromUdt, 'type'))) {
-			return { ...schema, ...typeFromUdt, name: schema.name };
-		}
-
-		return { ...schema, ...prepareTypeFromUDT(typeFromUdt), name: schema.name };
-	});
+	return mapAvroSchema(avroSchema, resolveSchemaUdt(udt));
 };
 
+const filterArrayItems = avroSchema => {
+	return mapAvroSchema(avroSchema, filterDuplicateArrayItems);
+}
+
+const resolveSchemaUdt = udt => schema => {
+	if (_.isString(schema.items)) {
+		let items = getTypeFromUdt(schema.items, udt, schema);
+		if (_.isPlainObject(item.type)) {
+			items = item.type;
+		}
+		schema = {
+			...schema,
+			items,
+		};
+	}
+	if (_.isArray(schema.items)) {
+		schema = {
+			...schema,
+			items: schema.items.map(type => {
+				if (_.isString(type)) {
+					return getTypeFromUdt(type, udt, schema)
+				}
+
+				return resolveSchemaUdt(udt)(type);
+			}).map(item => _.isPlainObject(item.type) ? item.type : item),
+		};
+	}
+
+	if (_.isPlainObject(schema.items) && schema.items.type) {
+		const typeFromUdt = getTypeFromUdt(schema.items.type, udt, schema);
+		if (_.isPlainObject(typeFromUdt)) {
+			schema = {
+				...schema,
+				items: { ...schema.items, ...typeFromUdt }
+			};
+		}
+	}
+	if (_.isArray(schema.type)) {
+		return {
+			...schema,
+			type: schema.type.map(type => getTypeFromUdt(type, udt, schema))
+		}
+	}
+
+	if (schema?.type?.type) {
+		return schema;
+	}
+
+	const typeFromUdt = getTypeFromUdt(schema.type, udt, schema);
+	if (_.isArray(_.get(typeFromUdt, 'type'))) {
+		return { ...schema, ...typeFromUdt, name: schema.name };
+	}
+
+	return { ...schema, ...prepareTypeFromUDT(typeFromUdt), name: schema.name };
+}
+
 const convertSchemaToUserDefinedTypes = (definitionsSchema, udt) => {
-	const avroSchema = {};
+	let avroSchema = {};
 	const jsonSchema = definitionsSchema;
 
 	handleRecursiveSchema(jsonSchema, avroSchema, {}, udt);
+	avroSchema = filterArrayItems(avroSchema);
 
 	return (avroSchema.fields || []).reduce((result, field) => {
 		if (_.isPlainObject(field.type)) {
@@ -1025,7 +1043,7 @@ const handleItems = (schema, avroSchema, udt) => {
 	}
 	schema.items = !Array.isArray(schema.items) ? [schema.items] : schema.items;
 
-	const items = schema.items
+	avroSchema.items = schema.items
 		.map(schemaItem => {
 			let itemData = {};
 			const schemaItemName = schemaItem.arrayItemCode || schemaItem.arrayItemName || schemaItem.code || schemaItem.name;
@@ -1046,21 +1064,40 @@ const handleItems = (schema, avroSchema, udt) => {
 
 			return itemData;
 		});
+};
 
-	const mappedItems = items.map(item => {
+const filterDuplicateArrayItems = avroSchema => {
+	if (!_.isArray(avroSchema.items)) {
+		return avroSchema;
+	}
+
+	const mappedItems = avroSchema.items.map(item => {
 		if (item.type === 'null') {
 			return 'null';
 		}
+
 		return item;
 	});
-	avroSchema.items = getUniqueItemsInArray(mappedItems);
-	if(avroSchema.items.length === 1) {
-		if (schema.items[0].$ref && !avroSchema.items[0].name) {
-			avroSchema.items = avroSchema.items[0].type;
-		} else {
-			avroSchema.items = avroSchema.items[0];
-		}
+
+	let items = getUniqueItemsInArray(mappedItems);
+
+	if (items.length !== 1) {
+		return {
+			...avroSchema,
+			items,
+		};
 	}
+
+	if (_.first(avroSchema.items).$ref && !_.first(avroSchema.items).name) {
+		items = _.first(items).type;
+	} else {
+		items = _.first(items);
+	}
+
+	return {
+		...avroSchema,
+		items,
+	};
 };
 
 const getUniqueItemsInArray = (items) => {
