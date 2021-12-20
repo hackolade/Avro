@@ -678,14 +678,17 @@ const handleChoice = (schema, choice, udt) => {
 				multipleField.type.push(newField);
 			} else if (Object(newField.type) === newField.type) {
 				newField.name = newField.name || field.name || fieldName;
-				multipleField.type = multipleField.type.concat([newField]);
+				const type = _.isArray(newField.type)
+					? _.map(newField.type, type => _.assign({}, newField, { type }))
+					: [newField];
+				multipleField.type = multipleField.type.concat(type);
 			} else if (Array.isArray(filedType)) {
 				multipleField.type = multipleField.type.concat(filedType);
 			} else {
 				multipleField.type = multipleField.type.concat([filedType]);
 			}
 
-			multipleField.type = _.uniq(multipleField.type);
+			multipleField.type = _.uniqBy(multipleField.type, type => (_.isObject(type) ? type.type : type));
 			if (multipleField.type.length === 1) {
 				multipleField.type = _.first(multipleField.type);
 			}
