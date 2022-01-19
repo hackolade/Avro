@@ -133,7 +133,7 @@ const handleEmptyDefaultInProperties = field => {
 			return { ...properties, [key]: updatedProperty };
 		}
 
-		const complexProperties = ['patternProperties', 'properties', 'items'];
+		const complexProperties = ['patternProperties', 'properties', 'items', 'allOf', 'oneOf', 'anyOf', 'not'];
 		
 		const propertyWithChoice = {
 			..._.omit(updatedProperty, [ ...complexProperties, 'type' ]),
