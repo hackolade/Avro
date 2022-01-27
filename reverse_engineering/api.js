@@ -1,563 +1,89 @@
 'use strict'
 
-const fs = require('fs');
-const path = require('path');
-let _;
-const avro = require('avsc');
-const snappy = require('snappyjs');
-const jsonSchemaAdapter = require('./helpers/adaptJsonSchema');
-const DEFAULT_FIELD_NAME = 'New_field';
-let stateExtension = null;
 const { setDependencies, dependencies } = require('./appDependencies');
+const jsonSchemaAdapter = require('./helpers/adaptJsonSchema');
+const convertToJsonSchemas = require('./helpers/convertToJsonSchemas');
+const { openAvroFile, getExtension } = require('./helpers/fileHelper');
+const { getNamespace } = require('./helpers/generalHelper');
 
-const ADDITIONAL_PROPS = [
-	'schemaType',
-	'logicalType',
-	'scale',
-	'precision',
-	'name',
-	'arrayItemName',
-	'doc',
-	'order',
-	'aliases',
-	'symbols',
-	'namespace',
-	'size',
-	'default',
-	'pattern',
-	'choice',
-];
+let _;
 
-const DATA_TYPES = [
-	'string',
-	'bytes',
-	'boolean',
-	'null',
-	'record',
-	'array',
-	'enum',
-	'fixed',
-	'int',
-	'long',
-	'float',
-	'double',
-	'map'
-];
-const META_PROPERTIES = [
-	'avro.java.string',
-	'java-element',
-	'java-element-class',
-	'java-class',
-	'java-key-class'
-];
+const reFromFile = async (data, logger, callback, app) => {
+	setDependencies(app);
+	_ = dependencies.lodash;
+	try {
+		const { filePath } = data;
+		const avroSchema = await openAvroFile(filePath);
+		const jsonSchemas = convertToJsonSchemas(avroSchema);
 
-const COMPLEX_TYPES = ['map', 'array', 'record'];
+		if (jsonSchemas.length === 1) {
+			const { schemaGroupName, namespace } = _.first(getSchemasData(avroSchema));
 
-module.exports = {
-	reFromFile(data, logger, callback, app) {
-		setDependencies(app);
-		_ = dependencies.lodash;
-		handleFileData(data.filePath)
-			.then(fileData => {
-				return parseData(fileData);
-			})
-			.then(schema => {
-				try {
-					const jsonSchema = convertToJsonSchema(schema);
-					let namespace = jsonSchema.namespace;
-					const { name, namespace: namespaceFromName } = getNameAndNamespace(jsonSchema.name);
-					if (namespaceFromName) {
-						namespace = namespace ? namespace + '.' + namespaceFromName : namespaceFromName;
-					}
-					jsonSchema.title = name;
-					delete jsonSchema.namespace;
-					delete jsonSchema.name;
-					const strJsonSchema = JSON.stringify(jsonSchema, null, 4);
-					return callback(null, { jsonSchema: strJsonSchema, extension: stateExtension, containerName: namespace, containerAdditionalData: { schemaGroupName: schema.schemaGroupName} });
-				} catch (err) {
-					logger.log('error', { message: err.message, stack: err.stack }, 'Parsing Avro Schema Error');
-					return callback(handleErrorObject(err))
-				}
-			})
-			.catch(err => {
-				logger.log('error', { message: err.message, stack: err.stack }, 'Avro Reverse-Engineering Error');
-				callback(err)
+			return callback(null, {
+				jsonSchema: JSON.stringify(_.first(jsonSchemas)),
+				extension: getExtension(filePath),
+				containerName: namespace,
+				containerAdditionalData: { schemaGroupName }
 			});
-	},
-
-	adaptJsonSchema(data, logger, callback, app) {
-		setDependencies(app);
-		_ = dependencies.lodash;
-		const formatError = error => {
-			return Object.assign({ title: 'Adapt JSON Schema' }, Object.getOwnPropertyNames(error).reduce((accumulator, key) => {
-				return Object.assign(accumulator, {
-					[key]: error[key]
-				});
-			}, {}));
-		};
-
-		logger.log('info', 'Adaptation of JSON Schema started...', 'Adapt JSON Schema');
-		try {
-			const jsonSchema = JSON.parse(data.jsonSchema);
-			const adaptedJsonSchema = jsonSchemaAdapter.adaptJsonSchema(jsonSchema);
-			const jsonSchemaName = jsonSchemaAdapter.adaptJsonSchemaName(data.jsonSchemaName);
-
-			logger.log('info', 'Adaptation of JSON Schema finished.', 'Adapt JSON Schema');
-
-			callback(null, {
-				jsonSchema: JSON.stringify(adaptedJsonSchema),
-				jsonSchemaName
-			});
-		} catch(error) {
-			const formattedError = formatError(error);
-			callback(formattedError);
-		}
-	}
-};
-
-const getFileExt = (filePath) => {
-	return path.extname(filePath);
-};
-
-const handleFileData = (filePath) => {
-	return new Promise((resolve, reject) => {
-		const extension = getFileExt(filePath);
-		stateExtension = extension;
-		const respond = (err, content) => {
-			if(err) {
-				reject(handleErrorObject(err));
-			} else {
-				resolve(content);
-			}
-		};
-
-		if (extension === '.avro') {
-			readAvroData(filePath, respond);
-		} else if (['.confluent-avro', '.avsc', '.azureSchemaRegistry-avro','.pulsarSchemaRegistry-avro'].includes(extension)) {
-			fs.readFile(filePath, 'utf-8', respond);
-		} else {
-			const error = new Error(`The file ${filePath} is not recognized as Avro Schema or Data.`)
-			respond(error);
-		}
-	});
-};
-
-const readAvroData = (filePath, cb) => {
-	const codecs = {
-		snappy: function (buf, cb) {
-			const uncompressed = snappy.uncompress(buf.slice(0, buf.length - 4));
-			return cb(uncompressed);
-		},
-		null: function (buf, cb) { cb(null, buf); }
-	};
-
-
-	avro.createFileDecoder(filePath, { codecs })
-		.on('metadata', (type, codecs, header) => {
-			try {
-				const schema = JSON.stringify(type);
-				return cb(null, schema);
-			} catch (error) {
-				return cb(handleErrorObject(error));
-			}
-		})
-		.on('error', cb);
-};
-
-
-const parseData = (fileData) => {
-	return new Promise((resolve, reject) => {
-		try {
-			resolve(JSON.parse(fileData));
-		} catch(err) {
-			reject(handleErrorObject(err));
-		}
-	});
-};
-
-const convertToJsonSchema = (data) => {
-	let jsonSchema = {};
-	const definitions = {};
-	handleRecursiveSchema(data, jsonSchema, {}, definitions);
-	jsonSchema.type = 'object';
-	jsonSchema.$schema = 'http://json-schema.org/draft-04/schema#';
-	jsonSchema.definitions = definitions;
-	return jsonSchema;
-};
-
-const handleRecursiveSchema = (data, schema, parentSchema = {}, definitions = {}) => {
-	for (let prop in data) {
-		switch(prop) {
-			case 'type':
-				handleType(data, schema, parentSchema, definitions);
-				break;
-			case 'fields':
-				handleFields(data, prop, schema, definitions);
-				break;
-			case 'items':
-				handleItems(data, prop, schema, definitions);
-				break;
-			default:
-				handleOtherProps(data, prop, schema);
-		}
-	}
-	const { namespace, name } = getNameAndNamespace(schema.name);
-	if (namespace) {
-		schema.namespace = schema.namespace ? schema.namespace + '.' + namespace : namespace;
-		schema.name = name;
-	}
-
-	if (isRequired(data, schema)) {
-		addRequired(parentSchema, data.name);
-	}
-	return;
-};
-
-
-const handleType = (data, schema, parentSchema, definitions) => {
-	if (Array.isArray(data.type)) {
-		schema = handleMultipleTypes(data, schema, parentSchema, definitions);
-	} else if (typeof data.type === 'object') {
-		if (data.type.name && ['record', 'enum', 'fixed'].includes(data.type.type)) {		
-			data.type = addDefinitions([data.type], definitions).pop();
-
-			handleRecursiveSchema(data, schema, {}, definitions);
-		} else if (data.type.items) {
-			data.type.items = convertItemsToDefinitions(data.type.items, definitions);
-
-			handleRecursiveSchema(data.type, schema, {}, definitions);
-		} else {
-			handleRecursiveSchema(data.type, schema, {}, definitions);
-		}
-	} else {
-		schema = getType(schema, data, data.type, definitions);
-	}
-};
-
-const convertItemsToDefinitions = (items, definitions) => {
-	const itemToDefinition = (item, definitions) => {
-		if (!item.name) {
-			return item;
 		}
 
-		const type = addDefinitions([ item ], definitions).pop();
-		const newItem = {
-			name: item.name,
-			type
-		};
+		return callback(null, getPackages(avroSchema, jsonSchemas), {}, [],  'multipleSchema');
+	} catch (err) {
+		const errorData = handleErrorObject(err);
+		logger.log('error', errorData, 'Parsing Avro Schema Error');
 
-		return newItem;
-	};
-
-	if (Array.isArray(items)) {
-		return items.map(item => itemToDefinition(item, definitions));
-	} else {
-		return itemToDefinition(items, definitions);
+		return callback(errorData);
 	}
 };
 
-const handleMultipleTypes = (data, schema, parentSchema, definitions) => {
-	const hasComplexType = data.type.some(isComplexType);
+const adaptJsonSchema = (data, logger, callback, app) => {
+	setDependencies(app);
+	_ = dependencies.lodash;
 
-	if (data.type.length === 1) {
-		data.type = data.type[0];
-		return handleType(data, schema, parentSchema, definitions);
-	}
+	logger.log('info', 'Adaptation of JSON Schema started...', 'Adapt JSON Schema');
+	try {
+		const jsonSchema = JSON.parse(data.jsonSchema);
+		const adaptedJsonSchema = jsonSchemaAdapter.adaptJsonSchema(jsonSchema);
 
-	if (hasComplexType) {
-		data.type = addDefinitions(data.type, definitions);
-		parentSchema = getChoice(data, parentSchema, definitions);
-	} else {
-		const typeObjects = data.type.map(type => getType({}, data, type, definitions));
-		schema = Object.assign(schema, ...typeObjects);
-		schema.type = typeObjects.map(item => item.type);
-	}
-};
+		logger.log('info', 'Adaptation of JSON Schema finished.', 'Adapt JSON Schema');
 
-const resolveRecursiveReferences = (parentName, child) => {
-	if (!child || parentName !== child.type) {
-		return child;
-	}
-
-	child.type = 'string';
-
-	return child;
-};
-
-const addDefinitions = (types, definitions) => {
-	return types.map(type => {
-		if (Object(type) !== type) {
-			return type;
-		} else if (!type.name) {
-			return type;
-		}
-
-		let schema = {};
-		const { name, namespace } = getNameAndNamespace(type.name);
-		type.name = name;
-		type = resolveRecursiveReferences(name, type);
-
-		handleRecursiveSchema(type, schema, {}, definitions);
-		if (namespace) {
-			schema.namespace = schema.namespace ? schema.namespace + '.' + namespace : namespace;
-		}
-		definitions[name] = schema;
-
-		return name;
-	});
-};
-
-const isComplexType = (type) => {
-	if (DATA_TYPES.includes(type)) {
-		return false;
-	}
-	if (typeof type === 'string') {
-		return true;
-	} else if (Object(type.type) === type.type) {
-		return isComplexType(type.type);
-	}
-
-	return COMPLEX_TYPES.includes(type.type);
-};
-
-const getTypeProperties = (type) => {
-	return Object.keys(type).reduce((schema, property) => {
-		if (['fields', 'items', 'type'].includes(property)) {
-			schema[property] = type[property];
-		} else {
-			handleOtherProps(type, property, schema);
-		}
-		
-
-		return schema;
-	}, {});
-};
-
-const getType = (schema, field, type, definitions) => {
-	if (Object(type) === type) {
-		if (type.name) {
-			schema.typeName = type.name;
-		}
-
-		return Object.assign(
-			{},
-			schema,
-			getTypeProperties(type),
-			getType(schema, field, type.type, definitions)
-		);
-	}
-
-	switch(type) {
-		case 'string':
-		case 'bytes':
-		case 'boolean':
-		case 'record':
-		case 'array':
-		case 'enum':
-		case 'fixed':
-		case 'null':
-		case 'choice':
-			return Object.assign(schema, { type });
-		case 'int':
-		case 'long':
-		case 'float':
-		case 'double':
-			return Object.assign(schema, {
-				type: 'number',
-				mode: type
-			});
-		case 'map':
-			return Object.assign(schema, {
-				type,
-				subtype: `map<${field.values}>`
-			});
-		default:
-			return Object.assign(schema, getReference(type, definitions));
-	}
-};
-
-const getReference = (type, definitions) => {
-	if (typeof type !== 'string') {
-		return { $ref: `#/definitions/${type}` };
-	}
-
-	const typeName = type.split('.').pop();
-	if (definitions[typeName]) {
-		return { $ref: `#/definitions/${typeName}` };
-	}
-
-	return { $ref: type, hackoladeMeta: { restrictExternalReferenceCreation: true }, type: 'reference' };
-};
-
-const getNameAndNamespace = name => {
-	if (!name || typeof name !== 'string') {
-		return { name, namespace: '' };
-	}
-
-	const splittedName = name.split('.');
-	const namespace = splittedName.slice(0, -1);
-	if (_.isEmpty(namespace)) {
-		return { name, namespace: '' };
-	}
-
-	return { namespace:namespace.join('.'), name:  _.last(splittedName) };
-};
-
-const getChoice = (data, parentSchema, definitions = {}) => {
-	const oneOfItem = getOneOf(data, definitions);
-	parentSchema.properties = Object.assign({} ,parentSchema.properties, oneOfItem);
-
-	return parentSchema;
-};
-
-const getOneOf = (data, definitions = {}) => {
-	const name = data.name || DEFAULT_FIELD_NAME;
-	const oneOfProperties = data.type.map(item => {
-
-		const subField = getSubField(item);
-		const subFieldSchema = {};
-		handleRecursiveSchema(subField, subFieldSchema, {}, definitions);
-		
-		return getCommonSubSchema(subFieldSchema, name, item.name);
-	});
-
-	return {
-		[name]: Object.assign({}, data, {
-			name,
-			type: 'choice',
-			choice: 'oneOf',
-			items: oneOfProperties
-		})
-	};
-};
-
-
-const getSubSchema = (data) => {
-	return Object.assign({
-		type: 'object'
-	}, data);
-}
-
-const getCommonSubSchema = (properties, fieldName, itemName) => {
-	const name = itemName ? itemName : fieldName;
-
-	return getSubSchema({
-		type: 'subschema',
-		properties: {
-			[name]: properties
-		}
-	});
-}
-
-const getSubField = (item) => {
-	const field = (typeof item === 'object') ? item : { type: item };
-	return field;
-};
-
-const handleFields = (data, prop, schema, definitions) => {
-	schema.properties = {};
-	schema.required = [];
-	data[prop].forEach(element => {
-		const name = element.name || DEFAULT_FIELD_NAME;
-		schema.properties[name] = {};
-		handleRecursiveSchema(element, schema.properties[name], schema, definitions);
-	});
-};
-
-const handleItems = (data, prop, schema, definitions) => {
-	const items = data[prop];
-	if (_.isArray(items)) {
-		schema.items = items.map(item => {
-			let schemaItem = {};
-			if (_.isString(item)) {
-				return getType({}, schemaItem, item, definitions);
-			}
-			handleRecursiveSchema(item, schemaItem, {}, definitions);
-
-			return schemaItem;
+		callback(null, {
+			jsonSchema: JSON.stringify(adaptedJsonSchema),
+			jsonSchemaName: jsonSchemaAdapter.adaptJsonSchemaName(data.jsonSchemaName),
 		});
-	} else if (typeof items === 'object') {
-		schema.items = {};
-		handleRecursiveSchema(items, schema.items, schema, definitions);
-	} else if (typeof items === 'string') {
-		schema.items = getType({}, data, items, definitions)
-	} else {
-		schema.items = {
-			type: items
-		};
+	} catch(error) {
+		callback({ ...handleErrorObject(error), title: 'Adapt JSON Schema' });
 	}
 };
 
-const isMetaProperty = (propertyName) => {
-	return META_PROPERTIES.includes(propertyName);
+const getPackages = (avroSchema, jsonSchemas) => {
+	const schemasData = getSchemasData(avroSchema);
+
+	return jsonSchemas.map((jsonSchema, index) => ({
+		objectNames: {
+			collectionName: jsonSchema.title,
+		},
+		doc: {
+			dbName: schemasData[index]?.namespace || '',
+			collectionName: jsonSchema.title,
+			bucketInfo: {
+				name: schemasData[index]?.namespace || '',
+				schemaGroupName: schemasData[index]?.schemaGroupName || ''
+			},
+		},
+		jsonSchema: JSON.stringify(jsonSchema),
+	}));
 };
 
-const addMetaProperty = (schema, metaKey, metaValue) => {
-	if (!Array.isArray(schema.metaProps)) {
-		schema.metaProps = [];
-	}
+const getSchemasData = avroSchema => {
+	avroSchema = _.isArray(avroSchema) ? avroSchema : [ avroSchema ];
 
-	const metaValueKeyMap = {
-		'avro.java.string': 'metaValueString',
-		'java-element': 'metaValueElement',
-		'java-element-class': 'metaValueElementClass',
-		'java-class': 'metaValueClass',
-		'java-key-class': 'metaValueKeyClass'
-	};
+	return avroSchema.map(schema => ({
+		namespace: getNamespace(schema) || '',
+		schemaGroupName: schema.schemaGroupName,
+	}));
+}
 
-	const metaValueKey = _.get(metaValueKeyMap, metaKey, 'metaValue');
+const handleErrorObject = error => _.pick(error, ['title', 'message', 'stack']);
 
-	schema.metaProps.push({
-		metaKey, [metaValueKey]: metaValue
-	});
-};
-
-const handleOtherProps = (data, prop, schema) => {
-	if (isMetaProperty(prop)) {
-		addMetaProperty(schema, prop, data[prop]);
-	}
-
-	if (!ADDITIONAL_PROPS.includes(prop)) {
-		return;
-	}
-	if (prop === 'doc') {
-        schema.description = data[prop];
-		
-		return;
-    }
-	if (prop === 'logicalType' && (data.type === 'bytes' || data.type === 'fixed')) {
-		schema['subtype'] = data.prop;
-	}
-  	if (prop === 'default' && typeof data[prop] === 'boolean') {
-		schema[prop] = data[prop].toString();	
-	} else {
-		schema[prop] = data[prop];
-	}
-};
-
-const handleErrorObject = (error) => {
-	let plainObject = {};
-	Object.getOwnPropertyNames(error).forEach(function (key) {
-		plainObject[key] = error[key];
-	});
-	return plainObject;
-};
-
-const isRequired = (data, schema) => {
-	if (!data) {
-		return false;
-	} else if (data.hasOwnProperty('default')) {
-		return false;
-	} else {
-		return true;
-	}
-};
-
-const addRequired = (parentSchema, name) => {
-	if (!Array.isArray(parentSchema.required)) {
-		parentSchema.required = [name];
-		return;
-	}
-
-	parentSchema.required.push(name);
-};
+module.exports = { reFromFile, adaptJsonSchema };

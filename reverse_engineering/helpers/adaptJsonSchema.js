@@ -1,170 +1,30 @@
 const { dependencies } = require('../appDependencies');
 const mapJsonSchema = require('./mapJsonSchema');
 
-const handleDate = field => {
-	return Object.assign({}, field, {
-		type: 'number',
-		mode: 'int',
-		logicalType: 'date'
-	});
+const COMPLEX_PROPERTIES = ['patternProperties', 'properties', 'items', 'allOf', 'oneOf', 'anyOf', 'not'];
+
+let _;
+
+const adaptJsonSchema = jsonSchema => {
+	_ = dependencies.lodash;
+
+	return mapJsonSchema(_.flow([
+		adaptType,
+		populateDefaultNullValuesForMultiple,
+		handleEmptyDefaultInProperties
+	]))(adaptNames(jsonSchema))
 };
 
-const handleTime = field => {
-	return Object.assign({}, field, {
-		type: 'number',
-		mode: 'int',
-		logicalType: 'time-millis'
-	});
-};
+const adaptJsonSchemaName = name => {
+	_ = dependencies.lodash;
 
-const handleDateTime = field => {
-	return Object.assign({}, field, {
-		type: 'number',
-		mode: 'long',
-		logicalType: 'timestamp-millis'
-	});
-};
-
-const handleNumber = field => {
-	if (field.mode || field.logicalType) {
-		return field;
-	}
-
-	return Object.assign({}, field, {
-		type: 'bytes',
-		subtype: 'decimal'
-	});
-};
-
-const handleInt = field => {
-	return Object.assign({}, field, {
-		type: 'number',
-		mode: 'int'
-	});
-};
-
-const handleStringFormat = field => {
-	const { format, ...fieldData } = field;
-
-	switch(format) {
-		case 'date':
-			return handleDate(fieldData);
-		case 'time':
-			return handleTime(fieldData);
-		case 'date-time':
-			return handleDateTime(fieldData);
-		default:
-			return field;
-	};
-};
-
-const adaptMultiple = field => {
-	const { fieldData, types } = field.type.reduce(({ fieldData, types }, type, index) => {
-		const typeField = Object.assign({}, fieldData, { type });
-		const updatedData = adaptType(typeField);
-		types[index] = updatedData.type;
-
-		return {
-			fieldData: updatedData,
-			types
-		};
-	}, { fieldData: field, types: field.type });
-
-	const uniqTypes =  dependencies.lodash.uniq(types);
-	if (uniqTypes.length === 1) {
-		return fieldData;
-	}
-
-	return Object.assign({}, fieldData, {type: uniqTypes});
-};
-
-const handleEmptyDefault = field => {
-	const _ = dependencies.lodash;
-	const hasDefault = !_.isUndefined(field.default) && field.default !== '';
-	const isMultiple = _.isArray(field.type);
-	const types = isMultiple ? field.type : [ field.type ];
-
-	if (hasDefault || _.first(types) === 'null') {
-		return field;
-	}
-
-	return {
-		...field,
-		default: null,
-		type: _.uniq([ 'null', ...types ]),
-	};
-};
-
-const isComplexType = type => ['object', 'record', 'array', 'map'].includes(type)
-
-const handleEmptyDefaultInProperties = field => {
-	const _ = dependencies.lodash;
-	let required = _.get(field, 'required', []);
-
-	if (!_.isPlainObject(field.properties)) {
-		return field;
-	}
-
-	const isRoot = field.$schema && field.type === 'object';
-	const propertiesKeys = Object.keys(field.properties);
-	if (isRoot && propertiesKeys.length === 1 && isComplexType(field.properties[_.first(propertiesKeys)].type)) {
-		return field;
-	}
-
-	const updatedProperties = propertiesKeys.reduce((properties, key) => {
-		const property = field.properties[key];
-
-		if (required.includes(key)) {
-			return { ...properties, [key]: property };
-		}
-
-		const updatedProperty = handleEmptyDefault(property);
-		if (property === updatedProperty || !_.isArray(updatedProperty.type)) {
-			return {
-				...properties,
-				[key]: property,
-			};
-		}
-
-		required = required.filter(name => name !== key);
-		const hasComplexType = updatedProperty.type.find(isComplexType);
-
-		if (!hasComplexType) {
-			return { ...properties, [key]: updatedProperty };
-		}
-
-		const complexProperties = ['patternProperties', 'properties', 'items', 'allOf', 'oneOf', 'anyOf', 'not'];
-		
-		const propertyWithChoice = {
-			..._.omit(updatedProperty, [ ...complexProperties, 'type' ]),
-			oneOf: updatedProperty.type.map(type => {
-				if (!isComplexType(type)) {
-					return {
-						..._.omit(updatedProperty, complexProperties),
-						type
-					}
-				}
-
-				return {
-					..._.omit(updatedProperty, type === 'array' ? ['patternProperties', 'properties'] : 'items'),
-					type
-				};
-			})
-		};
-
-		return { ...properties, [key]: propertyWithChoice };
-	}, {});
-
-	return Object.assign({}, field, {
-		properties: updatedProperties,
-		required
-	});
+	return convertToValidAvroName(name);
 };
 
 const adaptType = field => {
 	const type = field.type;
 
-	if (dependencies.lodash.isArray(type)) {
+	if (_.isArray(type)) {
 		return adaptMultiple(field);
 	}
 
@@ -184,7 +44,6 @@ const adaptType = field => {
 };
 
 const populateDefaultNullValuesForMultiple = field => {
-	const _ = dependencies.lodash;
 	if (!_.isArray(field.type))	{
 		return field;
 	}
@@ -192,31 +51,185 @@ const populateDefaultNullValuesForMultiple = field => {
 		return field;
 	}
 
-	return Object.assign({}, field, { default: null });
+	return { ...field, default: null };
 };
+
+const handleEmptyDefaultInProperties = field => {
+	let required = _.get(field, 'required', []);
+
+	if (!_.isPlainObject(field.properties)) {
+		return field;
+	}
+
+	const isRoot = field.$schema && field.type === 'object';
+	const propertiesKeys = Object.keys(field.properties);
+	if (isRoot && propertiesKeys.length === 1 && isComplexType(field.properties[_.first(propertiesKeys)].type)) {
+		return field;
+	}
+
+	const properties = propertiesKeys.reduce((properties, key) => {
+		const propertyValue = field.properties[key];
+		if (required.includes(key)) {
+			return { ...properties, [key]: propertyValue };
+		}
+
+		const property = handleEmptyDefault(propertyValue);
+		if (propertyValue === property || !_.isArray(property.type)) {
+			return { ...properties, [key]: propertyValue };
+		}
+
+		required = required.filter(name => name !== key);
+		const hasComplexType = property.type.find(isComplexType);
+
+		if (!hasComplexType) {
+			return { ...properties, [key]: property };
+		}
+
+		return {
+			...properties,
+			[key]: {
+				..._.omit(property, [ ...COMPLEX_PROPERTIES, 'type' ]),
+				oneOf: getOneOf(property),
+			}
+		};
+	}, {});
+
+	return {
+		...field,
+		properties,
+		required,
+	};
+};
+
+const getOneOf = property => property.type.map(type => {
+	if (!isComplexType(type)) {
+		return {
+			..._.omit(property, COMPLEX_PROPERTIES),
+			type
+		}
+	}
+
+	return {
+		..._.omit(property, type === 'array' ? ['patternProperties', 'properties'] : 'items'),
+		type
+	};
+});
+
+const handleDate = field => ({
+	...field,
+	type: 'number',
+	mode: 'int',
+	logicalType: 'date',
+})
+
+const handleTime = field => ({
+	...field,
+	type: 'number',
+	mode: 'int',
+	logicalType: 'time-millis',
+});
+
+const handleDateTime = field => ({
+	...field,
+	type: 'number',
+	mode: 'long',
+	logicalType: 'timestamp-millis',
+});
+
+const handleNumber = field => {
+	if (field.mode || field.logicalType) {
+		return field;
+	}
+
+	return {
+		...field,
+		type: 'bytes',
+		subtype: 'decimal',
+	};
+};
+
+const handleInt = field => ({
+	...field,
+	type: 'number',
+	mode: 'int'
+});
+
+const handleStringFormat = field => {
+	const { format, ...fieldData } = field;
+
+	switch(format) {
+		case 'date':
+			return handleDate(fieldData);
+		case 'time':
+			return handleTime(fieldData);
+		case 'date-time':
+			return handleDateTime(fieldData);
+		default:
+			return field;
+	};
+};
+
+const adaptMultiple = field => {
+	const { fieldData, types } = field.type.reduce(({ fieldData, types }, type, index) => {
+		const typeField = { ...fieldData, type };
+		const updatedData = adaptType(typeField);
+		types[index] = updatedData.type;
+
+		return {
+			fieldData: updatedData,
+			types
+		};
+	}, { fieldData: field, types: field.type });
+
+	const uniqTypes = _.uniq(types);
+	if (uniqTypes.length === 1) {
+		return fieldData;
+	}
+
+	return { ...fieldData, type: uniqTypes };
+};
+
+const handleEmptyDefault = field => {
+	const hasDefault = !_.isUndefined(field.default) && field.default !== '';
+	const isMultiple = _.isArray(field.type);
+	const types = isMultiple ? field.type : [ field.type ];
+
+	if (hasDefault || _.first(types) === 'null') {
+		return field;
+	}
+
+	return {
+		...field,
+		default: null,
+		type: _.uniq([ 'null', ...types ]),
+	};
+};
+
+const isComplexType = type => ['object', 'record', 'array', 'map'].includes(type)
 
 const adaptTitle = jsonSchema => {
 	if (!jsonSchema.title) {
 		return jsonSchema;
 	}
 
-	return Object.assign({}, jsonSchema, {
-		title: convertToValidAvroName(jsonSchema.title)
-	});
+	return {
+		...jsonSchema,
+		title: convertToValidAvroName(jsonSchema.title),
+	};
 };
 
 const adaptRequiredNames = jsonSchema => {
-	if (!dependencies.lodash.isArray(jsonSchema.required)) {
+	if (!_.isArray(jsonSchema.required)) {
 		return jsonSchema;
 	}
 
-	return Object.assign({}, jsonSchema, {
-		required: jsonSchema.required.map(convertToValidAvroName)
-	});
+	return {
+		...jsonSchema,
+		required: jsonSchema.required.map(convertToValidAvroName),
+	};
 };
 
 const adaptPropertiesNames = jsonSchema => {
-	const _ = dependencies.lodash;
 	if (!_.isPlainObject(jsonSchema)) {
 		return jsonSchema;
 	}
@@ -233,32 +246,31 @@ const adaptPropertiesNames = jsonSchema => {
 
 		const adaptedProperties = Object.keys(properties).reduce((adaptedProperties, key) => {
 			if (key === '$ref') {
-				return Object.assign({}, adaptedProperties, {
-					[key]: convertReferenceName(properties[key])
-				})
+				return {
+					...adaptedProperties,
+					[key]: convertReferenceName(properties[key]),
+				};
 			}
 
-			const updatedKey = convertToValidAvroName(key);
-			const adaptedProperty = adaptPropertiesNames(properties[key]);
-
-			return Object.assign({}, adaptedProperties, {
-				[updatedKey]: adaptedProperty
-			});
+			return {
+				...adaptedProperties,
+				[convertToValidAvroName(key)]: adaptPropertiesNames(properties[key]),
+			};
 		}, {});
 
-		return Object.assign({}, schema, {
-			[propertyKey]: adaptedProperties
-		});
+		return {
+			...schema,
+			[propertyKey]: adaptedProperties,
+		};
 	}, adaptedSchema);
 };
 
-const adaptNames = schema => dependencies.lodash.flow([
+const adaptNames = schema => _.flow([
 	adaptTitle,
 	adaptPropertiesNames
 ])(schema);
 
 const convertReferenceName = ref => {
-	const _ = dependencies.lodash;
 	if (!_.isString(ref)) {
 		return ref;
 	}
@@ -271,24 +283,11 @@ const convertReferenceName = ref => {
 };
 
 const convertToValidAvroName = name => {
-	const _ = dependencies.lodash;
 	if (!_.isString(name)) {
 		return name;
 	}
 
 	return name.replace(/[^A-Za-z0-9_]/g, '_');
 };
-
-const adaptJsonSchema = jsonSchema => {
-	const adaptedJsonSchema = adaptNames(jsonSchema);
-
-	return mapJsonSchema(adaptedJsonSchema, dependencies.lodash.flow([
-		adaptType,
-		populateDefaultNullValuesForMultiple,
-		handleEmptyDefaultInProperties
-	]));
-};
-
-const adaptJsonSchemaName = convertToValidAvroName;
 
 module.exports = { adaptJsonSchema, adaptJsonSchemaName };

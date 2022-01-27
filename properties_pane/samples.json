@@ -83,5 +83,16 @@
 			"key": "logicalType",
 			"value": "timestamp-micros"
 		}
+	},
+	{
+		"validateAs": "string",
+		"value": "063fb7cd-2ad1-440f-beee-671d2eb28c33",
+		"constraints": {
+			"pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+		},
+		"dependency": {
+			"key": "logicalType",
+			"value": "uuid"
+		}
 	}
 ]

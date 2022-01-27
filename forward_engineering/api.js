@@ -44,7 +44,8 @@ const LOGICAL_TYPES_MAP = {
 		'local-timestamp-millis',
 		'local-timestamp-micros',
 	],
-	fixed: ['decimal', 'duration']
+	fixed: ['decimal', 'duration'],
+	string: ['uuid'],
 };
 
 const RecordNameStrategy = 'RecordNameStrategy';
@@ -396,6 +397,14 @@ const resolveSchemaUdt = udt => schema => {
 			items,
 		};
 	}
+
+	if (_.isPlainObject(schema.values)) {
+		const values = resolveSchemaUdt(udt)(schema.values);
+		schema = {
+			...schema,
+			values: values.type || values,
+		};
+	}
 	if (_.isArray(schema.items)) {
 		schema = {
 			...schema,
@@ -516,6 +525,10 @@ const handleRecursiveSchema = (schema, avroSchema, parentSchema = {}, udt) => {
 				handleType(schema, avroSchema, udt);
 				break;
 			case 'properties':
+				if (schema.type === 'map') {
+					handleMapValues(schema, avroSchema, udt);
+					break;
+				}
 				handleFields(schema, avroSchema, udt);
 				break;
 			case 'items':
@@ -910,7 +923,7 @@ const getFieldWithConvertedType = (schema, field, type) => {
 		case 'map':
 			return Object.assign(schema, {
 				type,
-				values: getValues(type, field.subtype)
+				values: getValues(type, field.logicalType || field.subtype)
 			});
 		default:
 			return Object.assign(schema, { type });
@@ -1026,9 +1039,9 @@ const getTypeFromReference = (schema) => {
 	return schema.$ref
 };
 
-const getValues = (type, subtype) => {
+const getValues = (type, subtype = '') => {
 	const regex = new RegExp('\\' + type + '<(.*?)\>');
-	return subtype.match(regex)[1] || DEFAULT_TYPE;
+	return subtype.match(regex)?.[1] || DEFAULT_TYPE;
 };
 
 const handleFields = (schema, avroSchema, udt) => {
@@ -1038,6 +1051,14 @@ const handleFields = (schema, avroSchema, udt) => {
 		handleRecursiveSchema(field, avroField, schema, udt);
 		return avroField;
 	});
+};
+
+const handleMapValues = (schema, avroSchema, udt) => {
+	const mapSchemaKey = _.first(Object.keys(schema.properties));
+	const field = schema.properties[mapSchemaKey];
+	let avroField = {};
+	handleRecursiveSchema(field, avroField, schema, udt);
+	avroSchema.values = avroField;
 };
 
 const handleItems = (schema, avroSchema, udt) => {
