@@ -164,7 +164,7 @@ const getOneOf = field => ({
 	items: field.type.map(typeData => ({
 		type: 'record',
 		subschema: true,
-		properties: { [field.name]: _.omit(typeData, 'name') },
+		properties: { [field.name || DEFAULT_FIELD_NAME]: _.omit(typeData, 'name') },
 	})),
 });
 
