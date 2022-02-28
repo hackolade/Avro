@@ -27,13 +27,16 @@ const addDefinition = (namespace, definition) => {
 
 const filterUnusedDefinitions = schema => ({
 	...schema,
-	definitions: dependencies.lodash.pick(schema.definitions, getUsedDefinitionsWithRelated(schema)),
+	definitions: dependencies.lodash.pick(schema.definitions, sortDefinitionsNames(schema, getUsedDefinitions(schema))),
 });
 
-const getUsedDefinitionsWithRelated = schema => {
+const getUsedDefinitions = (schema, parentDefinitions = []) => {
 	let usedDefinitions = [];
 	mapJsonSchema(field => {
 		if (!field.$ref) {
+			return field;
+		}
+		if (parentDefinitions.includes(field.definitionName)) {
 			return field;
 		}
 		const definition = findDefinition(field.namespace, field.definitionName);
@@ -41,27 +44,8 @@ const getUsedDefinitionsWithRelated = schema => {
 			return field;
 		}
 
-		const relatedDefinitions = getUsedDefinitions(definition);
+		const relatedDefinitions = getUsedDefinitions(definition, [ ...parentDefinitions, ...usedDefinitions, field.definitionName ]);
 		usedDefinitions = [ ...usedDefinitions, field.definitionName, ...relatedDefinitions ];
-
-		return field;
-	})(dependencies.lodash.omit(schema, 'definitions'));
-
-	return sortDefinitionsNames(schema, usedDefinitions);
-};
-
-const getUsedDefinitions = schema => {
-	let usedDefinitions = [];
-	mapJsonSchema(field => {
-		if (!field.$ref) {
-			return field;
-		}
-		const definition = findDefinition(field.namespace, field.definitionName);
-		if (!definition) {
-			return field;
-		}
-
-		usedDefinitions = [ ...usedDefinitions, field.definitionName ];
 
 		return field;
 	})(schema);
