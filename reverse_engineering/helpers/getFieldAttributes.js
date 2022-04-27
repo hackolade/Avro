@@ -11,9 +11,9 @@ const META_VALUES_KEY_MAP = {
 	'java-key-class': 'metaValueKeyClass'
 };
 const NAMED_TYPES = ['record', 'fixed', 'enum'];
-const GENERAL_ATTRIBUTES = ['doc', 'aliases', 'order', 'pattern'];
+const GENERAL_ATTRIBUTES = ['doc', 'aliases', 'order', 'pattern', 'default'];
 const TYPE_SPECIFIC_ATTRIBUTES = {
-	enums: ['name', 'namespace', 'symbols'],
+	enum: ['name', 'namespace', 'symbols'],
 	array: ['items'],
 	map: ['values'],
 	record: ['name', 'namespace', 'fields'],
