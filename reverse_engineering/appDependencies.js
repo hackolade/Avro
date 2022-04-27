@@ -6,5 +6,5 @@ const setDependencies = app => {
 
 module.exports = {
     setDependencies,
-    dependencies
+    dependencies,
 };
