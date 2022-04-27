@@ -389,8 +389,8 @@ const filterArrayItems = avroSchema => {
 const resolveSchemaUdt = udt => schema => {
 	if (_.isString(schema.items)) {
 		let items = getTypeFromUdt(schema.items, udt, schema);
-		if (_.isPlainObject(item.type)) {
-			items = item.type;
+		if (_.isPlainObject(items.type)) {
+			items = items.type;
 		}
 		schema = {
 			...schema,
