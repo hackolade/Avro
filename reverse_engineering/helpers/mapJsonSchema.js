@@ -1,46 +1,44 @@
 const { dependencies } = require("../appDependencies");
 
-const add = (obj, properties) => Object.assign({}, obj, properties);
+let _;
 
-const mapJsonSchema = (jsonSchema, callback) => {
-	const _ = dependencies.lodash;
-	const mapProperties = (properties, mapper) => Object.keys(properties).reduce((newProperties, propertyName) => {
-		return add(newProperties, {
-			[propertyName]: mapper(properties[propertyName])
-		});
-	}, {});
-	const mapItems = (items, mapper) => {
-		if (Array.isArray(items)) {
-			return items.map(jsonSchema => mapper(jsonSchema));
-		} else if (_.isPlainObject(items)) {
-			return mapper(items);
-		} else {
-			return items;
-		}
-	};
-	const applyTo = (properties, jsonSchema, mapper) => {
-		return properties.reduce((jsonSchema, propertyName) => {
-			if (!jsonSchema[propertyName]) {
-				return jsonSchema;
-			}
-	
-			return Object.assign({}, jsonSchema, {
-				[propertyName]: mapper(jsonSchema[propertyName])
-			});
-		}, jsonSchema);
-	};
+const PROPERTIES_LIKE = [ 'properties', 'definitions', 'patternProperties' ];
+const ITEMS_LIKE = [ 'items', 'oneOf', 'allOf', 'anyOf', 'not' ];
+
+const mapJsonSchema = callback => jsonSchema => {
+	_ = dependencies.lodash;
 	if (!_.isPlainObject(jsonSchema)) {
 		return jsonSchema;
 	}
-	const mapper = _.partial(mapJsonSchema, _, callback);
-	const propertiesLike = [ 'properties', 'definitions', 'patternProperties' ];
-	const itemsLike = [ 'items', 'oneOf', 'allOf', 'anyOf', 'not' ];
-	
-	const copyJsonSchema = Object.assign({}, jsonSchema);
-	const jsonSchemaWithNewProperties = applyTo(propertiesLike, copyJsonSchema, _.partial(mapProperties, _, mapper));
-	const newJsonSchema = applyTo(itemsLike, jsonSchemaWithNewProperties, _.partial(mapItems, _, mapper));
+
+	const mapper = mapJsonSchema(callback);
+	const jsonSchemaWithNewProperties = applyTo(PROPERTIES_LIKE, { ...jsonSchema }, mapProperties(mapper));
+	const newJsonSchema = applyTo(ITEMS_LIKE, jsonSchemaWithNewProperties, mapItems(mapper));
 
 	return callback(newJsonSchema);
 };
+
+const mapProperties = mapper => properties => Object.keys(properties).reduce((newProperties, key) => ({
+	...newProperties,
+	[key]: mapper(properties[key]),
+}), {});
+
+const mapItems = mapper => items => {
+	if (_.isArray(items)) {
+		return items.map(mapper);
+	} else if (_.isPlainObject(items)) {
+		return mapper(items);
+	}
+
+	return items;
+};
+
+const applyTo = (properties, jsonSchema, mapper) => properties.reduce((jsonSchema, key) => {
+	if (!jsonSchema[key]) {
+		return jsonSchema;
+	}
+
+	return { ...jsonSchema,	[key]: mapper(jsonSchema[key]) };
+}, jsonSchema);
 
 module.exports = mapJsonSchema;
