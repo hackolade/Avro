@@ -22,7 +22,7 @@ const addDefinition = (namespace, definition) => {
 	const name = definition.name;
 	dependencies.lodash.set(definitions, [namespace, name], definition);
 
-	return { definitionName: name, $ref: name, name, namespace };
+	return { definitionName: name, $ref: name, name, namespace, default: definition.default };
 };
 
 const filterUnusedDefinitions = schema => ({
@@ -57,12 +57,12 @@ const sortDefinitionsNames = (schema, definitionsNames) => Object.keys(schema.de
 
 const updateRefs = mapJsonSchema(field => field.$ref ? updateRef(field) : field);
 
-const updateRef = ({ name, namespace, definitionName, $ref }) => {
+const updateRef = ({ name, namespace, description, definitionName, $ref }) => {
 	if (findDefinition(namespace, definitionName)) {
-		return { name, $ref: `#/definitions/${definitionName}`};
+		return { name, description, $ref: `#/definitions/${definitionName}`};
 	}
 
-	return { name, $ref, hackoladeMeta: { restrictExternalReferenceCreation: true } };
+	return { name, description, $ref, hackoladeMeta: { restrictExternalReferenceCreation: true } };
 };
 
 const findDefinition = (namespace, name) => definitions[namespace]?.[name];

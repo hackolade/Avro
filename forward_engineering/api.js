@@ -1049,6 +1049,9 @@ const handleFields = (schema, avroSchema, udt) => {
 		let field = schema.properties[key];
 		let avroField = Object.assign({}, { name: key });
 		handleRecursiveSchema(field, avroField, schema, udt);
+		if (field.refDescription) {
+			return { ...avroField, doc: field.refDescription };
+		}
 		return avroField;
 	});
 };
