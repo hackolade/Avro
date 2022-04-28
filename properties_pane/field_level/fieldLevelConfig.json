@@ -138,12 +138,7 @@ making sure that you maintain a proper JSON format.
 				"validation": {
 					"required": true
 				},
-				"dependency": [
-					{
-						"level": "parent",
-						"key": "type",
-						"value": "definitions"
-					}, { 
+				"dependency": { 
 					"type": "and", 
 					"values": [{
 						"key": "required",
@@ -156,7 +151,7 @@ making sure that you maintain a proper JSON format.
 							"value": "array"
 						}
 					}]
-				}]
+				}
 			},
 			{
 				"propertyName": "Default",
@@ -536,12 +531,7 @@ making sure that you maintain a proper JSON format.
 				"validation": {
 					"required": true
 				},
-				"dependency": [
-					{
-						"level": "parent",
-						"key": "type",
-						"value": "definitions"
-					}, { 
+				"dependency": { 
 					"type": "and", 
 					"values": [{
 						"key": "required",
@@ -554,7 +544,7 @@ making sure that you maintain a proper JSON format.
 							"value": "array"
 						}
 					}]
-				}]
+				}
 			},
 			{
 				"propertyName": "Default",
@@ -687,12 +677,7 @@ making sure that you maintain a proper JSON format.
 				"validation": {
 					"required": true
 				},
-				"dependency": [
-					{
-						"level": "parent",
-						"key": "type",
-						"value": "definitions"
-					}, { 
+				"dependency": { 
 					"type": "and", 
 					"values": [{
 						"key": "required",
@@ -705,7 +690,7 @@ making sure that you maintain a proper JSON format.
 							"value": "array"
 						}
 					}]
-				}]
+				}
 			},
 			{
 				"propertyName": "Default",
@@ -827,12 +812,7 @@ making sure that you maintain a proper JSON format.
 				"validation": {
 					"enum": [null, "null", ""]
 				},
-				"dependency": [
-					{
-						"level": "parent",
-						"key": "type",
-						"value": "definitions"
-					}, { 
+				"dependency": { 
 					"type": "and", 
 					"values": [{
 						"key": "required",
@@ -845,7 +825,7 @@ making sure that you maintain a proper JSON format.
 							"value": "array"
 						}
 					}]
-				}]
+				}
 			},
 			{
 				"propertyName": "Default",
@@ -1235,12 +1215,7 @@ making sure that you maintain a proper JSON format.
 					"required": true,
 					"in": "symbols"
 				},
-				"dependency": [
-					{
-						"level": "parent",
-						"key": "type",
-						"value": "definitions"
-					}, { 
+				"dependency": { 
 					"type": "and", 
 					"values": [{
 						"key": "required",
@@ -1253,7 +1228,7 @@ making sure that you maintain a proper JSON format.
 							"value": "array"
 						}
 					}]
-				}]
+				}
 			},
 			{
 				"propertyName": "Default",
