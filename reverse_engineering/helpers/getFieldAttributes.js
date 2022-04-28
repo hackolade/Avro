@@ -27,7 +27,7 @@ const DECIMAL_ATTRIBUTES = ['precision', 'scale'];
 
 let _;
 
-const getFieldAttributes = (type, attributes = {}) => {
+const getFieldAttributes = (attributes = {}, type = '') => {
 	_ = dependencies.lodash;
 
     return _.flow([
