@@ -26,15 +26,23 @@ const convertToJsonSchemas = avroSchema => {
 };
 
 const convertSchema = (schema, namespace = EMPTY_NAMESPACE) => {
-	if (_.isString(schema)) {
-		return convertType(namespace, schema, getFieldAttributes(schema));
-	}
-	if (_.isPlainObject(schema)) {
-		return convertType(namespace, schema.type, getFieldAttributes(schema.type, schema));
-	}
 	if (_.isArray(schema)) {
 		return convertUnion(namespace, schema);
 	}
+
+	if (!_.isObject(schema) && !_.isString(schema)) {
+		return;
+	}
+
+	const type = _.isString(schema) ? schema : schema.type;
+	const attributes =  _.isString(schema) ? {} : schema;
+	const field = convertType(namespace, type, getFieldAttributes(attributes, type));
+
+	if (!isNamedType(type)) {
+		return field;
+	}
+
+	return addDefinition(attributes.namespace || namespace, field);
 };
 
 const convertType = (parentNamespace, type, attributes) => {
@@ -46,19 +54,17 @@ const convertType = (parentNamespace, type, attributes) => {
 	if (isNumericType(type)) {
 		return convertNumeric(type, attributes);
 	}
-	if (isPrimitiveType(type) && !isNamedType(type)) {
+	if (isPrimitiveType(type)) {
 		return convertPrimitive(type, attributes);
 	}
 
 	switch(type) {
+		case 'fixed':
+			return convertFixed(attributes);
 		case 'map':
 			return convertMap(namespace, attributes);
-		case 'enum':
-			return addDefinition(namespace, convertEnum(attributes));
-		case 'fixed':
-			return addDefinition(namespace, convertFixed(attributes));
 		case 'record':
-			return addDefinition(namespace, convertRecord(namespace, attributes));
+			return convertRecord(namespace, attributes);
 		case 'array':
 			return convertArray(namespace, attributes);
 		default:
@@ -89,7 +95,6 @@ const convertMap = (namespace, attributes) => {
 	};
 };
 
-const convertEnum = attributes => ({ ...attributes, type: 'enum' });
 const convertFixed = attributes => ({ ...attributes, type: 'fixed' });
 
 const convertRecord = (namespace, attributes) => {
@@ -104,7 +109,7 @@ const convertRecord = (namespace, attributes) => {
 };
 
 const convertField = namespace => field => ({
-	...getFieldAttributes('', field),
+	...getFieldAttributes(field),
 	...convertSchema(field.type, namespace),
 	name: field.name
 });
@@ -146,7 +151,7 @@ const mergeMultipleFieldProperties = field => {
 		type: [ ...(multipleField.type || []), schema.type ],
 	}), {});
 
-	return { ...multipleField, name: field.name };
+	return { ...field, ...multipleField, name: field.name };
 };
 
 const setSchemaRootAttributes = schema => ({
@@ -171,7 +176,7 @@ const getOneOf = field => ({
 
 const getMapSubtype = values => _.isString(values) ? `map<${values}>` : ''
 const getRequired = properties => properties.filter(isRequired).map(field => field.name).filter(Boolean);
-const isRequired = field => !field.default;
+const isRequired = field => _.isUndefined(field.default);
 const isPrimitiveType = type => PRIMITIVE_TYPES.includes(type);
 const isNumericType = type => NUMERIC_TYPES.includes(type);
 const isNamedType = type => NAMED_TYPES.includes(type);
