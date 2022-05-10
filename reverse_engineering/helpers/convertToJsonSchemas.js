@@ -98,7 +98,7 @@ const convertMap = (namespace, attributes) => {
 const convertFixed = attributes => ({ ...attributes, type: 'fixed' });
 
 const convertRecord = (namespace, attributes) => {
-	const fields = handleMultipleFields(attributes.fields.map(convertField(namespace)));
+	const fields = handleMultipleFields((attributes.fields || []).map(convertField(namespace)));
 
 	return {
 		..._.omit(attributes, 'fields'),
