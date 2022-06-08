@@ -292,6 +292,10 @@ const getConfluentPostQuery = ({ data, schema }) => {
 		const containerPrefix = _.has(data, 'containerData.name') ? `${data.containerData.name}.`:'';
 		const topicPrefix = _.has(data, 'modelData.schemaTopic') ? `${data.modelData.schemaTopic}-`:'';
 
+		if (data?.containerData?.schemaGroupName) {
+			return `${data.containerData.schemaGroupName}.${name}${typePostfix}`;
+		}
+
 		const schemaNameStrategy = _.get(data, 'modelData.schemaNameStrategy', '');
 		switch(schemaNameStrategy){
 			case RecordNameStrategy:
