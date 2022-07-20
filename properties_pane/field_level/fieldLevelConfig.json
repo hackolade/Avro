@@ -286,6 +286,8 @@ making sure that you maintain a proper JSON format.
 					}
 				]
 			},
+			"minLength",
+			"maxLength",
 			"pattern",
 			"dependencies",
 			"primaryKey",

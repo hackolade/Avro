@@ -2096,7 +2096,7 @@ function RecordType(schema, opts) {
   Type.call(this, schema, opts);
 
   if (!Array.isArray(schema.fields)) {
-    Type.addError(new Error(f('non-array record fields: %j', schema.fields)));
+    Type.addError(new Error(f('non-array record fields: %j', schema.fields ?? 'no `fields` in schema')));
   }
   if (utils.hasDuplicates(schema.fields, function (f) { return f.name; })) {
     Type.addError(new Error(f('duplicate field name: %j', schema.fields)));
