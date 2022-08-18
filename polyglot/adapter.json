@@ -40,9 +40,12 @@
  * }
  */
  {
-	"modify": {
-		"field": [
-			["renameProperty", {"key": "childType", "value": "enum"}, "enum", "symbols"]
-		]
-	}
+    "modify": {
+        "field": [
+            {
+                "from": { "type": "enum" },
+                "to": { "symbols": { "type": "Source", "path": "enum" } }
+            }
+        ]
+    }
 }
