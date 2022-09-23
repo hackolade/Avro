@@ -321,12 +321,6 @@ making sure that you maintain a proper JSON format.
 				"isTargetProperty": true
 			},
 			{
-				"propertyName": "Required",
-				"propertyKeyword": "required",
-				"propertyType": "checkbox",
-				"template": "boolean"
-			},
-			{
 				"propertyName": "Precision",
 				"propertyKeyword": "precision",
 				"propertyValidate": true,
@@ -351,6 +345,12 @@ making sure that you maintain a proper JSON format.
 					"value": "decimal"
 				},
 				"isTargetProperty": true
+			},
+			{
+				"propertyName": "Required",
+				"propertyKeyword": "required",
+				"propertyType": "checkbox",
+				"template": "boolean"
 			},
 			{
 				"propertyName": "Aliases",
