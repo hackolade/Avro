@@ -137,7 +137,7 @@ const handleDateTime = field => ({
 });
 
 const handleNumber = field => {
-	if (field.mode || field.logicalType) {
+	if ((field.mode && field.mode !== 'decimal') || field.logicalType) {
 		return field;
 	}
 
