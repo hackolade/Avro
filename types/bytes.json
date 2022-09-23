@@ -22,6 +22,12 @@
 		"sample": "",
 		"metaProps": []
 	},
+	"descriptor": [{
+		"schema": {
+			"subtype": "decimal"
+		},
+		"mode": "decimal"
+	}],
 	"subtypes": {
 		"bytes": {
 			"parentType": "string"
