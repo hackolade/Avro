@@ -337,6 +337,7 @@ making sure that you maintain a proper JSON format.
 					"key": "subtype",
 					"value": "decimal"
 				},
+				"typeDecorator": true,
 				"isTargetProperty": true
 			},
 			{
@@ -350,6 +351,7 @@ making sure that you maintain a proper JSON format.
 					"key": "subtype",
 					"value": "decimal"
 				},
+				"typeDecorator": true,
 				"isTargetProperty": true
 			},
 			{
@@ -1410,6 +1412,7 @@ making sure that you maintain a proper JSON format.
 					"key": "subtype",
 					"value": "decimal"
 				},
+				"typeDecorator": true,
 				"isTargetProperty": true
 			},
 			{
@@ -1423,6 +1426,7 @@ making sure that you maintain a proper JSON format.
 					"key": "subtype",
 					"value": "decimal"
 				},
+				"typeDecorator": true,
 				"isTargetProperty": true
 			},
 			{
