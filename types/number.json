@@ -75,5 +75,34 @@
 			"logicalType": "local-timestamp-micros"
 		},
 		"format": "YYYY-MM-DD hh:mm:ss.nnnnnnZ"
+	},
+	{
+		"schema": {
+			"mode": "float"
+		},
+		"capacity": 4,
+		"mode": "floating"
+	},
+	{
+		"schema": {
+			"mode": "double"
+		},
+		"capacity": 8,
+		"mode": "floating"
+	}, {
+		"schema": {
+			"mode": "int"
+		},
+		"capacity": 3
+	}, {
+		"schema": {
+			"mode": "int"
+		},
+		"capacity": 4
+	}, {
+		"schema": {
+			"mode": "long"
+		},
+		"capacity": 8
 	}]
 }
