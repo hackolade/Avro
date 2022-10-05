@@ -1,4 +1,4 @@
-const { dependencies } = require('../appDependencies');
+const { dependencies } = require('../../shared/appDependencies');
 const mapJsonSchema = require('./mapJsonSchema');
 const { getNamespace, getName, EMPTY_NAMESPACE } = require('./generalHelper');
 

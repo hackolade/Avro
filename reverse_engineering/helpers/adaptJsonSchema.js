@@ -1,4 +1,4 @@
-const { dependencies } = require('../appDependencies');
+const { dependencies } = require('../../shared/appDependencies');
 const mapJsonSchema = require('./mapJsonSchema');
 
 const COMPLEX_PROPERTIES = ['patternProperties', 'properties', 'items', 'allOf', 'oneOf', 'anyOf', 'not'];
@@ -137,7 +137,7 @@ const handleDateTime = field => ({
 });
 
 const handleNumber = field => {
-	if ((field.mode && field.mode !== 'decimal') || field.logicalType) {
+	if (field.mode || field.logicalType) {
 		return field;
 	}
 

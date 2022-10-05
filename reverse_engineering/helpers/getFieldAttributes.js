@@ -1,29 +1,8 @@
 
-const { dependencies } = require('../appDependencies');
+const { dependencies } = require('../../shared/appDependencies');
+const { META_VALUES_KEY_MAP } = require('../../shared/constants');
+const { isNamedType, filterAttributes, isMetaProperty } = require('../../shared/typeHelper');
 const { getNamespace, getName } = require('./generalHelper');
-
-const META_PROPERTIES = ['avro.java.string', 'java-element', 'java-element-class', 'java-class', 'java-key-class'];
-const META_VALUES_KEY_MAP = {
-	'avro.java.string': 'metaValueString',
-	'java-element': 'metaValueElement',
-	'java-element-class': 'metaValueElementClass',
-	'java-class': 'metaValueClass',
-	'java-key-class': 'metaValueKeyClass'
-};
-const NAMED_TYPES = ['record', 'fixed', 'enum'];
-const GENERAL_ATTRIBUTES = ['doc', 'aliases', 'order', 'pattern', 'default'];
-const TYPE_SPECIFIC_ATTRIBUTES = {
-	enum: ['name', 'namespace', 'symbols'],
-	array: ['items'],
-	map: ['values'],
-	record: ['name', 'namespace', 'fields'],
-	fixed: ['name', 'namespace', 'size', 'logicalType'],
-	string: ['logicalType'],
-	bytes: ['logicalType'],
-	int: ['logicalType'],
-	long: ['logicalType'],
-};
-const DECIMAL_ATTRIBUTES = ['precision', 'scale'];
 
 let _;
 
@@ -40,15 +19,6 @@ const getFieldAttributes = (attributes = {}, type = '') => {
         addMetaProperties,
     ])(attributes);
 };
-
-const filterAttributes = type => attributes => _.pick(attributes, [
-	...(TYPE_SPECIFIC_ATTRIBUTES[type] || []),
-	...GENERAL_ATTRIBUTES,
-	...getLogicalTypeProperties(attributes.logicalType),
-	...META_PROPERTIES
-]);
-
-const getLogicalTypeProperties = logicalType => logicalType === 'decimal' ? DECIMAL_ATTRIBUTES : [];
 
 const setNamespace = type => properties => {
 	if (!isNamedType(type)) {
@@ -119,8 +89,5 @@ const addMetaProperties = properties => Object.keys(properties).reduce((updatedP
 		}],
 	};
 }, {});
-
-const isNamedType = type => NAMED_TYPES.includes(type);
-const isMetaProperty = type => META_PROPERTIES.includes(type)
 
 module.exports = getFieldAttributes;
