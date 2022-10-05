@@ -1093,6 +1093,12 @@ const handleItems = (schema, avroSchema, udt) => {
 				Object.assign(itemData, itemData.type);
 			}
 
+			const itemAttributes = Object.keys(itemData);
+			const needToSimplify = (itemAttributes.length === 1 || (itemAttributes.length === 2 && itemAttributes.includes('name')));
+			if (needToSimplify) {
+				return itemData.type;
+			}
+
 			return itemData;
 		});
 };

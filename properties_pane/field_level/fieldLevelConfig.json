@@ -321,12 +321,6 @@ making sure that you maintain a proper JSON format.
 				"isTargetProperty": true
 			},
 			{
-				"propertyName": "Required",
-				"propertyKeyword": "required",
-				"propertyType": "checkbox",
-				"template": "boolean"
-			},
-			{
 				"propertyName": "Precision",
 				"propertyKeyword": "precision",
 				"propertyValidate": true,
@@ -337,6 +331,7 @@ making sure that you maintain a proper JSON format.
 					"key": "subtype",
 					"value": "decimal"
 				},
+				"typeDecorator": true,
 				"isTargetProperty": true
 			},
 			{
@@ -350,7 +345,14 @@ making sure that you maintain a proper JSON format.
 					"key": "subtype",
 					"value": "decimal"
 				},
+				"typeDecorator": true,
 				"isTargetProperty": true
+			},
+			{
+				"propertyName": "Required",
+				"propertyKeyword": "required",
+				"propertyType": "checkbox",
+				"template": "boolean"
 			},
 			{
 				"propertyName": "Aliases",
@@ -1410,6 +1412,7 @@ making sure that you maintain a proper JSON format.
 					"key": "subtype",
 					"value": "decimal"
 				},
+				"typeDecorator": true,
 				"isTargetProperty": true
 			},
 			{
@@ -1423,6 +1426,7 @@ making sure that you maintain a proper JSON format.
 					"key": "subtype",
 					"value": "decimal"
 				},
+				"typeDecorator": true,
 				"isTargetProperty": true
 			},
 			{
