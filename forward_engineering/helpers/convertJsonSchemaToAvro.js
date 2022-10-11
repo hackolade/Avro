@@ -11,7 +11,7 @@ let _;
 let nameIndex = 0;
 
 const convertSchema = schema => {
-    _ = dependencies.lodash;
+	_ = dependencies.lodash;
 
 	schema = prepareSchema(schema);
 

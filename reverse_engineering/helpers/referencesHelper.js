@@ -68,9 +68,9 @@ const updateRef = ({ name, namespace, description, definitionName, $ref }) => {
 const findDefinition = (namespace, name) => definitions[namespace]?.[name];
 
 module.exports = {
-    addDefinition,
-    resolveRootReference,
-    getDefinitions,
-    filterUnusedDefinitions,
-    updateRefs
+	addDefinition,
+	resolveRootReference,
+	getDefinitions,
+	filterUnusedDefinitions,
+	updateRefs
 };

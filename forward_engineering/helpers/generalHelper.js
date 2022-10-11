@@ -11,14 +11,14 @@ const parseJson = str => {
 };
 
 const reorderAttributes = avroSchema => {
-    _ = dependencies.lodash;
+	_ = dependencies.lodash;
 
-    return _.flow([
-        setPropertyAsFirst('type'),
-        setPropertyAsFirst('doc'),
-        setPropertyAsFirst('namespace'),
-        setPropertyAsFirst('name'),
-    ])(avroSchema);
+	return _.flow([
+	    setPropertyAsFirst('type'),
+	    setPropertyAsFirst('doc'),
+	    setPropertyAsFirst('namespace'),
+	    setPropertyAsFirst('name'),
+	])(avroSchema);
 };
 
 const setPropertyAsFirst = key => avroSchema => {
@@ -35,7 +35,7 @@ const setPropertyAsFirst = key => avroSchema => {
 };
 
 const filterMultipleTypes = schemaTypes => {
-    _ = dependencies.lodash;
+	_ = dependencies.lodash;
 
 	const types = _.uniqBy(schemaTypes, type => type?.type || type);
 	if (types.length === 1) {
@@ -74,7 +74,7 @@ const simplifySchema = schema => {
 };
 
 module.exports = {
-    parseJson,
+	parseJson,
 	reorderAttributes,
 	filterMultipleTypes,
 	prepareName,

@@ -39,7 +39,7 @@ const LOGICAL_TYPES_MAP = {
 const isNamedType = type => NAMED_TYPES.includes(type);
 
 const filterAttributes = type => attributes => {
-    _ = dependencies.lodash;
+	_ = dependencies.lodash;
 
 	if (!LOGICAL_TYPES_MAP[attributes.type]?.includes(attributes.logicalType)) {
 		attributes = _.omit(attributes, 'logicalType');
@@ -58,7 +58,7 @@ const getLogicalTypeAttributes = (type, logicalType) => ['bytes', 'fixed'].inclu
 const isMetaProperty = key => META_PROPERTIES.includes(key);
 
 module.exports = {
-    isNamedType,
-    filterAttributes,
-    isMetaProperty,
+	isNamedType,
+	filterAttributes,
+	isMetaProperty,
 };

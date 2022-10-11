@@ -5,9 +5,9 @@ let _;
 const CHOICES = ['oneOf', 'anyOf', 'allOf'];
 
 const convertChoicesToProperties = schema => {
-    _ = dependencies.lodash;
+	_ = dependencies.lodash;
 
-    return CHOICES.reduce((schema, choice) => convertChoiceToProperties(schema, choice), schema);
+	return CHOICES.reduce((schema, choice) => convertChoiceToProperties(schema, choice), schema);
 };
 
 const convertChoiceToProperties = (schema, choice) => {

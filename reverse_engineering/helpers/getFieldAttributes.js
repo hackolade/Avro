@@ -9,15 +9,15 @@ let _;
 const getFieldAttributes = (attributes = {}, type = '') => {
 	_ = dependencies.lodash;
 
-    return _.flow([
-        filterAttributes(type),
-        setNamespace(type),
-        setSubtype(type),
-        setDescriptionFromDoc,
-        convertDefaultValue,
-        setDurationSize,
-        addMetaProperties,
-    ])(attributes);
+	return _.flow([
+	    filterAttributes(type),
+	    setNamespace(type),
+	    setSubtype(type),
+	    setDescriptionFromDoc,
+	    convertDefaultValue,
+	    setDurationSize,
+	    addMetaProperties,
+	])(attributes);
 };
 
 const setNamespace = type => properties => {

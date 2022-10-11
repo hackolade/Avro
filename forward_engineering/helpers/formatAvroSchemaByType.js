@@ -5,7 +5,7 @@ const { reorderAttributes } = require('./generalHelper');
 let _;
 
 const formatAvroSchemaByType = ({ scriptType, settings, needMinify, avroSchema }) => {
-    _ = dependencies.lodash;
+	_ = dependencies.lodash;
 
 	const formatter = getFormatter(scriptType);
 

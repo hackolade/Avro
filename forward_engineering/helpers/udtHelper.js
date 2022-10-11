@@ -14,9 +14,9 @@ const getUdtItem = type => {
 };
 
 const resolveUdt = avroSchema => {
-    _ = dependencies.lodash;
+	_ = dependencies.lodash;
 
-    return mapAvroSchema(avroSchema, resolveSchemaUdt);
+	return mapAvroSchema(avroSchema, resolveSchemaUdt);
 };
 
 const useUdt = type => {
@@ -82,11 +82,11 @@ const isNativeType = type => {
 };
 
 const getTypeFromUdt = type => {
-    if (isUdtUsed(type)) {
-        return getTypeWithNamespace(type);
-    }
+	if (isUdtUsed(type)) {
+	    return getTypeWithNamespace(type);
+	}
 
-    let udtItem = getUdtItem(type);
+	let udtItem = getUdtItem(type);
 
 	if (isDefinitionTypeValidForAvroDefinition(udtItem)) {
 		useUdt(type);
