@@ -247,7 +247,7 @@ const convertFixed = schema => {
 	return {
 		...schema,
 		name,
-		size: schema.size || 16,
+		size: _.isUndefined(schema.size) ? 16 : schema.size,
 		...getLogicalTypeProperties(schema),
 	};
 };
