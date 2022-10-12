@@ -1,4 +1,4 @@
-const { dependencies } = require("../appDependencies");
+const { dependencies } = require("../../shared/appDependencies");
 
 let _;
 

@@ -1,6 +1,6 @@
 'use strict'
 
-const { setDependencies, dependencies } = require('./appDependencies');
+const { setDependencies, dependencies } = require('../shared/appDependencies');
 const jsonSchemaAdapter = require('./helpers/adaptJsonSchema');
 const convertToJsonSchemas = require('./helpers/convertToJsonSchemas');
 const { openAvroFile, getExtension } = require('./helpers/fileHelper');
