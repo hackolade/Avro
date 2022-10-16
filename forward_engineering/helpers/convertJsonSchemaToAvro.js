@@ -1,5 +1,5 @@
 const { dependencies } = require('../../shared/appDependencies');
-const { filterAttributes } = require('../../shared/typeHelper');
+const { filterAttributes, isNamedType } = require('../../shared/typeHelper');
 const { getUdtItem, convertSchemaToReference } = require('./udtHelper');
 const { reorderAttributes, filterMultipleTypes, prepareName, simplifySchema } = require('./generalHelper');
 const convertChoicesToProperties = require('./convertChoicesToProperties');
@@ -327,12 +327,18 @@ const convertNumber = schema => {
 };
 
 const getUniqueItemsInArray = (items) => {
-	return _.uniqWith(items, (item1, item2) => (
-		item1 === item2 ||
-		item1.type === item2.type ||
-		item1.name === item2.name
-	));
+	return _.uniqWith(items, (item1, item2) => {
+		item1 = normalizeSchema(item1);
+		item2 = normalizeSchema(item2);
+		if (isNamedType(item1.type) && isNamedType(item2.type)) {
+			return item1.name === item2.name;
+		}
+
+		return item1.type === item2.type;
+	});
 };
+
+const normalizeSchema = schema => _.isString(schema) ? { type: schema } : schema;
 
 const getDefault = schema => {
 	const defaultTypeSchema = _.isArray(schema.type) ? _.first(schema.type) : schema.type;
