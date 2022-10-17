@@ -1097,6 +1097,7 @@ making sure that you maintain a proper JSON format.
 				},
 				"propertyType": "select",
 				"options": [
+					{ "value": "map", "name": " " },
 					{ "value": "map<string>", "name": "string" },
 					{ "value": "map<int>", "name": "int" },
 					{ "value": "map<long>", "name": "long" },
