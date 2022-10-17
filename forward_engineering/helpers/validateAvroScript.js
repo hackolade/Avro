@@ -26,7 +26,7 @@ const validateAvroScript = (script, scriptType, logger) => {
 		return _.first(validationMessages);
 	}
 
-	return getMessageForMultipleSchemaValidation((_.flatten(validationMessages));
+	return getMessageForMultipleSchemaValidation(_.flatten(validationMessages));
 };
 
 const parseScript = (script, scriptType) =>{
