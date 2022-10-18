@@ -85,12 +85,17 @@ const handleEmptyDefaultInProperties = field => {
 			return { ...properties, [key]: property };
 		}
 
+		const choicePropertiesKeyword = (property?.type || []).includes('array') ? 'items' : 'properties';
+
 		return {
 			...properties,
 			[key]: {
 				..._.omit(property, [ ...COMPLEX_PROPERTIES, 'type' ]),
-				oneOf: getOneOf(property),
-			}
+				name: key,
+				type: 'choice',
+				choice: 'oneOf',
+				[choicePropertiesKeyword]: (property?.type || []).map(getOneOfSubschema(property, key)),
+			},
 		};
 	}, {});
 
@@ -101,19 +106,20 @@ const handleEmptyDefaultInProperties = field => {
 	};
 };
 
-const getOneOf = property => property.type.map(type => {
-	if (!isComplexType(type)) {
-		return {
-			..._.omit(property, COMPLEX_PROPERTIES),
-			type
-		}
-	}
+const getOneOfSubschema = (property, name) => type => {
+	const itemData = isComplexType(type) ? _.omit(property, type === 'array' ? ['patternProperties', 'properties'] : 'items') : _.omit(property, COMPLEX_PROPERTIES);
 
 	return {
-		..._.omit(property, type === 'array' ? ['patternProperties', 'properties'] : 'items'),
-		type
-	};
-});
+		type: 'subschema',
+		subschema: true,
+		properties: {
+			[name]: {
+				...itemData,
+				type
+			}
+		},
+	}
+};
 
 const handleDate = field => ({
 	...field,
