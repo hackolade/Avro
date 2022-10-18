@@ -5,7 +5,7 @@ const { SCRIPT_TYPES } = require('../shared/constants');
 const { parseJson, prepareName } = require('./helpers/generalHelper');
 const validateAvroScript = require('./helpers/validateAvroScript');
 const formatAvroSchemaByType = require('./helpers/formatAvroSchemaByType');
-const { resolveUdt, addDefinitions } = require('./helpers/udtHelper');
+const { resolveUdt, addDefinitions, resetDefinitionsUsage } = require('./helpers/udtHelper');
 const convertSchema = require('./helpers/convertJsonSchemaToAvro');
 let _;
 
@@ -36,12 +36,15 @@ const generateModelScript = (data, logger, cb, app) => {
 					} = entity;
 
 					setUserDefinedTypes(internalDefinitions);
+					resetDefinitionsUsage();
+
+					const settings = getSettings({ containerData, entityData, modelData });
 
 					return getScript({ 
 						scriptType,
 						needMinify,
-						settings: getSettings({ containerData, entityData, modelData }),
-						avroSchema: convertJsonToAvro(jsonSchema),
+						settings,
+						avroSchema: convertJsonToAvro(jsonSchema, settings.name),
 					})
 				} catch (err) {
 					logger.log('error', { message: err.message, stack: err.stack }, 'Avro Forward-Engineering Error');
@@ -77,12 +80,14 @@ const generateScript = (data, logger, cb, app) => {
 		setUserDefinedTypes(externalDefinitions);
 		setUserDefinedTypes(modelDefinitions)
 		setUserDefinedTypes(internalDefinitions);
+		resetDefinitionsUsage();
 
+		const settings = getSettings({ containerData, entityData, modelData });
 		const script = getScript({
 			scriptType: getScriptType(options),
 			needMinify: isMinifyNeeded(options),
-			settings: getSettings({ containerData, entityData, modelData }),
-			avroSchema: convertJsonToAvro(jsonSchema),
+			settings,
+			avroSchema: convertJsonToAvro(jsonSchema, settings.name),
 		});
 
 		cb(null, script);
@@ -115,10 +120,11 @@ const getEntityData = (container, entityId) => {
 	return { containerData, jsonSchema, jsonData, entityData, internalDefinitions }
 }
 
-const convertJsonToAvro = jsonString => {
+const convertJsonToAvro = (jsonString, schemaName) => {
 	const jsonSchema = { ...parseJson(jsonString), type: 'record' };
 	const avroSchema = {
 		...convertSchema(jsonSchema),
+		name: schemaName,
 		type: 'record',
 	};
 
