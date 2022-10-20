@@ -238,9 +238,6 @@ const getValuesSchema = properties => {
 
 const convertFixed = schema => {
 	const name = schema.name || getDefaultName();
-	if (getUdtItem(name)) {
-		return convertSchemaToReference(schema);
-	}
 
 	const convertedSchema = {
 		...schema,
@@ -249,7 +246,14 @@ const convertFixed = schema => {
 		...getLogicalTypeProperties(schema),
 	};
 
-	addDefinitions({ [name]:  { ...convertedSchema, used: true } });
+	const schemaFromUdt = getUdtItem(name);
+	if (schemaFromUdt && _.isEqual(filterSchemaAttributes(convertedSchema), filterSchemaAttributes(schemaFromUdt))) {
+		return convertSchemaToReference(schema);
+	}
+
+	if (!schemaFromUdt) {
+		addDefinitions({ [name]:  { ...convertedSchema, used: true } });
+	}
 
 	return convertedSchema;
 };
@@ -292,11 +296,6 @@ const handleField = (name, field) => {
 
 const convertRecord = schema => {
 	const name = schema.name || getDefaultName();
-
-	if (getUdtItem(name)) {
-		return convertSchemaToReference(schema);
-	}
-
 	const convertedSchema = {
 		...schema,
 		name,
@@ -304,7 +303,14 @@ const convertRecord = schema => {
 		fields: Object.keys(schema.fields || {}).map(name => handleField(name, schema.fields[name])),
 	};
 
-	addDefinitions({ [name]:  { ...convertedSchema, used: true } });
+	const schemaFromUdt = getUdtItem(name);
+	if (schemaFromUdt && _.isEqual(filterSchemaAttributes(convertedSchema), filterSchemaAttributes(schemaFromUdt))) {
+		return convertSchemaToReference(schema);
+	}
+
+	if (!schemaFromUdt) {
+		addDefinitions({ [name]:  { ...convertedSchema, used: true } });
+	}
 
 	return convertedSchema;
 };
@@ -315,16 +321,20 @@ const convertPrimitive = schema => {
 
 const convertEnum = schema => {
 	const name = schema.name || getDefaultName();
-	if (getUdtItem(name)) {
-		return convertSchemaToReference(schema);
-	}
 
 	const convertedSchema = {
 		...schema,
 		name,
 	};
 
-	addDefinitions({ [name]:  { ...convertedSchema, used: true } });
+	const schemaFromUdt = getUdtItem(name);
+	if (schemaFromUdt && _.isEqual(filterSchemaAttributes(convertedSchema), filterSchemaAttributes(schemaFromUdt))) {
+		return convertSchemaToReference(schema);
+	}
+
+	if (!schemaFromUdt) {
+		addDefinitions({ [name]:  { ...convertedSchema, used: true } });
+	}
 
 	return convertedSchema;
 };
