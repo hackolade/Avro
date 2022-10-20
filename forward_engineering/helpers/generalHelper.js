@@ -1,6 +1,9 @@
 const { dependencies } = require('../../shared/appDependencies');
 
 let _;
+let nameIndex = 0;
+
+const DEFAULT_NAME = 'New_field';
 
 const parseJson = str => {
 	try {
@@ -49,7 +52,7 @@ const prepareName = name => {
 	const VALID_FULL_NAME_REGEX = /[^A-Za-z0-9_]/g;
 	const VALID_FIRST_NAME_LETTER_REGEX = /^[0-9]/;
 
-	return name
+	return (name || '')
 		.replace(VALID_FULL_NAME_REGEX, '_')
 		.replace(VALID_FIRST_NAME_LETTER_REGEX, '_');
 };
@@ -73,10 +76,18 @@ const simplifySchema = schema => {
 	return filteredSchema;
 };
 
+const getDefaultName = () => {
+	const defaultName = nameIndex ? `${DEFAULT_NAME}_${nameIndex++}` : DEFAULT_NAME;
+	nameIndex++;
+
+	return defaultName;
+};
+
 module.exports = {
 	parseJson,
 	reorderAttributes,
 	filterMultipleTypes,
 	prepareName,
 	simplifySchema,
+	getDefaultName,
 };

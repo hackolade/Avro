@@ -1,14 +1,12 @@
 const { dependencies } = require('../../shared/appDependencies');
 const { filterAttributes, isNamedType } = require('../../shared/typeHelper');
-const { getUdtItem, convertSchemaToReference } = require('./udtHelper');
-const { reorderAttributes, filterMultipleTypes, prepareName, simplifySchema } = require('./generalHelper');
+const { getUdtItem, convertSchemaToReference, addDefinitions } = require('./udtHelper');
+const { reorderAttributes, filterMultipleTypes, prepareName, simplifySchema, getDefaultName } = require('./generalHelper');
 const convertChoicesToProperties = require('./convertChoicesToProperties');
 const { GENERAL_ATTRIBUTES, META_VALUES_KEY_MAP } = require('../../shared/constants');
 const DEFAULT_TYPE = 'string';
-const DEFAULT_NAME = 'New_field';
 
 let _;
-let nameIndex = 0;
 
 const convertSchema = schema => {
 	_ = dependencies.lodash;
@@ -244,12 +242,16 @@ const convertFixed = schema => {
 		return convertSchemaToReference(schema);
 	}
 
-	return {
+	const convertedSchema = {
 		...schema,
 		name,
 		size: _.isUndefined(schema.size) ? 16 : schema.size,
 		...getLogicalTypeProperties(schema),
 	};
+
+	addDefinitions({ [name]:  { ...convertedSchema, used: true } });
+
+	return convertedSchema;
 };
 
 const convertArray = schema => {
@@ -295,12 +297,16 @@ const convertRecord = schema => {
 		return convertSchemaToReference(schema);
 	}
 
-	return {
+	const convertedSchema = {
 		...schema,
 		name,
 		type: 'record',
 		fields: Object.keys(schema.fields || {}).map(name => handleField(name, schema.fields[name])),
 	};
+
+	addDefinitions({ [name]:  { ...convertedSchema, used: true } });
+
+	return convertedSchema;
 };
 
 const convertPrimitive = schema => {
@@ -313,10 +319,14 @@ const convertEnum = schema => {
 		return convertSchemaToReference(schema);
 	}
 
-	return {
+	const convertedSchema = {
 		...schema,
 		name,
 	};
+
+	addDefinitions({ [name]:  { ...convertedSchema, used: true } });
+
+	return convertedSchema;
 };
 
 const convertNumber = schema => {
@@ -374,13 +384,6 @@ const getMetaProperties = (metaProperties) => {
 
 		return { ...props, [property.metaKey]: property[metaValueKey] };
 	}, {});
-};
-
-const getDefaultName = () => {
-	const defaultName = nameIndex ? `${DEFAULT_NAME}_${nameIndex++}` : DEFAULT_NAME;
-	nameIndex++;
-
-	return defaultName;
 };
 
 module.exports = convertSchema;

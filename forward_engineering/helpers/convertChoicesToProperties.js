@@ -1,5 +1,5 @@
 const { dependencies } = require('../../shared/appDependencies');
-const { filterMultipleTypes, prepareName } = require('./generalHelper');
+const { filterMultipleTypes, prepareName, getDefaultName } = require('./generalHelper');
 let _;
 
 const CHOICES = ['oneOf', 'anyOf', 'allOf'];
@@ -35,7 +35,7 @@ const convertChoiceToProperties = (schema, choice) => {
 	}
 
 	const multipleFieldsHash = allSubSchemaFields.reduce((multipleFieldsHash, field) => {
-		const fieldName = choiceMeta.code || choiceMeta.name || field.name;
+		const fieldName = choiceMeta.code || choiceMeta.name || field.name || getDefaultName();
 		const multipleField = multipleFieldsHash[fieldName] ||
 			{
 				...choiceMeta,

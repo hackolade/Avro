@@ -139,9 +139,18 @@ const addDefinitions = definitions => {
 	udt = { ...udt, ...definitions };
 };
 
+const resetDefinitionsUsage = () => {
+	udt = Object.keys(udt || {}).reduce((updatedUdt, key) => {
+		const definition = udt[key];
+
+		return { ...updatedUdt, [key]: _.isString(definition) ? definition : _.omit(definition, 'used') };
+	}, {});
+};
+
 module.exports = {
    resolveUdt,
    getUdtItem,
    addDefinitions,
    convertSchemaToReference,
+   resetDefinitionsUsage,
 };
