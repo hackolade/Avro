@@ -29,51 +29,31 @@
 	},
 	"descriptor": [{
 		"schema": {
-			"mode": "int",
-			"logicalType": "date"
+			"mode": "float"
 		},
-		"format": "YYYY-MM-DD"
+		"capacity": 4,
+		"mode": "floating"
+	},
+	{
+		"schema": {
+			"mode": "double"
+		},
+		"capacity": 8,
+		"mode": "floating"
 	}, {
 		"schema": {
-			"mode": "int",
-			"logicalType": "time-millis"
+			"mode": "int"
 		},
-		"format": "hh:mm:ss.nnn"
+		"capacity": 3
 	}, {
 		"schema": {
-			"mode": "long",
-			"logicalType": "time-micros"
+			"mode": "int"
 		},
-		"format": "hh:mm:ss.nnnnnn"
+		"capacity": 4
 	}, {
 		"schema": {
-			"mode": "long",
-			"logicalType": "time-micros"
+			"mode": "long"
 		},
-		"format": "hh:mm:ss.nnnnnnnnn"
-	}, {
-		"schema": {
-			"mode": "long",
-			"logicalType": "timestamp-millis"
-		},
-		"format": "YYYY-MM-DD hh:mm:ss.nnn"
-	}, {
-		"schema": {
-			"mode": "long",
-			"logicalType": "timestamp-micros"
-		},
-		"format": "YYYY-MM-DD hh:mm:ss.nnnnnn"
-	}, {
-		"schema": {
-			"mode": "long",
-			"logicalType": "local-timestamp-millis"
-		},
-		"format": "YYYY-MM-DD hh:mm:ss.nnnZ"
-	}, {
-		"schema": {
-			"mode": "long",
-			"logicalType": "local-timestamp-micros"
-		},
-		"format": "YYYY-MM-DD hh:mm:ss.nnnnnnZ"
+		"capacity": 8
 	}]
 }

@@ -1,4 +1,5 @@
-const { dependencies } = require('../appDependencies');
+const { dependencies } = require('../../shared/appDependencies');
+const { isNamedType } = require('../../shared/typeHelper');
 const getFieldAttributes = require('./getFieldAttributes');
 const { getNamespace, getName, EMPTY_NAMESPACE } = require('./generalHelper');
 const { addDefinition, resolveRootReference, getDefinitions, filterUnusedDefinitions, updateRefs } = require('./referencesHelper');
@@ -6,7 +7,6 @@ const { addDefinition, resolveRootReference, getDefinitions, filterUnusedDefinit
 const DEFAULT_FIELD_NAME = 'New_field';
 const PRIMITIVE_TYPES = ['string', 'bytes', 'boolean', 'null', 'enum', 'fixed', 'int', 'long', 'float', 'double'];
 const NUMERIC_TYPES = ['int', 'long', 'float', 'double'];
-const NAMED_TYPES = ['record', 'fixed', 'enum'];
 
 let _;
 
@@ -179,7 +179,6 @@ const getRequired = properties => properties.filter(isRequired).map(field => fie
 const isRequired = field => _.isUndefined(field.default);
 const isPrimitiveType = type => PRIMITIVE_TYPES.includes(type);
 const isNumericType = type => NUMERIC_TYPES.includes(type);
-const isNamedType = type => NAMED_TYPES.includes(type);
 const hasComplexType = schemas => schemas.some(schema => !isPrimitiveType(schema.mode || schema.type));
 const convertArrayToJsonSchemaObject = array => array.reduce((object, item) => ({
 	...object,

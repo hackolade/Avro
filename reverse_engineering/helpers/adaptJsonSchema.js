@@ -1,4 +1,4 @@
-const { dependencies } = require('../appDependencies');
+const { dependencies } = require('../../shared/appDependencies');
 const mapJsonSchema = require('./mapJsonSchema');
 
 const COMPLEX_PROPERTIES = ['patternProperties', 'properties', 'items', 'allOf', 'oneOf', 'anyOf', 'not'];
@@ -26,10 +26,6 @@ const adaptType = field => {
 
 	if (_.isArray(type)) {
 		return adaptMultiple(field);
-	}
-
-	if (type === 'string') {
-		return handleStringFormat(field);
 	}
 
 	if (type === 'number') {
@@ -85,12 +81,17 @@ const handleEmptyDefaultInProperties = field => {
 			return { ...properties, [key]: property };
 		}
 
+		const choicePropertiesKeyword = (property?.type || []).includes('array') ? 'items' : 'properties';
+
 		return {
 			...properties,
 			[key]: {
 				..._.omit(property, [ ...COMPLEX_PROPERTIES, 'type' ]),
-				oneOf: getOneOf(property),
-			}
+				name: key,
+				type: 'choice',
+				choice: 'oneOf',
+				[choicePropertiesKeyword]: (property?.type || []).map(getOneOfSubschema(property, key)),
+			},
 		};
 	}, {});
 
@@ -101,43 +102,23 @@ const handleEmptyDefaultInProperties = field => {
 	};
 };
 
-const getOneOf = property => property.type.map(type => {
-	if (!isComplexType(type)) {
-		return {
-			..._.omit(property, COMPLEX_PROPERTIES),
-			type
-		}
-	}
+const getOneOfSubschema = (property, name) => type => {
+	const itemData = isComplexType(type) ? _.omit(property, type === 'array' ? ['patternProperties', 'properties'] : 'items') : _.omit(property, COMPLEX_PROPERTIES);
 
 	return {
-		..._.omit(property, type === 'array' ? ['patternProperties', 'properties'] : 'items'),
-		type
-	};
-});
-
-const handleDate = field => ({
-	...field,
-	type: 'number',
-	mode: 'int',
-	logicalType: 'date',
-})
-
-const handleTime = field => ({
-	...field,
-	type: 'number',
-	mode: 'int',
-	logicalType: 'time-millis',
-});
-
-const handleDateTime = field => ({
-	...field,
-	type: 'number',
-	mode: 'long',
-	logicalType: 'timestamp-millis',
-});
+		type: 'subschema',
+		subschema: true,
+		properties: {
+			[name]: {
+				...itemData,
+				type
+			}
+		},
+	}
+};
 
 const handleNumber = field => {
-	if ((field.mode && field.mode !== 'decimal') || field.logicalType) {
+	if (field.mode || field.logicalType) {
 		return field;
 	}
 
@@ -153,21 +134,6 @@ const handleInt = field => ({
 	type: 'number',
 	mode: 'int'
 });
-
-const handleStringFormat = field => {
-	const { format, ...fieldData } = field;
-
-	switch(format) {
-		case 'date':
-			return handleDate(fieldData);
-		case 'time':
-			return handleTime(fieldData);
-		case 'date-time':
-			return handleDateTime(fieldData);
-		default:
-			return field;
-	};
-};
 
 const adaptMultiple = field => {
 	const { fieldData, types } = field.type.reduce(({ fieldData, types }, type, index) => {

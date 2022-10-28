@@ -6,9 +6,9 @@ const ALLOWED_EXTENSIONS = ['.avro', '.avsc', '.confluent-avro', '.azureSchemaRe
 const SNAPPY_CHECKSUM_LENGTH = 4;
 
 const openAvroFile = async path => {
-    const content = await getFileContent(path);
+	const content = await getFileContent(path);
 
-    return JSON.parse(content);
+	return JSON.parse(content);
 };
 
 const getFileContent = path => new Promise((resolve, reject) => {

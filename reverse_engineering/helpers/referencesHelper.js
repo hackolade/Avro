@@ -1,4 +1,4 @@
-const { dependencies } = require('../appDependencies');
+const { dependencies } = require('../../shared/appDependencies');
 const mapJsonSchema = require('./mapJsonSchema');
 const { getNamespace, getName, EMPTY_NAMESPACE } = require('./generalHelper');
 
@@ -68,9 +68,9 @@ const updateRef = ({ name, namespace, description, definitionName, $ref }) => {
 const findDefinition = (namespace, name) => definitions[namespace]?.[name];
 
 module.exports = {
-    addDefinition,
-    resolveRootReference,
-    getDefinitions,
-    filterUnusedDefinitions,
-    updateRefs
+	addDefinition,
+	resolveRootReference,
+	getDefinitions,
+	filterUnusedDefinitions,
+	updateRefs
 };
