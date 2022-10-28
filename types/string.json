@@ -6,6 +6,7 @@
 	"default": true,
 	"defaultValues": {
 		"required": true,
+		"format": "",
 		"minLength": "",
 		"maxLength": "",
 		"pattern": "",

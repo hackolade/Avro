@@ -129,6 +129,7 @@ making sure that you maintain a proper JSON format.
 				"template": "textarea"
 			},
 			"type",
+			"format",
 			"required",
 			{
 				"propertyName": "Default",
