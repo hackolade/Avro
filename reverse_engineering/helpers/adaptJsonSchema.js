@@ -28,10 +28,6 @@ const adaptType = field => {
 		return adaptMultiple(field);
 	}
 
-	if (type === 'string') {
-		return handleStringFormat(field);
-	}
-
 	if (type === 'number') {
 		return handleNumber(field);
 	}
@@ -121,27 +117,6 @@ const getOneOfSubschema = (property, name) => type => {
 	}
 };
 
-const handleDate = field => ({
-	...field,
-	type: 'number',
-	mode: 'int',
-	logicalType: 'date',
-})
-
-const handleTime = field => ({
-	...field,
-	type: 'number',
-	mode: 'int',
-	logicalType: 'time-millis',
-});
-
-const handleDateTime = field => ({
-	...field,
-	type: 'number',
-	mode: 'long',
-	logicalType: 'timestamp-millis',
-});
-
 const handleNumber = field => {
 	if (field.mode || field.logicalType) {
 		return field;
@@ -159,21 +134,6 @@ const handleInt = field => ({
 	type: 'number',
 	mode: 'int'
 });
-
-const handleStringFormat = field => {
-	const { format, ...fieldData } = field;
-
-	switch(format) {
-		case 'date':
-			return handleDate(fieldData);
-		case 'time':
-			return handleTime(fieldData);
-		case 'date-time':
-			return handleDateTime(fieldData);
-		default:
-			return field;
-	};
-};
 
 const adaptMultiple = field => {
 	const { fieldData, types } = field.type.reduce(({ fieldData, types }, type, index) => {
