@@ -140,6 +140,8 @@ const addDefinitions = definitions => {
 };
 
 const resetDefinitionsUsage = () => {
+	_ = dependencies.lodash;
+
 	udt = Object.keys(udt || {}).reduce((updatedUdt, key) => {
 		const definition = udt[key];
 
