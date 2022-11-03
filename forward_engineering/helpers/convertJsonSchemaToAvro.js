@@ -252,7 +252,7 @@ const convertFixed = schema => {
 	}
 
 	if (!schemaFromUdt) {
-		addDefinitions({ [name]:  { ...convertedSchema, used: true } });
+		addDefinitions({ [name]:  { ...filterSchemaAttributes(convertedSchema), used: true } });
 	}
 
 	return convertedSchema;
@@ -309,7 +309,7 @@ const convertRecord = schema => {
 	}
 
 	if (!schemaFromUdt) {
-		addDefinitions({ [name]:  { ...convertedSchema, used: true } });
+		addDefinitions({ [name]:  { ...filterSchemaAttributes(convertedSchema), used: true } });
 	}
 
 	return convertedSchema;
@@ -333,7 +333,7 @@ const convertEnum = schema => {
 	}
 
 	if (!schemaFromUdt) {
-		addDefinitions({ [name]:  { ...convertedSchema, used: true } });
+		addDefinitions({ [name]:  { ...filterSchemaAttributes(convertedSchema), used: true } });
 	}
 
 	return convertedSchema;
