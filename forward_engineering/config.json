@@ -17,7 +17,7 @@
       "keyword": "schemaRegistry",
       "disableApplyScriptToInstance": true,
       "cliOnly": true,
-      "deprecated": true
+      "hidden": true
     },
     {
       "name": "Azure Schema Registry",
