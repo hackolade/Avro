@@ -1249,6 +1249,10 @@ making sure that you maintain a proper JSON format.
 					"level": "parent",
 					"key": "childType",
 					"value": "array"
+				}, {
+					"level": "parent",
+					"key": "type",
+					"value": "definitions"
 				}]
 			},
 			{
