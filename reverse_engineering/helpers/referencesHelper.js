@@ -19,10 +19,18 @@ const getDefinitions = () => Object.keys(definitions).reduce((jsonDefinitions, n
 }), {});
 
 const addDefinition = (namespace, definition) => {
-	const name = definition.name;
-	dependencies.lodash.set(definitions, [namespace, name], definition);
+	_ = dependencies.lodash;
 
-	return { definitionName: name, $ref: name, name, namespace, default: definition.default };
+	const name = definition.name;
+	_.set(definitions, [namespace, name], definition);
+
+	return {
+		definitionName: name,
+		$ref: name,
+		name,
+		namespace,
+		...(!_.isUndefined(definition.default) && { default: definition.default }),
+	};
 };
 
 const filterUnusedDefinitions = schema => ({
