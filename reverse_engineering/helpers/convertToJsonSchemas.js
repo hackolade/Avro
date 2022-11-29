@@ -108,11 +108,26 @@ const convertRecord = (namespace, attributes) => {
 	};
 };
 
-const convertField = namespace => field => ({
-	...getFieldAttributes(field),
-	...convertSchema(field.type, namespace),
-	name: field.name
-});
+const convertField = namespace => field => {
+	const fieldAttributes = getFieldAttributes(field);
+
+	return {
+		...fieldAttributes,
+		...convertSchema(resolveDefaultForNamedTypes(field.type, fieldAttributes.default), namespace),
+		name: field.name
+	};
+};
+
+const resolveDefaultForNamedTypes = (schema, defaultValue) => {
+	if (_.isUndefined(defaultValue) || !_.isObject(schema) || !isNamedType(schema.type)) {
+		return schema;
+	}
+
+	return {
+		...schema,
+		default: defaultValue,
+	};
+};
 
 const convertArray = (namespace, attributes) => {
 	const items = convertSchema(attributes.items, namespace) || [];
