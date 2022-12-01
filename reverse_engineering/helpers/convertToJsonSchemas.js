@@ -25,7 +25,7 @@ const convertToJsonSchemas = avroSchema => {
 	]));
 };
 
-const convertSchema = (schema, namespace = EMPTY_NAMESPACE) => {
+const convertSchema = (schema, namespace = EMPTY_NAMESPACE, defaultValue) => {
 	if (_.isArray(schema)) {
 		return convertUnion(namespace, schema);
 	}
@@ -42,7 +42,10 @@ const convertSchema = (schema, namespace = EMPTY_NAMESPACE) => {
 		return field;
 	}
 
-	return addDefinition(attributes.namespace || namespace, field);
+	return addDefinition(attributes.namespace || namespace, {
+		...field,
+		...(defaultValue && { default: defaultValue }),
+	});
 };
 
 const convertType = (parentNamespace, type, attributes) => {
@@ -54,6 +57,11 @@ const convertType = (parentNamespace, type, attributes) => {
 	if (isNumericType(type)) {
 		return convertNumeric(type, attributes);
 	}
+
+	if (type === 'enum') {
+		return convertEnum(attributes);
+	}
+
 	if (isPrimitiveType(type)) {
 		return convertPrimitive(type, attributes);
 	}
@@ -81,6 +89,13 @@ const convertUnion = (namespace, types) => {
 };
 
 const convertNumeric = (type, attributes) => ({ ...attributes, type: 'number', mode: type });
+
+const convertEnum = attributes => ({
+	..._.omit(attributes, 'default'),
+	...( attributes.default && { symbolDefault: attributes.default }),
+	type: 'enum',
+});
+
 const convertPrimitive = (type, attributes) => ({ ...attributes, type });
 
 const convertMap = (namespace, attributes) => {
@@ -113,19 +128,8 @@ const convertField = namespace => field => {
 
 	return {
 		...fieldAttributes,
-		...convertSchema(resolveDefaultForNamedTypes(field.type, fieldAttributes.default), namespace),
+		...convertSchema(field.type, namespace, fieldAttributes.default),
 		name: field.name
-	};
-};
-
-const resolveDefaultForNamedTypes = (schema, defaultValue) => {
-	if (_.isUndefined(defaultValue) || !_.isObject(schema) || !isNamedType(schema.type)) {
-		return schema;
-	}
-
-	return {
-		...schema,
-		default: defaultValue,
 	};
 };
 
