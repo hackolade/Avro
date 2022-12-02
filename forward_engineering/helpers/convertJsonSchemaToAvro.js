@@ -351,7 +351,10 @@ const convertEnum = schema => {
 		addDefinitions({ [name]:  { ...filterSchemaAttributes(convertedSchema), symbolDefault: convertedSchema.symbolDefault, used: true } });
 	}
 
-	return convertedSchema;
+	return {
+		..._.omit(convertedSchema, 'symbolDefault'),
+		default: convertedSchema.symbolDefault,
+	};
 };
 
 const convertNumber = schema => {
