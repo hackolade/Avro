@@ -139,6 +139,12 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "text"
 			},
 			{
+				"propertyName": "Confluent subject name",
+				"propertyKeyword": "confluentSubjectName",
+				"propertyType": "text",
+				"disabled": true
+			},
+			{
 				"propertyName": "Description",
 				"propertyKeyword": "description",
 				"shouldValidate": false,
