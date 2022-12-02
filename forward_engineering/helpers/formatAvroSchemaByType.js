@@ -39,7 +39,7 @@ const formatConfluentSchema = ({ settings, needMinify, avroSchema }) => {
 	const {
 		name,
 		namespace,
-		schemaGroupName,
+		confluentSubjectName,
 		schemaType,
 		schemaTopic,
 		schemaNameStrategy,
@@ -49,7 +49,7 @@ const formatConfluentSchema = ({ settings, needMinify, avroSchema }) => {
 		schema: needMinify ? JSON.stringify(avroSchema) : avroSchema,
 		name,
 		namespace,
-		schemaGroupName,
+		confluentSubjectName,
 		schemaType,
 		schemaTopic,
 		schemaNameStrategy
@@ -59,7 +59,7 @@ const formatConfluentSchema = ({ settings, needMinify, avroSchema }) => {
 const getConfluentPostQuery = ({
 	name,
 	namespace, 
-	schemaGroupName,
+	confluentSubjectName,
 	schemaType,
 	schemaTopic,
 	schemaNameStrategy,
@@ -73,8 +73,8 @@ const getConfluentPostQuery = ({
 		const containerPrefix = namespace ? `${namespace}.`:'';
 		const topicPrefix = schemaTopic ? `${schemaTopic}-`:'';
 
-		if (schemaGroupName) {
-			return `${schemaGroupName}.${name}${typePostfix}`;
+		if (confluentSubjectName) {
+			return `${confluentSubjectName}.${name}${typePostfix}`;
 		}
 
 		switch(schemaNameStrategy){

@@ -81,6 +81,7 @@ const getSchemasData = avroSchema => {
 	return avroSchema.map(schema => ({
 		namespace: getNamespace(schema) || '',
 		schemaGroupName: schema.schemaGroupName,
+		confluentSubjectName: schema.subject,
 	}));
 }
 

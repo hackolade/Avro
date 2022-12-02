@@ -169,6 +169,7 @@ const getSettings = ({ containerData, entityData, modelData, }) => {
 		topic: entityData?.pulsarTopicName || '',
 		persistence: entityData?.isNonPersistentTopic ? 'non-persistent' : 'persistent',
 		schemaGroupName: containerData?.schemaGroupName || '',
+		confluentSubjectName: containerData?.confluentSubjectName || '',
 		schemaType: entityData?.schemaType || '',
 		schemaTopic: modelData?.schemaTopic || '',
 		schemaNameStrategy: modelData?.schemaNameStrategy || '',
