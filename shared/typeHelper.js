@@ -6,7 +6,7 @@ let _;
 const META_PROPERTIES = ['avro.java.string', 'java-element', 'java-element-class', 'java-class', 'java-key-class'];
 const NAMED_TYPES = ['record', 'fixed', 'enum'];
 const TYPE_SPECIFIC_ATTRIBUTES = {
-	enum: ['name', 'aliases', 'namespace', 'symbols'],
+	enum: ['name', 'aliases', 'namespace', 'symbols', 'symbolDefault'],
 	array: ['items'],
 	map: ['values'],
 	record: ['name', 'aliases', 'namespace', 'fields'],

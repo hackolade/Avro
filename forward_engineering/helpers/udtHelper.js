@@ -86,7 +86,7 @@ const getTypeFromUdt = type => {
 	    return getTypeWithNamespace(type);
 	}
 
-	let udtItem = getUdtItem(type);
+	let udtItem = resolveSymbolDefaultValue(getUdtItem(type));
 
 	if (isDefinitionTypeValidForAvroDefinition(udtItem)) {
 		useUdt(type);
@@ -99,6 +99,17 @@ const getTypeFromUdt = type => {
 	}
 
 	return resolveSchemaUdt(udtItem);
+};
+
+const resolveSymbolDefaultValue = udtItem => {
+	if (udtItem.type !== 'enum') {
+		return udtItem;
+	}
+
+	return {
+		..._.omit(udtItem, 'symbolDefault'),
+		default: udtItem.symbolDefault,
+	};
 };
 
 const getTypeWithNamespace = type => {

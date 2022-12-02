@@ -284,13 +284,28 @@ const handleField = (name, field) => {
 	const { description, default: defaultValue, order, aliases, ...schema } = field;
 	const typeSchema = convertSchema(schema);
 
-	return {
+	return resolveFieldDefaultValue({
 		name: prepareName(name),
 		type: _.isArray(typeSchema.type) ? typeSchema.type : typeSchema,
 		default: defaultValue,
 		doc: description,
 		order,
 		aliases,
+	}, typeSchema);
+};
+
+const resolveFieldDefaultValue = (field, type) => {
+	let udtItem = _.isString(type) && getUdtItem(type);
+
+	if (!udtItem || !isNamedType(udtItem.type)) {
+		return field;
+	}
+
+	const defaultValue = field.default || udtItem.default;
+
+	return {
+		...field,
+		default: defaultValue,
 	};
 };
 
@@ -333,7 +348,7 @@ const convertEnum = schema => {
 	}
 
 	if (!schemaFromUdt) {
-		addDefinitions({ [name]:  { ...filterSchemaAttributes(convertedSchema), used: true } });
+		addDefinitions({ [name]:  { ...filterSchemaAttributes(convertedSchema), symbolDefault: convertedSchema.symbolDefault, used: true } });
 	}
 
 	return convertedSchema;
