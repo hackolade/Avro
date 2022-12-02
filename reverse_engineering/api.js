@@ -17,13 +17,13 @@ const reFromFile = async (data, logger, callback, app) => {
 		const jsonSchemas = convertToJsonSchemas(avroSchema);
 
 		if (jsonSchemas.length === 1) {
-			const { schemaGroupName, namespace } = _.first(getSchemasData(avroSchema));
+			const { schemaGroupName, confluentSubjectName, namespace } = _.first(getSchemasData(avroSchema));
 
 			return callback(null, {
 				jsonSchema: JSON.stringify(_.first(jsonSchemas)),
 				extension: getExtension(filePath),
 				containerName: namespace,
-				containerAdditionalData: { schemaGroupName }
+				containerAdditionalData: { schemaGroupName, confluentSubjectName }
 			});
 		}
 
@@ -68,7 +68,8 @@ const getPackages = (avroSchema, jsonSchemas) => {
 			collectionName: jsonSchema.title,
 			bucketInfo: {
 				name: schemasData[index]?.namespace || '',
-				schemaGroupName: schemasData[index]?.schemaGroupName || ''
+				schemaGroupName: schemasData[index]?.schemaGroupName || '',
+				confluentSubjectName: schemasData[index]?.confluentSubjectName || ''
 			},
 		},
 		jsonSchema: JSON.stringify(jsonSchema),
