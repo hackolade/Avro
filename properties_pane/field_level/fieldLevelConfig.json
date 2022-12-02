@@ -1256,11 +1256,6 @@ making sure that you maintain a proper JSON format.
 				}]
 			},
 			{
-				"propertyName": "Symbol default",
-				"propertyKeyword": "symbolDefault",
-				"propertyType": "text"
-			},
-			{
 				"propertyName": "Type name",
 				"propertyKeyword": "typeName",
 				"shouldValidate": false,
@@ -1289,6 +1284,11 @@ making sure that you maintain a proper JSON format.
 				"validation": {
 					"regex": "^[A-Za-z_][A-Za-z0-9_]*$"
 				}
+			},
+			{
+				"propertyName": "Symbol default",
+				"propertyKeyword": "symbolDefault",
+				"propertyType": "text"
 			},
 			{
 				"propertyName": "Meta properties",
