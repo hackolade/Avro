@@ -69,10 +69,10 @@ const getPackages = (avroSchema, jsonSchemas) => {
 			},
 			jsonSchema: JSON.stringify({
 				...jsonSchema,
-				schemaType: schemaType || '',
-				schemaTopic: schemaTopic || '',
-				schemaGroupName: schemaGroupName || '',
-				confluentSubjectName: confluentSubjectName || '',
+				schemaType: schemaType,
+				schemaTopic: schemaTopic,
+				schemaGroupName: schemaGroupName,
+				confluentSubjectName: confluentSubjectName,
 			}),
 		};
 	});
