@@ -107,7 +107,7 @@ const formatSchemaRegistry = ({ needMinify, avroSchema }) => {
 const formatAzureSchemaRegistry = ({ settings, needMinify, avroSchema }) => {
 	const { schemaGroupName, schemaRegistryUrl, name } = settings;
 
-	return `PUT ${schemaRegistryUrl || ''} /${schemaGroupName}/schemas/${name}?api-version=2020-09-01-preview\n${stringifyCommon(needMinify, avroSchema)}`;
+	return `PUT ${schemaRegistryUrl || ''}/${schemaGroupName}/schemas/${name}?api-version=2020-09-01-preview\n${stringifyCommon(needMinify, avroSchema)}`;
 };
 
 const formatPulsarSchemaRegistry = ({ settings, needMinify, avroSchema }) => {
