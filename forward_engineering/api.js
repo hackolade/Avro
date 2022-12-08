@@ -1,7 +1,7 @@
 'use strict'
 
 const { setDependencies, dependencies } = require('../shared/appDependencies');
-const { SCRIPT_TYPES } = require('../shared/constants');
+const { SCRIPT_TYPES, SCHEMA_REGISTRIES_KEYS } = require('../shared/constants');
 const { parseJson, prepareName } = require('./helpers/generalHelper');
 const validateAvroScript = require('./helpers/validateAvroScript');
 const formatAvroSchemaByType = require('./helpers/formatAvroSchemaByType');
@@ -15,10 +15,10 @@ const generateModelScript = (data, logger, cb, app) => {
 		setDependencies(app);
 		_ = dependencies.lodash;
 
-		const { containers, externalDefinitions, modelDefinitions, options, targetScriptOptions } = data;
-		const scriptType = targetScriptOptions.format || SCRIPT_TYPES.CONFLUENT_SCHEMA_REGISTRY;
-		const needMinify = isMinifyNeeded(options);
+		const { containers, externalDefinitions, modelDefinitions, options } = data;
 		const modelData = data.modelData[0] || {};
+		const scriptType = getScriptType(data, modelData) || SCRIPT_TYPES.CONFLUENT_SCHEMA_REGISTRY;
+		const needMinify = isMinifyNeeded(options);
 
 		setUserDefinedTypes(externalDefinitions);
 		setUserDefinedTypes(modelDefinitions);
@@ -84,7 +84,7 @@ const generateScript = (data, logger, cb, app) => {
 
 		const settings = getSettings({ containerData, entityData, modelData });
 		const script = getScript({
-			scriptType: getScriptType(options),
+			scriptType: getScriptType(options, modelData),
 			needMinify: isMinifyNeeded(options),
 			settings,
 			avroSchema: convertJsonToAvro(jsonSchema, settings.name),
@@ -102,13 +102,14 @@ const validate = (data, logger, cb, app) => {
 	_ = dependencies.lodash;
 
 	const targetScript = data.script;
-	const scriptType = data.targetScriptOptions.keyword || data.targetScriptOptions.format;
+	const modelData = data.modelData[0] || {};
+	const scriptType = getScriptType(data, modelData);
 	const validationMessages = validateAvroScript(targetScript, scriptType, logger);
 
 	return cb(null, validationMessages);
 };
 
-const getScriptType = options => options?.targetScriptOptions?.keyword;
+const getScriptType = (options, modelData) => options?.targetScriptOptions?.keyword || options?.targetScriptOptions?.format || SCRIPT_TYPES[SCHEMA_REGISTRIES_KEYS[modelData?.schemaRegistryType]];
 
 const getEntityData = (container, entityId) => {
 	const containerData = _.first(_.get(container, 'containerData', []));
@@ -169,9 +170,12 @@ const getSettings = ({ containerData, entityData, modelData, }) => {
 		topic: entityData?.pulsarTopicName || '',
 		persistence: entityData?.isNonPersistentTopic ? 'non-persistent' : 'persistent',
 		schemaGroupName: containerData?.schemaGroupName || '',
+		confluentSubjectName: containerData?.confluentSubjectName || '',
 		schemaType: entityData?.schemaType || '',
-		schemaTopic: modelData?.schemaTopic || '',
-		schemaNameStrategy: modelData?.schemaNameStrategy || '',
+		schemaTopic: entityData?.schemaTopic || '',
+		schemaNameStrategy: entityData?.schemaNameStrategy || '',
+		schemaRegistryType: modelData?.schemaRegistryType || '',
+		schemaRegistryUrl: modelData?.schemaRegistryUrl || '',
 	};
 };
 

@@ -141,7 +141,7 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "selecthashed"
 			},
 			{
-				"propertyName": "Confluent schema type",
+				"propertyName": "Schema type",
 				"propertyKeyword": "schemaType",
 				"propertyTooltip": "Select from list of options",
 				"propertyType": "select",
@@ -149,23 +149,91 @@ making sure that you maintain a proper JSON format.
 					"",
 					"key",
 					"value"
-				]
+				],
+				"dependency": {
+					"level": "model",
+					"key": "schemaRegistryType",
+					"value": "Confluent Schema Registry"
+				}
+			},
+			{
+				"propertyName": "Subject Name Strategy",
+				"propertyKeyword": "schemaNameStrategy",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"validation": {
+					"required": true
+				},
+				"options": [
+					"",
+					"TopicNameStrategy",
+					"RecordNameStrategy",
+					"TopicRecordNameStrategy"
+				],
+				"dependency": {
+					"level": "model",
+					"key": "schemaRegistryType",
+					"value": "Confluent Schema Registry"
+				}
+			},
+			{
+				"propertyName": "Topic",
+				"propertyKeyword": "schemaTopic",
+				"shouldValidate": false,
+				"propertyTooltip": "",
+				"propertyType": "text",
+				"dependency": {
+					"type": "and", 
+					"values": [
+						{
+						"level": "model",
+						"key": "schemaRegistryType",
+						"value": "Confluent Schema Registry"
+						}, [{
+							"key": "schemaNameStrategy",
+							"value": "TopicNameStrategy"
+						}, {
+							"key": "schemaNameStrategy",
+							"value": "TopicRecordNameStrategy"
+						}]
+					]
+				}
+			},
+			{
+				"propertyName": "Pulsar topic name",
+				"propertyKeyword": "pulsarTopicName",
+				"propertyType": "text",
+				"dependency": {
+					"level": "model",
+					"key": "schemaRegistryType",
+					"value": "Pulsar Schema Registry"
+				}
+			},
+			{
+				"propertyName": "Is non-persistent Pulsar topic",
+				"propertyKeyword": "isNonPersistentTopic",
+				"propertyType": "checkbox",
+				"template": "boolean",
+				"dependency": {
+					"level": "model",
+					"key": "schemaRegistryType",
+					"value": "Pulsar Schema Registry"
+				}
+			},
+			{
+				"propertyName": "Subject",
+				"propertyKeyword": "confluentSubjectName",
+				"propertyType": "text",
+				"dependency": {
+					"level": "model",
+					"key": "schemaRegistryType",
+					"value": "Confluent Schema Registry"
+				}
 			},
 			{
 				"propertyName": "Additional properties",
 				"propertyKeyword": "additionalProperties",
 				"propertyTooltip": "Description",
-				"propertyType": "checkbox",
-				"template": "boolean"
-			},
-			{
-				"propertyName": "Pulsar topic name",
-				"propertyKeyword": "pulsarTopicName",
-				"propertyType": "text"
-			},
-			{
-				"propertyName": "Is non-persistent Pulsar topic",
-				"propertyKeyword": "isNonPersistentTopic",
 				"propertyType": "checkbox",
 				"template": "boolean"
 			},
