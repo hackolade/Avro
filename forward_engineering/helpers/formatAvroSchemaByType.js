@@ -65,6 +65,7 @@ const getConfluentPostQuery = ({
 	schemaTopic,
 	schemaNameStrategy,
 	schemaRegistryUrl,
+	confluentSubjectName,
 	schema,
 }) => {
 	const RECORD_NAME_STRATEGY = 'RecordNameStrategy';
@@ -72,6 +73,10 @@ const getConfluentPostQuery = ({
 	const TOPIC_RECORD_NAME_STRATEGY = 'TopicRecordNameStrategy';
 
 	const getName = () => {
+		if (confluentSubjectName) {
+			return confluentSubjectName;
+		}
+
 		const typePostfix = schemaType ? `-${schemaType}` : '';
 		const containerPrefix = namespace ? `${namespace}.`:'';
 		const topicPrefix = schemaTopic ? `${schemaTopic}-`:'';

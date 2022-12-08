@@ -140,12 +140,6 @@ making sure that you maintain a proper JSON format.
 				"disabledOption": true
 			},
 			{
-				"propertyName": "Confluent subject name",
-				"propertyKeyword": "confluentSubjectName",
-				"propertyType": "text",
-				"disabled": true
-			},
-			{
 				"propertyName": "Schema registry",
 				"propertyKeyword": "schemaRegistryType",
 				"propertyTooltip": "Select from list of options",
