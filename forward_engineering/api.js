@@ -17,7 +17,7 @@ const generateModelScript = (data, logger, cb, app) => {
 
 		const { containers, externalDefinitions, modelDefinitions, options } = data;
 		const modelData = data.modelData[0] || {};
-		const scriptType = getScriptType(data, modelData);
+		const scriptType = getScriptType(data, modelData) || SCRIPT_TYPES.CONFLUENT_SCHEMA_REGISTRY;
 		const needMinify = isMinifyNeeded(options);
 
 		setUserDefinedTypes(externalDefinitions);
