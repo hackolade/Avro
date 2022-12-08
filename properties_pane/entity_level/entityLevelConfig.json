@@ -169,7 +169,7 @@ making sure that you maintain a proper JSON format.
 					"TopicNameStrategy",
 					"RecordNameStrategy",
 					"TopicRecordNameStrategy"
-      			],
+				],
 				"dependency": {
 					"level": "model",
 					"key": "schemaRegistryType",
