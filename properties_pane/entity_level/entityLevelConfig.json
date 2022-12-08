@@ -224,7 +224,6 @@ making sure that you maintain a proper JSON format.
 				"propertyName": "Subject",
 				"propertyKeyword": "confluentSubjectName",
 				"propertyType": "text",
-				"disabled": true,
 				"dependency": {
 					"level": "model",
 					"key": "schemaRegistryType",
