@@ -79,7 +79,7 @@ const getConfluentPostQuery = ({
 
 		const typePostfix = schemaType ? `-${schemaType}` : '';
 		const containerPrefix = namespace ? `${namespace}.`:'';
-		const topicPrefix = schemaTopic ? `${schemaTopic}-`:'';
+		const topicPrefix = schemaTopic || '';
 
 		switch(schemaNameStrategy){
 			case RECORD_NAME_STRATEGY:
@@ -87,7 +87,7 @@ const getConfluentPostQuery = ({
 			case TOPIC_NAME_STRATEGY:
 				return `${topicPrefix}${typePostfix}`
 			case TOPIC_RECORD_NAME_STRATEGY:
-				return `${topicPrefix}${containerPrefix}${name}${typePostfix}`
+				return `${topicPrefix}-${containerPrefix}${name}${typePostfix}`
 			default:
 				return `${name}${typePostfix}`;
 		}
