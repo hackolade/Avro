@@ -16,18 +16,12 @@ const reFromFile = async (data, logger, callback, app) => {
 		const avroSchema = await openAvroFile(filePath);
 		const jsonSchemas = convertToJsonSchemas(avroSchema);
 
-		if (jsonSchemas.length === 1) {
-			const { schemaGroupName, confluentSubjectName, namespace } = _.first(getSchemasData(avroSchema));
+		const { schemaRegistryType, schemaRegistryUrl } = _.first(getSchemasData(avroSchema));
 
-			return callback(null, {
-				jsonSchema: JSON.stringify(_.first(jsonSchemas)),
-				extension: getExtension(filePath),
-				containerName: namespace,
-				containerAdditionalData: { schemaGroupName, confluentSubjectName }
-			});
-		}
-
-		return callback(null, getPackages(avroSchema, jsonSchemas), {}, [],  'multipleSchema');
+		return callback(null, getPackages(avroSchema, jsonSchemas), {
+			schemaRegistryType,
+			schemaRegistryUrl,
+		}, [],  'multipleSchema');
 	} catch (err) {
 		const errorData = handleErrorObject(err);
 		logger.log('error', errorData, 'Parsing Avro Schema Error');
@@ -59,21 +53,29 @@ const adaptJsonSchema = (data, logger, callback, app) => {
 const getPackages = (avroSchema, jsonSchemas) => {
 	const schemasData = getSchemasData(avroSchema);
 
-	return jsonSchemas.map((jsonSchema, index) => ({
-		objectNames: {
-			collectionName: jsonSchema.title,
-		},
-		doc: {
-			dbName: schemasData[index]?.namespace || '',
-			collectionName: jsonSchema.title,
-			bucketInfo: {
-				name: schemasData[index]?.namespace || '',
-				schemaGroupName: schemasData[index]?.schemaGroupName || '',
-				confluentSubjectName: schemasData[index]?.confluentSubjectName || ''
+	return jsonSchemas.map((jsonSchema, index) => {
+		const { namespace, schemaType, schemaGroupName, confluentSubjectName, schemaTopic } = schemasData[index] || {};
+
+		return {
+			objectNames: {
+				collectionName: jsonSchema.title,
 			},
-		},
-		jsonSchema: JSON.stringify(jsonSchema),
-	}));
+			doc: {
+				dbName: namespace || '',
+				collectionName: jsonSchema.title,
+				bucketInfo: {
+					name: namespace || '',
+				},
+			},
+			jsonSchema: JSON.stringify({
+				...jsonSchema,
+				schemaType: schemaType || '',
+				schemaTopic: schemaTopic || '',
+				schemaGroupName: schemaGroupName || '',
+				confluentSubjectName: confluentSubjectName || '',
+			}),
+		};
+	});
 };
 
 const getSchemasData = avroSchema => {
@@ -82,7 +84,11 @@ const getSchemasData = avroSchema => {
 	return avroSchema.map(schema => ({
 		namespace: getNamespace(schema) || '',
 		schemaGroupName: schema.schemaGroupName,
-		confluentSubjectName: schema.subject,
+		schemaRegistryType: schema.schemaRegistryType,
+		schemaRegistryUrl: schema.schemaRegistryUrl,
+		confluentSubjectName: schema.confluentSubjectName,
+		schemaTopic: schema.schemaTopic,
+		schemaType: schema.schemaType,
 	}));
 }
 

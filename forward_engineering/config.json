@@ -10,7 +10,9 @@
     {
       "name": "Avro Schema",
       "keyword": "avroSchema",
-      "disableApplyScriptToInstance": true
+      "disableApplyScriptToInstance": true,
+      "cliOnly": true,
+      "hidden": true
     },
     {
       "name": "Schema Registry",
@@ -22,7 +24,9 @@
     {
       "name": "Azure Schema Registry",
       "keyword": "azureSchemaRegistry",
-      "isApplicationHandler": true
+      "isApplicationHandler": true,
+      "cliOnly": true,
+      "hidden": true
     },
     {
       "name": "Confluent API Schema",
@@ -33,12 +37,16 @@
           "value": "txt",
           "label": "txt"
         }
-      ]
+      ],
+      "cliOnly": true,
+      "hidden": true
     },
     {
       "name": "Pulsar Schema Registry",
       "keyword": "pulsarSchemaRegistry",
-      "isApplicationHandler": true
+      "isApplicationHandler": true,
+      "cliOnly": true,
+      "hidden": true
     }
   ],
   "additionalOptions": [
@@ -57,19 +65,25 @@
           "name": "Confluent API Schema",
           "keyword": "confluentSchemaRegistry",
           "mode": "json",
-          "isApplicationHandler": true
+          "isApplicationHandler": true,
+          "cliOnly": true,
+          "hidden": true
         },
         {
           "name": "Azure Schema Registry",
           "keyword": "azureSchemaRegistry",
           "mode": "json",
-          "isApplicationHandler": true
+          "isApplicationHandler": true,
+          "cliOnly": true,
+          "hidden": true
         },
         {
           "name": "Pulsar Schema Registry",
           "keyword": "pulsarSchemaRegistry",
           "mode": "json",
-          "isApplicationHandler": true
+          "isApplicationHandler": true,
+          "cliOnly": true,
+          "hidden": true
         }
       ]
     }

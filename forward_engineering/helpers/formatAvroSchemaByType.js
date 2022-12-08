@@ -43,6 +43,7 @@ const formatConfluentSchema = ({ settings, needMinify, avroSchema }) => {
 		schemaType,
 		schemaTopic,
 		schemaNameStrategy,
+		schemaRegistryUrl,
 	} = settings;
 
 	return getConfluentPostQuery({
@@ -52,20 +53,22 @@ const formatConfluentSchema = ({ settings, needMinify, avroSchema }) => {
 		confluentSubjectName,
 		schemaType,
 		schemaTopic,
-		schemaNameStrategy
+		schemaNameStrategy,
+		schemaRegistryUrl,
 	});
 };
 
 const getConfluentPostQuery = ({
 	name,
 	namespace, 
-	confluentSubjectName,
 	schemaType,
 	schemaTopic,
 	schemaNameStrategy,
-	schema
+	schemaRegistryUrl,
+	schema,
 }) => {
 	const RECORD_NAME_STRATEGY = 'RecordNameStrategy';
+	const TOPIC_NAME_STRATEGY = 'TopicNameStrategy';
 	const TOPIC_RECORD_NAME_STRATEGY = 'TopicRecordNameStrategy';
 
 	const getName = () => {
@@ -73,13 +76,11 @@ const getConfluentPostQuery = ({
 		const containerPrefix = namespace ? `${namespace}.`:'';
 		const topicPrefix = schemaTopic ? `${schemaTopic}-`:'';
 
-		if (confluentSubjectName) {
-			return `${confluentSubjectName}.${name}${typePostfix}`;
-		}
-
 		switch(schemaNameStrategy){
 			case RECORD_NAME_STRATEGY:
 				return `${containerPrefix}${name}${typePostfix}`
+			case TOPIC_NAME_STRATEGY:
+				return `${topicPrefix}${typePostfix}`
 			case TOPIC_RECORD_NAME_STRATEGY:
 				return `${topicPrefix}${containerPrefix}${name}${typePostfix}`
 			default:
@@ -87,7 +88,7 @@ const getConfluentPostQuery = ({
 		}
 	}
 
-	return `POST /subjects/${getName()}/versions\n${JSON.stringify(
+	return `POST ${schemaRegistryUrl || ''}/subjects/${getName()}/versions\n${JSON.stringify(
 		{ schema, schemaType: 'AVRO' },
 		null,
 		4
@@ -99,20 +100,20 @@ const formatSchemaRegistry = ({ needMinify, avroSchema }) => {
 };
 
 const formatAzureSchemaRegistry = ({ settings, needMinify, avroSchema }) => {
-	const { schemaGroupName, name } = settings;
+	const { schemaGroupName, schemaRegistryUrl, name } = settings;
 
-	return `PUT /${schemaGroupName}/schemas/${name}?api-version=2020-09-01-preview\n${stringifyCommon(needMinify, avroSchema)}`;
+	return `PUT ${schemaRegistryUrl || ''} /${schemaGroupName}/schemas/${name}?api-version=2020-09-01-preview\n${stringifyCommon(needMinify, avroSchema)}`;
 };
 
 const formatPulsarSchemaRegistry = ({ settings, needMinify, avroSchema }) => {
-	const { persistence, namespace, topic } = settings;
+	const { persistence, namespace, topic, schemaRegistryUrl } = settings;
 	const bodyObject = {
 		type: 'AVRO',
 		data: avroSchema,
 		properties: {}
 	};
 
-	return `POST /${persistence}/${namespace}/${topic}/schema\n${stringifyCommon(needMinify, bodyObject)}`;
+	return `POST ${schemaRegistryUrl || ''}/${persistence}/${namespace}/${topic}/schema\n${stringifyCommon(needMinify, bodyObject)}`;
 };
 
 const formatCommon = ({ needMinify, avroSchema }) => {

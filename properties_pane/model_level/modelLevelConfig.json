@@ -140,27 +140,39 @@ making sure that you maintain a proper JSON format.
 				"disabledOption": true
 			},
 			{
-				"propertyName": "Subject Name Strategy",
-				"propertyKeyword": "schemaNameStrategy",
+				"propertyName": "Confluent subject name",
+				"propertyKeyword": "confluentSubjectName",
+				"propertyType": "text",
+				"disabled": true
+			},
+			{
+				"propertyName": "Schema registry",
+				"propertyKeyword": "schemaRegistryType",
 				"propertyTooltip": "Select from list of options",
 				"propertyType": "select",
 				"options": [
 					"",
-					"TopicNameStrategy",
-					"RecordNameStrategy",
-					"TopicRecordNameStrategy"
+					"Confluent Schema Registry",
+					"Azure Schema Registry",
+					"Pulsar Schema Registry"
       			]
 			},
 			{
-				"propertyName": "Topic",
-				"propertyKeyword": "schemaTopic",
+				"propertyName": "Schema registry URL",
+				"propertyKeyword": "schemaRegistryUrl",
 				"shouldValidate": false,
 				"propertyTooltip": "",
 				"propertyType": "text",
-				"dependency": {
-					"key": "schemaNameStrategy",
-					"value": "TopicRecordNameStrategy"
-				}
+				"dependency": [{
+					"key": "schemaRegistryType",
+					"value": "Confluent Schema Registry"
+				},{
+					"key": "schemaRegistryType",
+					"value": "Azure Schema Registry"
+				},{
+					"key": "schemaRegistryType",
+					"value": "Pulsar Schema Registry"
+				}]
 			},
 			{
 				"propertyName": "Comments",
