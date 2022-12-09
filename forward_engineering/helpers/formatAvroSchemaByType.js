@@ -84,7 +84,7 @@ const getConfluentPostQuery = ({
 			case RECORD_NAME_STRATEGY:
 				return `${containerPrefix}${name}${typePostfix}`
 			case TOPIC_NAME_STRATEGY:
-				return `${topicPrefix}${typePostfix}`
+				return `${topicPrefix || name}${typePostfix}`
 			case TOPIC_RECORD_NAME_STRATEGY:
 				return `${topicPrefix}-${containerPrefix}${name}${typePostfix}`
 			default:
