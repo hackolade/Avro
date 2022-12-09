@@ -42,7 +42,17 @@
 {
     "add": {},
     "modify": {
-        "model": ["detectSchemaRegistry"],
+        "model": [{
+            "from": {
+                "schemaNameStrategy": {
+                    "type": "RegExp",
+                    "value": ".+"
+                }
+            },
+            "to": {
+                "schemaRegistryType": "Confluent Schema Registry"
+            }
+        }],
         "entity": [
             ["copyPropertyFromModelLevel", "schemaNameStrategy", "schemaNameStrategy"],
             ["copyPropertyFromModelLevel", "schemaTopic", "schemaTopic"]
