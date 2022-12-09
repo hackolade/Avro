@@ -179,7 +179,10 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "Topic",
 				"propertyKeyword": "schemaTopic",
-				"shouldValidate": false,
+				"shouldValidate": true,
+				"validation": {
+					"regex": "^[a-zA-Z0-9\\._\\-]*$"
+				},
 				"propertyTooltip": "",
 				"propertyType": "text",
 				"dependency": {
@@ -223,6 +226,10 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "Subject",
 				"propertyKeyword": "confluentSubjectName",
+				"shouldValidate": true,
+				"validation": {
+					"regex": "^[a-zA-Z0-9\\._\\-]*$"
+				},
 				"propertyType": "text",
 				"dependency": {
 					"level": "model",
