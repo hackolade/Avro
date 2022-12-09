@@ -136,7 +136,12 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "Schema group name",
 				"propertyKeyword": "schemaGroupName",
-				"propertyType": "text"
+				"propertyType": "text",
+				"dependency": {
+					"level": "model",
+					"key": "schemaRegistryType",
+					"value": "Azure Schema Registry"
+				}
 			},
 			{
 				"propertyName": "Description",
