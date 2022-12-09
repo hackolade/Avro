@@ -103,7 +103,10 @@ const validate = (data, logger, cb, app) => {
 
 	const targetScript = data.script;
 	const modelData = data.modelData[0] || {};
-	const scriptType = getScriptType(data, modelData);
+	let scriptType = getScriptType(data, modelData);
+	if (!scriptType && targetScript.startsWith('POST /')) {
+		scriptType = SCRIPT_TYPES.CONFLUENT_SCHEMA_REGISTRY;
+	}
 	const validationMessages = validateAvroScript(targetScript, scriptType, logger);
 
 	return cb(null, validationMessages);
