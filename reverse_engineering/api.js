@@ -86,7 +86,7 @@ const getPackages = (avroSchema, jsonSchemas) => {
 };
 
 const inferSchemaNameStrategy = ({ name, namespace, confluentSubjectName, schemaTopic }) => {
-	let splittedSubjectName = confluentSubjectName.split('-').filter(Boolean);
+	let splittedSubjectName = (confluentSubjectName || '').split('-').filter(Boolean);
 	const endsWithSchemaType = ['key', 'value'].includes(_.last(splittedSubjectName));
 	const startsWithTopic = _.first(splittedSubjectName) === schemaTopic;
 
@@ -104,7 +104,7 @@ const inferSchemaNameStrategy = ({ name, namespace, confluentSubjectName, schema
 
 	const splittedRecordName = [
 		namespace,
-		...name.split('-'),
+		...(name || '').split('-'),
 	].filter(Boolean);
 
 	const recordNameStrategy = _.isEqual(splittedRecordName, splittedSubjectName);
