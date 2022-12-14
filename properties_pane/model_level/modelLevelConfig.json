@@ -137,7 +137,7 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "select",
 				"options": [
 				],
-				"disabledOption": true
+				"disabled": true
 			},
 			{
 				"propertyName": "Schema registry",
