@@ -99,6 +99,10 @@ const inferSchemaNameStrategy = ({ name, namespace, confluentSubjectName, schema
 	}
 
 	if (startsWithTopic && _.isEmpty(splittedSubjectName)) {
+		if (name === schemaTopic) {
+			return 'RecordNameStrategy';
+		}
+
 		return 'TopicNameStrategy';
 	}
 
