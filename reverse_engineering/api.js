@@ -3,7 +3,7 @@
 const { setDependencies, dependencies } = require('../shared/appDependencies');
 const jsonSchemaAdapter = require('./helpers/adaptJsonSchema');
 const convertToJsonSchemas = require('./helpers/convertToJsonSchemas');
-const { openAvroFile, getExtension } = require('./helpers/fileHelper');
+const { openAvroFile } = require('./helpers/fileHelper');
 const { getNamespace } = require('./helpers/generalHelper');
 
 let _;
@@ -55,6 +55,12 @@ const getPackages = (avroSchema, jsonSchemas) => {
 
 	return jsonSchemas.map((jsonSchema, index) => {
 		const { namespace, schemaType, schemaGroupName, confluentSubjectName, schemaTopic } = schemasData[index] || {};
+		const schemaNameStrategy = inferSchemaNameStrategy({
+			name: jsonSchema.title,
+			namespace,
+			confluentSubjectName,
+			schemaTopic,
+		});
 
 		return {
 			objectNames: {
@@ -73,9 +79,41 @@ const getPackages = (avroSchema, jsonSchemas) => {
 				schemaTopic: schemaTopic,
 				schemaGroupName: schemaGroupName,
 				confluentSubjectName: confluentSubjectName,
+				...(schemaNameStrategy && { schemaNameStrategy }), 
 			}),
 		};
 	});
+};
+
+const inferSchemaNameStrategy = ({ name, namespace, confluentSubjectName, schemaTopic }) => {
+	let splittedSubjectName = (confluentSubjectName || '').split('-').filter(Boolean);
+	const endsWithSchemaType = ['key', 'value'].includes(_.last(splittedSubjectName));
+	const startsWithTopic = _.first(splittedSubjectName) === schemaTopic;
+
+	if (endsWithSchemaType) {
+		splittedSubjectName = splittedSubjectName.slice(0, -1);
+	}
+
+	if (startsWithTopic) {
+		splittedSubjectName = splittedSubjectName.slice(1);
+	}
+
+	if (startsWithTopic && _.isEmpty(splittedSubjectName)) {
+		return 'TopicNameStrategy';
+	}
+
+	const splittedRecordName = [
+		namespace,
+		...(name || '').split('-'),
+	].filter(Boolean);
+
+	const recordNameStrategy = _.isEqual(splittedRecordName, splittedSubjectName);
+
+	if (!recordNameStrategy) {
+		return;
+	}
+
+	return startsWithTopic ? 'TopicRecordNameStrategy' : 'RecordNameStrategy';
 };
 
 const getSchemasData = avroSchema => {
