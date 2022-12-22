@@ -72,7 +72,7 @@ const getConfluentPostQuery = ({
 	const TOPIC_RECORD_NAME_STRATEGY = 'TopicRecordNameStrategy';
 
 	const getName = () => {
-		if (confluentSubjectName) {
+		if (!schemaNameStrategy && confluentSubjectName) {
 			return confluentSubjectName;
 		}
 
