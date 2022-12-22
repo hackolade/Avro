@@ -76,19 +76,19 @@ const getConfluentPostQuery = ({
 			return confluentSubjectName;
 		}
 
-		const typePostfix = schemaType ? `-${schemaType}` : '';
-		const containerPrefix = namespace ? `${namespace}.`:'';
+		const typePostfix = schemaType || '';
+		const containerPrefix = namespace || '';
 		const topicPrefix = schemaTopic || '';
 
 		switch(schemaNameStrategy){
 			case RECORD_NAME_STRATEGY:
-				return `${containerPrefix}${name}${typePostfix}`
+				return [containerPrefix, name, typePostfix].filter(Boolean).join('-');
 			case TOPIC_NAME_STRATEGY:
-				return `${topicPrefix || name}${typePostfix}`
+				return [topicPrefix || name, typePostfix].filter(Boolean).join('-');
 			case TOPIC_RECORD_NAME_STRATEGY:
-				return `${topicPrefix}-${containerPrefix}${name}${typePostfix}`
+				return [topicPrefix, containerPrefix, name, typePostfix].filter(Boolean).join('-');
 			default:
-				return `${name}${typePostfix}`;
+				return [name, typePostfix].filter(Boolean).join('-');
 		}
 	}
 
