@@ -106,11 +106,11 @@ const inferSchemaNameStrategy = ({ name, namespace, confluentSubjectName, schema
 		return 'TopicNameStrategy';
 	}
 
-	const splittedRecordName = [
-		namespace,
-		...(name || '').split('-'),
-	].filter(Boolean);
+	if (_.first(splittedSubjectName) === namespace) {
+		splittedSubjectName = splittedSubjectName.slice(1);
+	}
 
+	const splittedRecordName = [...(name || '').split('-')].filter(Boolean);
 	const recordNameStrategy = _.isEqual(splittedRecordName, splittedSubjectName);
 
 	if (!recordNameStrategy) {
