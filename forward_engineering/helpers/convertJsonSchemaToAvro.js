@@ -36,7 +36,7 @@ const prepareSchema = schema => ({
 });
 
 const convertDescriptionToDoc = schema => {
-	const description = schema.refDescription || schema.description;
+	const description = (schema.$ref && schema.refDescription) || schema.description;
 	if (!description) {
 		return schema;
 	}

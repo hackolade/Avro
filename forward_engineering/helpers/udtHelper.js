@@ -69,10 +69,10 @@ const resolveSchemaUdt = schema => {
 
 	const typeFromUdt = getTypeFromUdt(type);
 	if (_.isArray(_.get(typeFromUdt, 'type'))) {
-		return { ...schema, ...typeFromUdt, name: schema.name };
+		return { ...schema, ...typeFromUdt, name: schema.name, doc: schema.doc };
 	}
 
-	return { ...schema, ...prepareTypeFromUDT(typeFromUdt), name: schema.name };
+	return { ...schema, ...prepareTypeFromUDT(typeFromUdt), name: schema.name, doc: schema.doc };
 };
 
 const isNativeType = type => {
