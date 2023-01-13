@@ -69,10 +69,20 @@ const resolveSchemaUdt = schema => {
 
 	const typeFromUdt = getTypeFromUdt(type);
 	if (_.isArray(_.get(typeFromUdt, 'type'))) {
-		return { ...schema, ...typeFromUdt, name: schema.name, doc: schema.doc };
+		return reorderAttributes({
+			...schema,
+			...typeFromUdt,
+			...(schema.name && { name: schema.name }),
+			...(schema.doc && { doc: schema.doc }),
+		});
 	}
 
-	return { ...schema, ...prepareTypeFromUDT(typeFromUdt), name: schema.name, doc: schema.doc };
+	return reorderAttributes({
+		...schema,
+		...prepareTypeFromUDT(typeFromUdt),
+		...(schema.name && { name: schema.name }),
+		...(schema.doc && { doc: schema.doc }),
+	});
 };
 
 const isNativeType = type => {
