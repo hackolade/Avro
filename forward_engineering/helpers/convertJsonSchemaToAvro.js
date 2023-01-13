@@ -178,7 +178,12 @@ const filterSchemaAttributes = schema => {
 const convertMultiple = schema => {
 	const type = filterMultipleTypes(schema.type.map(type => {
 		if(_.isString(type)) {
-			return convertSchema({ ...schema, type });
+			const typeSchema = convertSchema({ ...schema, type });
+			if (_.isString(typeSchema)) {
+				return typeSchema;
+			}
+
+			return simplifySchema({ ..._.omit(typeSchema, GENERAL_ATTRIBUTES), type: typeSchema.type });
 		}
 
 		const fieldType = type.type || getTypeFromReference(type) || DEFAULT_TYPE;
