@@ -44,8 +44,6 @@ const isUdtUsed = type => {
 const isDefinitionTypeValidForAvroDefinition = definition => {
 	if (_.isString(definition)) {
 		return isNamedType(definition);
-	} else if (_.isArray(definition)) {
-		return definition.some(isDefinitionTypeValidForAvroDefinition);
 	} else {
 		return isNamedType(definition?.type);
 	}
