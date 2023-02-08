@@ -83,6 +83,28 @@ const getDefaultName = () => {
 	return defaultName;
 };
 
+const convertName = schema => {
+	_ = dependencies.lodash;
+
+	const nameProperties = ['typeName', 'code', 'name', 'displayName'];
+	const nameKey = nameProperties.find(key => schema[key]);
+	if (!nameKey) {
+		return schema;
+	}
+
+	return { ..._.omit(schema, nameProperties), name: prepareName(schema[nameKey])};
+};
+
+const compareSchemasByStructure = (schema1, schema2) => {
+	const propertiesToCompare = ['type', 'name', 'fields', 'items', 'values', 'logicalType', 'precision', 'scale', 'size'];
+
+	return _.isEqualWith(schema1, schema2, (schema1, schema2, key) => {
+		if (!propertiesToCompare.includes(key)) {
+			return true;
+		}
+	});
+};
+
 module.exports = {
 	parseJson,
 	reorderAttributes,
@@ -90,4 +112,6 @@ module.exports = {
 	prepareName,
 	simplifySchema,
 	getDefaultName,
+	convertName,
+	compareSchemasByStructure,
 };
