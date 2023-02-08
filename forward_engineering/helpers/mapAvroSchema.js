@@ -11,9 +11,17 @@ const mapAvroSchema = (avroSchema, iteratee) => {
 
 	if (Array.isArray(avroSchema.fields)) {
 		const fields = avroSchema.fields.map(field => {
+			const typeSchema = mapAvroSchema(field.type, iteratee);
+			if (Array.isArray(typeSchema.type)) {
+				return {
+					...field,
+					...typeSchema,
+				};
+			}
+
 			return {
 				...field,
-				type: mapAvroSchema(field.type, iteratee)
+				type: typeSchema
 			};
 		});
 
