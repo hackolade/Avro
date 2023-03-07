@@ -231,11 +231,13 @@ making sure that you maintain a proper JSON format.
 					"regex": "^[a-zA-Z0-9\\._\\-]*$"
 				},
 				"propertyType": "text",
+				"propertyTooltip": "This property is automatically assembled during forward-engineering, or populated during reverse-engineering from CSR.",
 				"dependency": {
 					"level": "model",
 					"key": "schemaRegistryType",
 					"value": "Confluent Schema Registry"
-				}
+				},
+				"disabled": true
 			},
 			{
 				"propertyName": "Additional properties",
