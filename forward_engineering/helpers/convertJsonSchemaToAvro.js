@@ -1,7 +1,7 @@
 const { dependencies } = require('../../shared/appDependencies');
 const { filterAttributes, isNamedType } = require('../../shared/typeHelper');
 const { getUdtItem, convertSchemaToReference, addDefinitions } = require('./udtHelper');
-const { reorderAttributes, filterMultipleTypes, prepareName, simplifySchema, getDefaultName } = require('./generalHelper');
+const { reorderAttributes, filterMultipleTypes, prepareName, simplifySchema, getDefaultName, convertName, compareSchemasByStructure, } = require('./generalHelper');
 const convertChoicesToProperties = require('./convertChoicesToProperties');
 const { GENERAL_ATTRIBUTES, META_VALUES_KEY_MAP } = require('../../shared/constants');
 const DEFAULT_TYPE = 'string';
@@ -115,16 +115,6 @@ const convertProperties = schema => {
 		...schema,
 		[propertiesKey]: schema.properties
 	};
-};
-
-const convertName = schema => {
-	const nameProperties = ['typeName', 'code', 'name'];
-	const nameKey = nameProperties.find(key => schema[key]);
-	if (!nameKey) {
-		return schema;
-	}
-
-	return { ..._.omit(schema, nameProperties), name: prepareName(schema[nameKey])};
 };
 
 const convertMetaProperties = schema => {
@@ -252,7 +242,7 @@ const convertFixed = schema => {
 	};
 
 	const schemaFromUdt = getUdtItem(name);
-	if (schemaFromUdt && _.isEqual(filterSchemaAttributes(convertedSchema), filterSchemaAttributes(schemaFromUdt))) {
+	if (schemaFromUdt && compareSchemasByStructure(filterSchemaAttributes(convertedSchema), filterSchemaAttributes(schemaFromUdt))) {
 		return convertSchemaToReference(schema);
 	}
 
@@ -281,7 +271,7 @@ const convertArray = schema => {
 
 	return {
 		...schema,
-		items: convertSchema(schema.items),
+		items: convertSchema(schema.items || {}),
 	};
 };
 
@@ -324,7 +314,7 @@ const convertRecord = schema => {
 	};
 
 	const schemaFromUdt = getUdtItem(name);
-	if (schemaFromUdt && _.isEqual(filterSchemaAttributes(convertedSchema), filterSchemaAttributes(schemaFromUdt))) {
+	if (schemaFromUdt && compareSchemasByStructure(filterSchemaAttributes(convertedSchema), filterSchemaAttributes(schemaFromUdt))) {
 		return convertSchemaToReference(schema);
 	}
 
@@ -348,7 +338,7 @@ const convertEnum = schema => {
 	};
 
 	const schemaFromUdt = getUdtItem(name);
-	if (schemaFromUdt && _.isEqual(filterSchemaAttributes(convertedSchema), filterSchemaAttributes(schemaFromUdt))) {
+	if (schemaFromUdt && compareSchemasByStructure(filterSchemaAttributes(convertedSchema), filterSchemaAttributes(schemaFromUdt))) {
 		return convertSchemaToReference(schema);
 	}
 

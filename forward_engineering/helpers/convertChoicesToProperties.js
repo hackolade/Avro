@@ -1,5 +1,5 @@
 const { dependencies } = require('../../shared/appDependencies');
-const { filterMultipleTypes, prepareName, getDefaultName } = require('./generalHelper');
+const { filterMultipleTypes, prepareName, getDefaultName, convertName, } = require('./generalHelper');
 let _;
 
 const CHOICES = ['oneOf', 'anyOf', 'allOf'];
@@ -44,13 +44,17 @@ const convertChoiceToProperties = (schema, choice) => {
 				type: [],
 				choiceMeta
 			};
-		const multipleTypes = ensureArray(multipleField.type).concat({ ...field, name: prepareName(field.name || fieldName) });
+		const multipleTypeAttributes = { ...field, name: prepareName(field.name || fieldName) };
+		const multipleTypes = filterMultipleTypes(ensureArray(multipleField.type).concat(multipleTypeAttributes));
+		const type = _.isArray(multipleTypes) ? multipleTypes.map(typeSchema => typeSchema?.type || typeSchema) : multipleTypes?.type || multipleTypes;
 
 		return {
 			...multipleFieldsHash,
 			[fieldName]: {
-				...multipleField,
-				type: filterMultipleTypes(multipleTypes),
+				...convertName(multipleField),
+				...convertName(multipleTypeAttributes),
+				default: multipleField.default,
+				type,
 			},
 		};
 	}, {});
