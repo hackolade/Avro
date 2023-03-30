@@ -34,7 +34,7 @@ const convertChoiceToProperties = (schema, choice) => {
 		};
 	}
 
-	const multipleFieldsHash = allSubSchemaFields.reduce((multipleFieldsHash, field) => {
+	const multipleFieldsHash = allSubSchemaFields.reduce((multipleFieldsHash, field, index) => {
 		const fieldName = choiceMeta.code || choiceMeta.name || field.name || getDefaultName();
 		const multipleField = multipleFieldsHash[fieldName] ||
 			{
@@ -47,13 +47,15 @@ const convertChoiceToProperties = (schema, choice) => {
 		const multipleTypeAttributes = { ...field, name: prepareName(field.name || fieldName) };
 		const multipleTypes = filterMultipleTypes(ensureArray(multipleField.type).concat(multipleTypeAttributes));
 		const type = _.isArray(multipleTypes) ? multipleTypes.map(typeSchema => typeSchema?.type || typeSchema) : multipleTypes?.type || multipleTypes;
+		const defaultFromSubschema = index === 0 ? multipleTypeAttributes.default : undefined;
+		const defaultValue = !_.isUndefined(multipleField.default) ? multipleField.default : defaultFromSubschema;
 
 		return {
 			...multipleFieldsHash,
 			[fieldName]: {
 				...convertName(multipleField),
 				...convertName(multipleTypeAttributes),
-				default: multipleField.default,
+				default: defaultValue,
 				type,
 			},
 		};
