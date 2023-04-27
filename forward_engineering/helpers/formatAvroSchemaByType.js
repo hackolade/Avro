@@ -44,6 +44,8 @@ const formatConfluentSchema = ({ settings, needMinify, avroSchema }) => {
 		schemaTopic,
 		schemaNameStrategy,
 		schemaRegistryUrl,
+		confluentCompatibility,
+		references,
 	} = settings;
 
 	return getConfluentPostQuery({
@@ -55,6 +57,8 @@ const formatConfluentSchema = ({ settings, needMinify, avroSchema }) => {
 		schemaTopic,
 		schemaNameStrategy,
 		schemaRegistryUrl,
+		confluentCompatibility,
+		references,
 	});
 };
 
@@ -65,6 +69,8 @@ const getConfluentPostQuery = ({
 	schemaTopic,
 	schemaNameStrategy,
 	confluentSubjectName,
+	confluentCompatibility,
+	references,
 	schema,
 }) => {
 	const RECORD_NAME_STRATEGY = 'RecordNameStrategy';
@@ -92,8 +98,11 @@ const getConfluentPostQuery = ({
 		}
 	}
 
-	return `POST /subjects/${getName()}/versions\n${JSON.stringify(
-		{ schema, schemaType: 'AVRO' },
+	const subjectName = getName();
+	const compatibilityRequest = confluentCompatibility ? `PUT /config/${subjectName} HTTP/1.1\n{ "compatibility": "${confluentCompatibility}" }\n\n` : '';
+
+	return `${compatibilityRequest}POST /subjects/${subjectName}/versions\n${JSON.stringify(
+		{ schema, schemaType: 'AVRO', ...(!_.isEmpty(references) && { references }) },
 		null,
 		4
 	)}`;

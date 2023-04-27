@@ -5,7 +5,7 @@ const { SCRIPT_TYPES, SCHEMA_REGISTRIES_KEYS } = require('../shared/constants');
 const { parseJson, prepareName } = require('./helpers/generalHelper');
 const validateAvroScript = require('./helpers/validateAvroScript');
 const formatAvroSchemaByType = require('./helpers/formatAvroSchemaByType');
-const { resolveUdt, addDefinitions, resetDefinitionsUsage } = require('./helpers/udtHelper');
+const { resolveUdt, addDefinitions, resetDefinitionsUsage, resolveCollectionReferences } = require('./helpers/udtHelper');
 const convertSchema = require('./helpers/convertJsonSchemaToAvro');
 let _;
 
@@ -16,6 +16,7 @@ const generateModelScript = (data, logger, cb, app) => {
 		_ = dependencies.lodash;
 
 		const { containers, externalDefinitions, modelDefinitions, options } = data;
+
 		const modelData = data.modelData[0] || {};
 		const scriptType = getScriptType(data, modelData) || SCRIPT_TYPES.CONFLUENT_SCHEMA_REGISTRY;
 		const needMinify = isMinifyNeeded(options);
@@ -23,34 +24,35 @@ const generateModelScript = (data, logger, cb, app) => {
 		setUserDefinedTypes(externalDefinitions);
 		setUserDefinedTypes(modelDefinitions);
 
-		const script = (containers || []).flatMap(container => {
-			const containerEntities = container.entities.map(entityId => getEntityData(container, entityId));
+		const entities = (containers || [])
+			.flatMap(container => container.entities
+			.map(entityId => getEntityData(container, entityId)))
+			.map(entity => ({ ...entity, jsonSchema: parseJson(entity.jsonSchema) }));
 
-			return containerEntities.map(entity => {
-				try {
-					const {
-						containerData,
-						entityData,
-						jsonSchema,
-						internalDefinitions,
-					} = entity;
+		const script = resolveCollectionReferences(entities, scriptType).map(entity => {
+			try {
+				const {
+					containerData,
+					entityData,
+					jsonSchema,
+					internalDefinitions,
+					references,
+				} = entity;
+				setUserDefinedTypes(internalDefinitions);
+				resetDefinitionsUsage();
 
-					setUserDefinedTypes(internalDefinitions);
-					resetDefinitionsUsage();
+				const settings = getSettings({ containerData, entityData, modelData, references });
 
-					const settings = getSettings({ containerData, entityData, modelData });
-
-					return getScript({ 
-						scriptType,
-						needMinify,
-						settings,
-						avroSchema: convertJsonToAvro(jsonSchema, settings.name),
-					})
-				} catch (err) {
-					logger.log('error', { message: err.message, stack: err.stack }, 'Avro Forward-Engineering Error');
-					return '';
-				}
-			})
+				return getScript({ 
+					scriptType,
+					needMinify,
+					settings,
+					avroSchema: convertJsonToAvro(jsonSchema, settings.name),
+				})
+			} catch (err) {
+				logger.log('error', { message: err.message, stack: err.stack }, 'Avro Forward-Engineering Error');
+				return '';
+			}
 		});
 		cb(null, script.filter(Boolean).join('\n\n'));
 	} catch (err) {
@@ -87,7 +89,7 @@ const generateScript = (data, logger, cb, app) => {
 			scriptType: getScriptType(options, modelData),
 			needMinify: isMinifyNeeded(options),
 			settings,
-			avroSchema: convertJsonToAvro(jsonSchema, settings.name),
+			avroSchema: convertJsonToAvro(parseJson(jsonSchema), settings.name),
 		});
 
 		cb(null, script);
@@ -124,8 +126,8 @@ const getEntityData = (container, entityId) => {
 	return { containerData, jsonSchema, jsonData, entityData, internalDefinitions }
 }
 
-const convertJsonToAvro = (jsonString, schemaName) => {
-	const jsonSchema = { ...parseJson(jsonString), type: 'record' };
+const convertJsonToAvro = (jsonSchema, schemaName) => {
+	jsonSchema = { ...jsonSchema, type: 'record' };
 	const avroSchema = {
 		...convertSchema(jsonSchema),
 		name: schemaName,
@@ -166,7 +168,7 @@ const getScript = ({
 	});
 };
 
-const getSettings = ({ containerData, entityData, modelData, }) => {
+const getSettings = ({ containerData, entityData, modelData, references, }) => {
 	return {
 		name: getRootRecordName(entityData),
 		namespace: containerData?.name || '',
@@ -174,11 +176,13 @@ const getSettings = ({ containerData, entityData, modelData, }) => {
 		persistence: entityData?.isNonPersistentTopic ? 'non-persistent' : 'persistent',
 		schemaGroupName: containerData?.schemaGroupName || '',
 		confluentSubjectName: entityData?.confluentSubjectName || '',
+		confluentCompatibility: entityData?.confluentCompatibility || '',
 		schemaType: entityData?.schemaType || '',
 		schemaTopic: entityData?.schemaTopic || '',
 		schemaNameStrategy: entityData?.schemaNameStrategy || '',
 		schemaRegistryType: modelData?.schemaRegistryType || '',
 		schemaRegistryUrl: modelData?.schemaRegistryUrl || '',
+		references: references || [],
 	};
 };
 

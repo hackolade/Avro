@@ -1,5 +1,5 @@
 const { dependencies } = require('../../shared/appDependencies');
-const mapJsonSchema = require('./mapJsonSchema');
+const mapJsonSchema = require('../../shared/mapJsonSchema');
 
 const COMPLEX_PROPERTIES = ['patternProperties', 'properties', 'items', 'allOf', 'oneOf', 'anyOf', 'not'];
 

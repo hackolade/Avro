@@ -54,7 +54,7 @@ const getPackages = (avroSchema, jsonSchemas) => {
 	const schemasData = getSchemasData(avroSchema);
 
 	return jsonSchemas.map((jsonSchema, index) => {
-		const { namespace, schemaType, schemaGroupName, confluentSubjectName, schemaTopic } = schemasData[index] || {};
+		const { namespace, schemaType, schemaGroupName, confluentSubjectName, schemaTopic, confluentVersion } = schemasData[index] || {};
 		const schemaNameStrategy = inferSchemaNameStrategy({
 			name: jsonSchema.title,
 			namespace,
@@ -79,6 +79,7 @@ const getPackages = (avroSchema, jsonSchemas) => {
 				schemaTopic: schemaTopic,
 				schemaGroupName: schemaGroupName,
 				confluentSubjectName: confluentSubjectName,
+				confluentVersion: confluentVersion,
 				...(schemaNameStrategy && { schemaNameStrategy }), 
 			}),
 		};
@@ -131,6 +132,7 @@ const getSchemasData = avroSchema => {
 		confluentSubjectName: schema.confluentSubjectName,
 		schemaTopic: schema.schemaTopic,
 		schemaType: schema.schemaType,
+		confluentVersion: schema.version,
 	}));
 }
 
