@@ -102,7 +102,7 @@ const getConfluentPostQuery = ({
 	const compatibilityRequest = confluentCompatibility ? `PUT /config/${subjectName} HTTP/1.1\n{ "compatibility": "${confluentCompatibility}" }\n\n` : '';
 
 	return `${compatibilityRequest}POST /subjects/${subjectName}/versions\n${JSON.stringify(
-		{ schema, schemaType: 'AVRO', ...(!_.isEmpty(references) && { references }) },
+		{ schema, schemaType: 'AVRO', ...(!_.isEmpty(references) && { references: _.uniqBy(references, 'name') }) },
 		null,
 		4
 	)}`;
