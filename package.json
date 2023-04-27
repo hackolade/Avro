@@ -21,6 +21,7 @@
             "validateMultipleDefaultByFirstType": true,
 			"reverseMissedJsonPropertyAsNull": true,
 			"disablePatternField": true,
+			"enableEntitiesForModelDefinitions": true,
 			"forwardEngineering": {
 				"jsonSchema": {
 					"keepParentType": {

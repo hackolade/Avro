@@ -1,5 +1,5 @@
 const { dependencies } = require('../../shared/appDependencies');
-const mapJsonSchema = require('./mapJsonSchema');
+const mapJsonSchema = require('../../shared/mapJsonSchema');
 const { getNamespace, getName, EMPTY_NAMESPACE } = require('./generalHelper');
 
 let _;
@@ -68,6 +68,10 @@ const updateRefs = mapJsonSchema(field => field.$ref ? updateRef(field) : field)
 const updateRef = ({ name, namespace, description, definitionName, $ref }) => {
 	if (findDefinition(namespace, definitionName)) {
 		return { name, description, $ref: `#/definitions/${definitionName}`};
+	}
+
+	if ($ref.startsWith('#collection/')) {
+		return { name, description, $ref };
 	}
 
 	return { name, description, $ref, hackoladeMeta: { restrictExternalReferenceCreation: true } };

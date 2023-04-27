@@ -240,6 +240,38 @@ making sure that you maintain a proper JSON format.
 				"disabled": true
 			},
 			{
+				"propertyName": "Compatibility type",
+				"propertyKeyword": "confluentCompatibility",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"",
+					"BACKWARD",
+					"BACKWARD_TRANSITIVE",
+					"FORWARD",
+					"FORWARD_TRANSITIVE",
+					"FULL",
+					"FULL_TRANSITIVE",
+					"NONE"
+				],
+				"dependency": {
+					"level": "model",
+					"key": "schemaRegistryType",
+					"value": "Confluent Schema Registry"
+				}
+			},
+			{
+				"propertyName": "Schema version",
+				"propertyKeyword": "confluentVersion",
+				"shouldValidate": true,
+				"propertyType": "text",
+				"dependency": {
+					"level": "model",
+					"key": "schemaRegistryType",
+					"value": "Confluent Schema Registry"
+				}
+			},
+			{
 				"propertyName": "Additional properties",
 				"propertyKeyword": "additionalProperties",
 				"propertyTooltip": "Description",

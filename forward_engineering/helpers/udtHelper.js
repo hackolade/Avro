@@ -1,6 +1,7 @@
 const { dependencies } = require('../../shared/appDependencies');
 const { isNamedType, filterAttributes } = require('../../shared/typeHelper');
-const { AVRO_TYPES } = require('../../shared/constants');
+const { AVRO_TYPES, SCRIPT_TYPES } = require('../../shared/constants');
+const mapJsonSchema = require('../../shared/mapJsonSchema');
 const { reorderAttributes, simplifySchema } = require('./generalHelper');
 const mapAvroSchema = require('./mapAvroSchema');
 
@@ -168,10 +169,44 @@ const resetDefinitionsUsage = () => {
 	}, {});
 };
 
+const resolveCollectionReferences = (entities, scriptType) => {
+	if (scriptType !== SCRIPT_TYPES.CONFLUENT_SCHEMA_REGISTRY) {
+		return entities;
+	}
+
+	const entitiesIds = entities.map(entity => entity.jsonSchema.GUID);
+	return entities.map(entity => {
+		let references = [];
+		const mapper = mapJsonSchema(field => {
+			if (!field.ref || !entitiesIds.includes(field.ref)) {
+				return field;
+			}
+
+			const definition = entities.find(entity => entity.jsonSchema.GUID === field.ref).jsonSchema;
+			references = [...references, {
+				name: definition.code || definition.collectionName,
+				namespace: definition.bucketName,
+				...(definition.confluentVersion && { version: definition.confluentVersion }),
+			}];
+
+			return {
+				$ref: `#/definitions/${definition.code || definition.collectionName}`,
+			};
+		});
+
+		return {
+			...entity,
+			jsonSchema: mapper(entity.jsonSchema),
+			references,
+		};
+	})
+};
+
 module.exports = {
    resolveUdt,
    getUdtItem,
    addDefinitions,
    convertSchemaToReference,
    resetDefinitionsUsage,
+   resolveCollectionReferences,
 };

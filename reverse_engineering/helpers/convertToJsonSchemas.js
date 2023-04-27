@@ -9,10 +9,12 @@ const PRIMITIVE_TYPES = ['string', 'bytes', 'boolean', 'null', 'enum', 'fixed', 
 const NUMERIC_TYPES = ['int', 'long', 'float', 'double'];
 
 let _;
+let collectionReferences = [];
 
 const convertToJsonSchemas = avroSchema => {
 	_ = dependencies.lodash;
 
+	collectionReferences = avroSchema.references || [];
 	const convertedSchema = convertSchema(avroSchema);
 	const jsonSchemas = _.isArray(convertedSchema.type) ? convertedSchema.type : [ convertedSchema ];
 
@@ -147,13 +149,18 @@ const convertArray = (namespace, attributes) => {
 	};
 };
 
-const convertUserDefinedType = (namespace, type, attributes) => ({
-	...attributes,
-	$ref: type,
-	definitionName: getName({ name: type }),
-	name: getName({ name: type }),
-	namespace: getNamespace({ name: type, namespace }),
-});
+const convertUserDefinedType = (namespace, type, attributes) => {
+	const name = getName({ name: type });
+	const ref = collectionReferences.map(reference => reference.name === name) ? `#collection/definitions/${name}` : type;
+
+	return {
+		...attributes,
+		$ref: ref,
+		definitionName: name,
+		name: name,
+		namespace: getNamespace({ name: type, namespace }),
+	};
+};
 
 const handleMultipleFields = items => items.map(item => {
 	if (!_.isArray(item.type)) {
