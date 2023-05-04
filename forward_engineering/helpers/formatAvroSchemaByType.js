@@ -62,6 +62,31 @@ const formatConfluentSchema = ({ settings, needMinify, avroSchema }) => {
 	});
 };
 
+const getConfluentSubjectName = ({ name, namespace, schemaType, schemaTopic, schemaNameStrategy, confluentSubjectName }) => {
+	const RECORD_NAME_STRATEGY = 'RecordNameStrategy';
+	const TOPIC_NAME_STRATEGY = 'TopicNameStrategy';
+	const TOPIC_RECORD_NAME_STRATEGY = 'TopicRecordNameStrategy';
+
+	if (!schemaNameStrategy && confluentSubjectName) {
+		return confluentSubjectName;
+	}
+
+	const typePostfix = schemaType || '';
+	const containerPrefix = namespace || '';
+	const topicPrefix = schemaTopic || '';
+
+	switch(schemaNameStrategy){
+		case RECORD_NAME_STRATEGY:
+			return [containerPrefix, name, typePostfix].filter(Boolean).join('-');
+		case TOPIC_NAME_STRATEGY:
+			return [topicPrefix || name, typePostfix].filter(Boolean).join('-');
+		case TOPIC_RECORD_NAME_STRATEGY:
+			return [topicPrefix, containerPrefix, name, typePostfix].filter(Boolean).join('-');
+		default:
+			return [name, typePostfix].filter(Boolean).join('-');
+	};
+};
+
 const getConfluentPostQuery = ({
 	name,
 	namespace, 
@@ -73,32 +98,7 @@ const getConfluentPostQuery = ({
 	references,
 	schema,
 }) => {
-	const RECORD_NAME_STRATEGY = 'RecordNameStrategy';
-	const TOPIC_NAME_STRATEGY = 'TopicNameStrategy';
-	const TOPIC_RECORD_NAME_STRATEGY = 'TopicRecordNameStrategy';
-
-	const getName = () => {
-		if (!schemaNameStrategy && confluentSubjectName) {
-			return confluentSubjectName;
-		}
-
-		const typePostfix = schemaType || '';
-		const containerPrefix = namespace || '';
-		const topicPrefix = schemaTopic || '';
-
-		switch(schemaNameStrategy){
-			case RECORD_NAME_STRATEGY:
-				return [containerPrefix, name, typePostfix].filter(Boolean).join('-');
-			case TOPIC_NAME_STRATEGY:
-				return [topicPrefix || name, typePostfix].filter(Boolean).join('-');
-			case TOPIC_RECORD_NAME_STRATEGY:
-				return [topicPrefix, containerPrefix, name, typePostfix].filter(Boolean).join('-');
-			default:
-				return [name, typePostfix].filter(Boolean).join('-');
-		}
-	}
-
-	const subjectName = getName();
+	const subjectName = getConfluentSubjectName({ name, namespace, schemaType, schemaTopic, schemaNameStrategy, confluentSubjectName })
 	const compatibilityRequest = confluentCompatibility ? `PUT /config/${subjectName} HTTP/1.1\n{ "compatibility": "${confluentCompatibility}" }\n\n` : '';
 
 	return `${compatibilityRequest}POST /subjects/${subjectName}/versions\n${JSON.stringify(
@@ -137,4 +137,4 @@ const stringifyCommon = (needMinify, schema) => {
 	return needMinify ? JSON.stringify(schema) : JSON.stringify(schema, null, 4);
 };
 
-module.exports = formatAvroSchemaByType;
+module.exports = { formatAvroSchemaByType, getConfluentSubjectName };
