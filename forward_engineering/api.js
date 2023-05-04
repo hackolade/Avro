@@ -4,7 +4,7 @@ const { setDependencies, dependencies } = require('../shared/appDependencies');
 const { SCRIPT_TYPES, SCHEMA_REGISTRIES_KEYS } = require('../shared/constants');
 const { parseJson, prepareName } = require('./helpers/generalHelper');
 const validateAvroScript = require('./helpers/validateAvroScript');
-const formatAvroSchemaByType = require('./helpers/formatAvroSchemaByType');
+const { formatAvroSchemaByType } = require('./helpers/formatAvroSchemaByType');
 const { resolveUdt, addDefinitions, resetDefinitionsUsage, resolveCollectionReferences } = require('./helpers/udtHelper');
 const convertSchema = require('./helpers/convertJsonSchemaToAvro');
 let _;
