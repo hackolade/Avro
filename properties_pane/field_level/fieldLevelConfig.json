@@ -865,12 +865,7 @@ making sure that you maintain a proper JSON format.
 				"template": "textarea"
 			},
 			"type",
-			{
-				"propertyName": "Required",
-				"propertyKeyword": "required",
-				"propertyType": "checkbox",
-				"template": "boolean"
-			},
+			"required",
 			{
 				"propertyName": "Type name",
 				"propertyKeyword": "typeName",
