@@ -38,7 +38,7 @@ const convertSchema = (schema, namespace = EMPTY_NAMESPACE, defaultValue) => {
 
 	const type = _.isString(schema) ? schema : schema.type;
 	const attributes =  _.isString(schema) ? {} : schema;
-	const field = convertType(namespace, type, getFieldAttributes(attributes, type));
+	const field = convertType(namespace, type, getFieldAttributes(attributes, type), defaultValue);
 
 	if (!isNamedType(type)) {
 		return field;
@@ -50,7 +50,7 @@ const convertSchema = (schema, namespace = EMPTY_NAMESPACE, defaultValue) => {
 	});
 };
 
-const convertType = (parentNamespace, type, attributes) => {
+const convertType = (parentNamespace, type, attributes, defaultValue) => {
 	const namespace = attributes.namespace || parentNamespace;
 
 	if (_.isArray(type)) {
@@ -68,15 +68,15 @@ const convertType = (parentNamespace, type, attributes) => {
 		return convertPrimitive(type, attributes);
 	}
 
-	switch(type) {
+	switch (type) {
 		case 'fixed':
-			return convertFixed(attributes);
+			return convertFixed(attributes, defaultValue);
 		case 'map':
-			return convertMap(namespace, attributes);
+			return convertMap(namespace, attributes, defaultValue);
 		case 'record':
-			return convertRecord(namespace, attributes);
+			return convertRecord(namespace, attributes, defaultValue);
 		case 'array':
-			return convertArray(namespace, attributes);
+			return convertArray(namespace, attributes, defaultValue);
 		default:
 			return convertUserDefinedType(namespace, type, attributes);
 	}
@@ -100,7 +100,7 @@ const convertEnum = attributes => ({
 
 const convertPrimitive = (type, attributes) => ({ ...attributes, type });
 
-const convertMap = (namespace, attributes) => {
+const convertMap = (namespace, attributes, defaultValue) => {
 	const valuesSchema = handleMultipleFields([{ ...convertSchema(attributes.values, namespace), name: 'schema' }]);
 
 	return {
@@ -109,12 +109,17 @@ const convertMap = (namespace, attributes) => {
 		subtype: getMapSubtype(attributes.values),
 		properties: convertArrayToJsonSchemaObject(valuesSchema),
 		required: getRequired(valuesSchema),
+		...(defaultValue && { default: defaultValue }),
 	};
 };
 
-const convertFixed = attributes => ({ ...attributes, type: 'fixed' });
+const convertFixed = (attributes, defaultValue) => ({
+	...attributes,
+	type: 'fixed',
+	...(defaultValue && { default: defaultValue }),
+});
 
-const convertRecord = (namespace, attributes) => {
+const convertRecord = (namespace, attributes, defaultValue) => {
 	const fields = handleMultipleFields((attributes.fields || []).map(convertField(namespace)));
 
 	return {
@@ -122,6 +127,7 @@ const convertRecord = (namespace, attributes) => {
 		type: 'record',
 		properties: convertArrayToJsonSchemaObject(fields),
 		required: getRequired(fields),
+		...(defaultValue && { default: defaultValue }),
 	};
 };
 
@@ -135,7 +141,7 @@ const convertField = namespace => field => {
 	};
 };
 
-const convertArray = (namespace, attributes) => {
+const convertArray = (namespace, attributes, defaultValue) => {
 	const items = convertSchema(attributes.items, namespace) || [];
 	const multipleTypes = handleMultipleFields(_.isArray(items) ? items : [items]);
 	const [ choices, fields ] = _.partition(multipleTypes, field => field.type === 'choice');
@@ -146,6 +152,7 @@ const convertArray = (namespace, attributes) => {
 		items: fields,
 		properties: convertArrayToJsonSchemaObject(choices),
 		required: getRequired(multipleTypes),
+		...(defaultValue && { default: defaultValue }),
 	};
 };
 
