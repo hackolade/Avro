@@ -38,7 +38,7 @@ const convertSchema = (schema, namespace = EMPTY_NAMESPACE, defaultValue) => {
 
 	const type = _.isString(schema) ? schema : schema.type;
 	const attributes =  _.isString(schema) ? {} : schema;
-	const field = convertType(namespace, type, getFieldAttributes(attributes, type));
+	const field = convertType(namespace, type, getFieldAttributes(attributes, type, defaultValue));
 
 	if (!isNamedType(type)) {
 		return field;

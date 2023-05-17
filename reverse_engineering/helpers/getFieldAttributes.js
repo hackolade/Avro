@@ -6,10 +6,11 @@ const { getNamespace, getName } = require('./generalHelper');
 
 let _;
 
-const getFieldAttributes = (attributes = {}, type = '') => {
+const getFieldAttributes = (attributes = {}, type = '', defaultValue) => {
 	_ = dependencies.lodash;
 
 	return _.flow([
+		setDefaultValue(defaultValue),
 	    filterAttributes(type),
 	    setNamespace(type),
 	    setSubtype(type),
@@ -89,5 +90,9 @@ const addMetaProperties = properties => Object.keys(properties).reduce((updatedP
 		}],
 	};
 }, {});
+
+const setDefaultValue = defaultValue => properties => {
+	return {...properties, ...(defaultValue && { default: properties.default || defaultValue })};
+}
 
 module.exports = getFieldAttributes;

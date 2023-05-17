@@ -867,6 +867,34 @@ making sure that you maintain a proper JSON format.
 			"type",
 			"required",
 			{
+				"propertyName": "Default",
+				"propertyKeyword": "default",
+				"shouldValidate": true,
+				"validation": {
+					"required": true
+				},
+				"propertyType": "details",
+				"template": "textAreaJson",
+				"markdown": false,
+				"dependency": {
+					"type": "and",
+					"values": [
+						{
+							"key": "required",
+							"value": false
+						},
+						{
+							"type": "not",
+							"values": {
+								"level": "parent",
+								"key": "childType",
+								"value": "array"
+							}
+						}
+					]
+				}
+			},
+			{
 				"propertyName": "Type name",
 				"propertyKeyword": "typeName",
 				"shouldValidate": false,
@@ -983,6 +1011,34 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "required",
 				"propertyType": "checkbox",
 				"template": "boolean"
+			},
+			{
+				"propertyName": "Default",
+				"propertyKeyword": "default",
+				"shouldValidate": true,
+				"validation": {
+					"required": true
+				},
+				"propertyType": "details",
+				"template": "textAreaJson",
+				"markdown": false,
+				"dependency": {
+					"type": "and",
+					"values": [
+						{
+							"key": "required",
+							"value": false
+						},
+						{
+							"type": "not",
+							"values": {
+								"level": "parent",
+								"key": "childType",
+								"value": "array"
+							}
+						}
+					]
+				}
 			},
 			{
 				"propertyName": "Aliases",
@@ -1106,6 +1162,34 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "required",
 				"propertyType": "checkbox",
 				"template": "boolean"
+			},
+			{
+				"propertyName": "Default",
+				"propertyKeyword": "default",
+				"shouldValidate": true,
+				"validation": {
+					"required": true
+				},
+				"propertyType": "details",
+				"template": "textAreaJson",
+				"markdown": false,
+				"dependency": {
+					"type": "and",
+					"values": [
+						{
+							"key": "required",
+							"value": false
+						},
+						{
+							"type": "not",
+							"values": {
+								"level": "parent",
+								"key": "childType",
+								"value": "array"
+							}
+						}
+					]
+				}
 			},
 			{
 				"propertyName": "Aliases",
