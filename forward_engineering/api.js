@@ -86,7 +86,7 @@ const generateScript = (data, logger, cb, app) => {
 
 		const settings = getSettings({ containerData, entityData, modelData });
 		const script = getScript({
-			scriptType: options.isCalledFromFETab ? getScriptType(options, modelData) : SCRIPT_TYPES.COMMON,
+			scriptType: options.origin === 'ui' ? getScriptType(options, modelData) : SCRIPT_TYPES.COMMON,
 			needMinify: isMinifyNeeded(options),
 			settings,
 			avroSchema: convertJsonToAvro(parseJson(jsonSchema), settings.name),
