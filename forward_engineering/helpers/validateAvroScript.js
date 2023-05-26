@@ -18,6 +18,7 @@ let _;
 const validateAvroScript = (script, scriptType, logger) => {
 	_ = dependencies.lodash;
 
+	scriptType = detectScriptType(script) || scriptType;
 	const scripts = parseScript(script, scriptType);
 	const validator = getScriptValidator(scriptType);
 
@@ -27,6 +28,12 @@ const validateAvroScript = (script, scriptType, logger) => {
 	}
 
 	return getMessageForMultipleSchemaValidation(_.flatten(validationMessages));
+};
+
+const detectScriptType = script => {
+	if (parseJson(script).type) {
+		return SCRIPT_TYPES.COMMON;
+	}
 };
 
 const parseScript = (script, scriptType) =>{
