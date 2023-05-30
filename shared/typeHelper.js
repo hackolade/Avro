@@ -1,5 +1,6 @@
 const { dependencies } = require('./appDependencies');
 const { GENERAL_ATTRIBUTES } = require('./constants');
+const { getCustomPropertiesKeywords, getFieldLevelConfig } = require('./customProperties');
 
 let _;
 
@@ -35,30 +36,9 @@ const LOGICAL_TYPES_MAP = {
 	string: ['uuid'],
 };
 
-let fieldLevelConfig;
-const setFieldLevelConfig = config => fieldLevelConfig = config;
-
-const getCustomAttributes = (type, attributes) => {
-	const typeConfig = fieldLevelConfig?.structure?.[type] || [];
-
-	return typeConfig
-		.filter(property => {
-			if (!property.isTargetProperty) {
-				return false;
-			}
-
-			if (!property.dependency) {
-				return true;
-			}
-
-			return attributes[property.dependency.key] === property.dependency.value;
-		})
-		.map(property => property.fieldKeyword);
-};
-
 const isNamedType = type => NAMED_TYPES.includes(type);
 
-const filterAttributes = type => attributes => {
+const filterAttributes = (type, customProperties) => attributes => {
 	_ = dependencies.lodash;
 
 	if (!LOGICAL_TYPES_MAP[attributes.type]?.includes(attributes.logicalType)) {
@@ -70,7 +50,7 @@ const filterAttributes = type => attributes => {
 		...GENERAL_ATTRIBUTES,
 		...getLogicalTypeAttributes(type, attributes.logicalType),
 		...META_PROPERTIES,
-		...getCustomAttributes(type, attributes),
+		...(customProperties || getCustomPropertiesKeywords(getFieldLevelConfig(type), attributes)),
 	]);
 };
 
@@ -82,5 +62,4 @@ module.exports = {
 	isNamedType,
 	filterAttributes,
 	isMetaProperty,
-	setFieldLevelConfig,
 };

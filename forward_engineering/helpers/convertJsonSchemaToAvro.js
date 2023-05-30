@@ -8,7 +8,7 @@ const DEFAULT_TYPE = 'string';
 
 let _;
 
-const convertSchema = schema => {
+const convertSchema = (schema, customProperties) => {
 	_ = dependencies.lodash;
 
 	schema = prepareSchema(schema);
@@ -23,7 +23,7 @@ const convertSchema = schema => {
 	schema = convertMetaProperties(schema);
 
 	schema = convertType(schema);
-	schema = filterSchemaAttributes(schema);
+	schema = filterSchemaAttributes(schema, customProperties);
 	schema = reorderAttributes(schema);
 	schema = simplifySchema(schema);
 
@@ -157,12 +157,12 @@ const convertType = schema => {
 	}
 };
 
-const filterSchemaAttributes = schema => {
+const filterSchemaAttributes = (schema, customProperties) => {
 	if (_.isArray(schema)) {
 		return schema;
 	}
 
-	return filterAttributes(schema.type)(schema);
+	return filterAttributes(schema.type, customProperties)(schema);
 };
 
 const convertMultiple = schema => {

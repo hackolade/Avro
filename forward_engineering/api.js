@@ -7,14 +7,15 @@ const validateAvroScript = require('./helpers/validateAvroScript');
 const { formatAvroSchemaByType } = require('./helpers/formatAvroSchemaByType');
 const { resolveUdt, addDefinitions, resetDefinitionsUsage, resolveCollectionReferences } = require('./helpers/udtHelper');
 const convertSchema = require('./helpers/convertJsonSchemaToAvro');
-const { setFieldLevelConfig } = require('../shared/typeHelper');
+const { initPluginConfiguration } = require('../shared/customProperties');
+const { getCustomPropertiesKeywords, getEntityLevelConfig } = require('../shared/customProperties');
 let _;
 
 const generateModelScript = (data, logger, cb, app) => {
 	logger.clear();
 	try {
 		setDependencies(app);
-		setFieldLevelConfig(data.pluginConfiguration?.fieldLevelConfig);
+		initPluginConfiguration(data.pluginConfiguration, logger);
 		_ = dependencies.lodash;
 
 		const { containers, externalDefinitions, modelDefinitions, options } = data;
@@ -67,7 +68,7 @@ const generateScript = (data, logger, cb, app) => {
 	logger.clear();
 	try {
 		setDependencies(app);
-		setFieldLevelConfig(data.pluginConfiguration?.fieldLevelConfig);
+		initPluginConfiguration(data.pluginConfiguration, logger);
 		_ = dependencies.lodash;
 
 		const {
@@ -104,7 +105,7 @@ const generateScript = (data, logger, cb, app) => {
 
 const validate = (data, logger, cb, app) => {
 	setDependencies(app);
-	setFieldLevelConfig(data.pluginConfiguration?.fieldLevelConfig);
+	initPluginConfiguration(data.pluginConfiguration);
 	_ = dependencies.lodash;
 
 	const targetScript = data.script;
@@ -133,7 +134,7 @@ const getEntityData = (container, entityId) => {
 const convertJsonToAvro = (jsonSchema, schemaName) => {
 	jsonSchema = { ...jsonSchema, type: 'record' };
 	const avroSchema = {
-		...convertSchema(jsonSchema),
+		...convertSchema(jsonSchema, getCustomPropertiesKeywords(getEntityLevelConfig(), jsonSchema)),
 		name: schemaName,
 		type: 'record',
 	};
@@ -193,7 +194,7 @@ const getSettings = ({ containerData, entityData, modelData, references, }) => {
 const isMinifyNeeded = options => {
 	const additionalOptions = options?.additionalOptions || [];
 
-	return (additionalOptions.find(option => option.id === 'minify') || {}).value;
+	return additionalOptions.find(option => option.id === 'minify')?.value;
 };
 
 const getRootRecordName = entityData => prepareName(entityData.code || entityData.name || entityData.collectionName);
