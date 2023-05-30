@@ -61,7 +61,7 @@ const getEntityLevelConfig = () => pluginConfiguration.entityLevelConfig?.[0]?.s
 
 module.exports = {
 	initPluginConfiguration,
-    getCustomPropertiesKeywords,
-    getFieldLevelConfig,
-    getEntityLevelConfig,
+	getCustomPropertiesKeywords,
+	getFieldLevelConfig,
+	getEntityLevelConfig,
 };
