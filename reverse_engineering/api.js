@@ -1,6 +1,7 @@
 'use strict'
 
 const { setDependencies, dependencies } = require('../shared/appDependencies');
+const { setFieldLevelConfig } = require('../shared/typeHelper');
 const jsonSchemaAdapter = require('./helpers/adaptJsonSchema');
 const convertToJsonSchemas = require('./helpers/convertToJsonSchemas');
 const { openAvroFile } = require('./helpers/fileHelper');
@@ -10,6 +11,7 @@ let _;
 
 const reFromFile = async (data, logger, callback, app) => {
 	setDependencies(app);
+	setFieldLevelConfig(data.pluginConfiguration?.fieldLevelConfig);
 	_ = dependencies.lodash;
 	try {
 		const { filePath } = data;

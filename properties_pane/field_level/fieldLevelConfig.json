@@ -318,8 +318,7 @@ making sure that you maintain a proper JSON format.
 				"options": [
 					"",
 					"decimal"
-				],
-				"isTargetProperty": true
+				]
 			},
 			{
 				"propertyName": "Precision",
@@ -332,8 +331,7 @@ making sure that you maintain a proper JSON format.
 					"key": "subtype",
 					"value": "decimal"
 				},
-				"typeDecorator": true,
-				"isTargetProperty": true
+				"typeDecorator": true
 			},
 			{
 				"propertyName": "Scale",
@@ -346,8 +344,7 @@ making sure that you maintain a proper JSON format.
 					"key": "subtype",
 					"value": "decimal"
 				},
-				"typeDecorator": true,
-				"isTargetProperty": true
+				"typeDecorator": true
 			},
 			{
 				"propertyName": "Required",
@@ -490,8 +487,7 @@ making sure that you maintain a proper JSON format.
 				"dependency": {
 					"key": "mode",
 					"value": "int"
-				},
-				"isTargetProperty": true
+				}
 			},
 			{
 				"propertyName": "Logical type",
@@ -512,8 +508,7 @@ making sure that you maintain a proper JSON format.
 				"dependency": {
 					"key": "mode",
 					"value": "long"
-				},
-				"isTargetProperty": true
+				}
 			},
 			{
 				"propertyName": "Order",
@@ -1488,8 +1483,7 @@ making sure that you maintain a proper JSON format.
 					"",
 					"decimal",
 					"duration"
-				],
-				"isTargetProperty": true
+				]
 			},
 			{
 				"propertyName": "Precision",
@@ -1502,8 +1496,7 @@ making sure that you maintain a proper JSON format.
 					"key": "subtype",
 					"value": "decimal"
 				},
-				"typeDecorator": true,
-				"isTargetProperty": true
+				"typeDecorator": true
 			},
 			{
 				"propertyName": "Scale",
@@ -1516,8 +1509,7 @@ making sure that you maintain a proper JSON format.
 					"key": "subtype",
 					"value": "decimal"
 				},
-				"typeDecorator": true,
-				"isTargetProperty": true
+				"typeDecorator": true
 			},
 			{
 				"propertyName": "Namespace",

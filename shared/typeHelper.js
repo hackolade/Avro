@@ -35,6 +35,26 @@ const LOGICAL_TYPES_MAP = {
 	string: ['uuid'],
 };
 
+let fieldLevelConfig;
+const setFieldLevelConfig = config => fieldLevelConfig = config;
+
+const getCustomAttributes = (type, attributes) => {
+	const typeConfig = fieldLevelConfig?.structure?.[type] || [];
+
+	return typeConfig
+		.filter(property => {
+			if (!property.isTargetProperty) {
+				return false;
+			}
+
+			if (!property.dependency) {
+				return true;
+			}
+
+			return attributes[property.dependency.key] === property.dependency.value;
+		})
+		.map(property => property.fieldKeyword);
+};
 
 const isNamedType = type => NAMED_TYPES.includes(type);
 
@@ -49,7 +69,8 @@ const filterAttributes = type => attributes => {
 		...(TYPE_SPECIFIC_ATTRIBUTES[type] || []),
 		...GENERAL_ATTRIBUTES,
 		...getLogicalTypeAttributes(type, attributes.logicalType),
-		...META_PROPERTIES
+		...META_PROPERTIES,
+		...getCustomAttributes(type, attributes),
 	]);
 };
 
@@ -61,4 +82,5 @@ module.exports = {
 	isNamedType,
 	filterAttributes,
 	isMetaProperty,
+	setFieldLevelConfig,
 };

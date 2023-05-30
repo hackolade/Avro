@@ -7,12 +7,14 @@ const validateAvroScript = require('./helpers/validateAvroScript');
 const { formatAvroSchemaByType } = require('./helpers/formatAvroSchemaByType');
 const { resolveUdt, addDefinitions, resetDefinitionsUsage, resolveCollectionReferences } = require('./helpers/udtHelper');
 const convertSchema = require('./helpers/convertJsonSchemaToAvro');
+const { setFieldLevelConfig } = require('../shared/typeHelper');
 let _;
 
 const generateModelScript = (data, logger, cb, app) => {
 	logger.clear();
 	try {
 		setDependencies(app);
+		setFieldLevelConfig(data.pluginConfiguration?.fieldLevelConfig);
 		_ = dependencies.lodash;
 
 		const { containers, externalDefinitions, modelDefinitions, options } = data;
@@ -65,6 +67,7 @@ const generateScript = (data, logger, cb, app) => {
 	logger.clear();
 	try {
 		setDependencies(app);
+		setFieldLevelConfig(data.pluginConfiguration?.fieldLevelConfig);
 		_ = dependencies.lodash;
 
 		const {
@@ -101,6 +104,7 @@ const generateScript = (data, logger, cb, app) => {
 
 const validate = (data, logger, cb, app) => {
 	setDependencies(app);
+	setFieldLevelConfig(data.pluginConfiguration?.fieldLevelConfig);
 	_ = dependencies.lodash;
 
 	const targetScript = data.script;
