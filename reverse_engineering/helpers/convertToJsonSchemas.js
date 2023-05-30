@@ -3,6 +3,7 @@ const { isNamedType } = require('../../shared/typeHelper');
 const getFieldAttributes = require('./getFieldAttributes');
 const { getNamespace, getName, EMPTY_NAMESPACE } = require('./generalHelper');
 const { addDefinition, resolveRootReference, getDefinitions, filterUnusedDefinitions, updateRefs } = require('./referencesHelper');
+const { getCustomPropertiesKeywords, getEntityLevelConfig } = require('../../shared/customProperties');
 
 const DEFAULT_FIELD_NAME = 'New_field';
 const PRIMITIVE_TYPES = ['string', 'bytes', 'boolean', 'null', 'enum', 'fixed', 'int', 'long', 'float', 'double'];
@@ -15,7 +16,7 @@ const convertToJsonSchemas = avroSchema => {
 	_ = dependencies.lodash;
 
 	collectionReferences = avroSchema.references || [];
-	const convertedSchema = convertSchema(avroSchema);
+	const convertedSchema = convertSchema({ schema: avroSchema, customProperties: getCustomPropertiesKeywords(getEntityLevelConfig(), avroSchema) });
 	const jsonSchemas = _.isArray(convertedSchema.type) ? convertedSchema.type : [ convertedSchema ];
 
 	return jsonSchemas.map(_.flow([
@@ -27,7 +28,7 @@ const convertToJsonSchemas = avroSchema => {
 	]));
 };
 
-const convertSchema = (schema, namespace = EMPTY_NAMESPACE, defaultValue) => {
+const convertSchema = ({ schema, namespace = EMPTY_NAMESPACE, defaultValue, customProperties }) => {
 	if (_.isArray(schema)) {
 		return convertUnion(namespace, schema);
 	}
@@ -38,7 +39,7 @@ const convertSchema = (schema, namespace = EMPTY_NAMESPACE, defaultValue) => {
 
 	const type = _.isString(schema) ? schema : schema.type;
 	const attributes =  _.isString(schema) ? {} : schema;
-	const field = convertType(namespace, type, getFieldAttributes(attributes, type, defaultValue));
+	const field = convertType(namespace, type, getFieldAttributes({ attributes, type, defaultValue, customProperties }));
 
 	if (!isNamedType(type)) {
 		return field;
@@ -84,10 +85,10 @@ const convertType = (parentNamespace, type, attributes) => {
 
 const convertUnion = (namespace, types) => {
 	if (types.length === 1) {
-		return convertSchema(_.first(types), namespace);
+		return convertSchema({ schema: _.first(types), namespace });
 	}
 
-	return { type: types.map(schema => convertSchema(schema, namespace)) };
+	return { type: types.map(schema => convertSchema({ schema, namespace })) };
 };
 
 const convertNumeric = (type, attributes) => ({ ...attributes, type: 'number', mode: type });
@@ -101,7 +102,7 @@ const convertEnum = attributes => ({
 const convertPrimitive = (type, attributes) => ({ ...attributes, type });
 
 const convertMap = (namespace, attributes) => {
-	const valuesSchema = handleMultipleFields([{ ...convertSchema(attributes.values, namespace), name: 'schema' }]);
+	const valuesSchema = handleMultipleFields([{ ...convertSchema({ schema: attributes.values, namespace }), name: 'schema' }]);
 
 	return {
 		..._.omit(attributes, 'values'),
@@ -126,17 +127,17 @@ const convertRecord = (namespace, attributes) => {
 };
 
 const convertField = namespace => field => {
-	const fieldAttributes = getFieldAttributes(field);
+	const fieldAttributes = getFieldAttributes({ attributes: field });
 
 	return {
 		...fieldAttributes,
-		...convertSchema(field.type, namespace, fieldAttributes.default),
+		...convertSchema({ schema: field.type, namespace, defaultValue: fieldAttributes.default }),
 		name: field.name
 	};
 };
 
 const convertArray = (namespace, attributes) => {
-	const items = convertSchema(attributes.items, namespace) || [];
+	const items = convertSchema({ schema: attributes.items, namespace }) || [];
 	const multipleTypes = handleMultipleFields(_.isArray(items) ? items : [items]);
 	const [ choices, fields ] = _.partition(multipleTypes, field => field.type === 'choice');
 
