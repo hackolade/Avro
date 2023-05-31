@@ -32,8 +32,16 @@ const convertSchema = (schema, customProperties) => {
 
 const prepareSchema = schema => ({
 	...convertChoicesToProperties(schema),
-	type: schema.type || getTypeFromReference(schema),
+	type: getAvroType(schema.type) || getTypeFromReference(schema),
 });
+
+const getAvroType = type => {
+	if (type === 'object') {
+		return 'record';
+	}
+
+	return type;
+};
 
 const convertDescriptionToDoc = schema => {
 	const description = (schema.$ref && schema.refDescription) || schema.description;
