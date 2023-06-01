@@ -263,7 +263,7 @@ const convertFixed = schema => {
 
 const convertArray = schema => {
 	if (_.isArray(schema.items)) {
-		const items = getUniqueItemsInArray(schema.items.map(convertSchema));
+		const items = getUniqueItemsInArray(schema.items.map(item => convertSchema(item)));
 		if (items.length === 1) {
 			return {
 				...schema,
