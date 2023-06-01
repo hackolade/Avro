@@ -32,8 +32,16 @@ const convertSchema = (schema, customProperties) => {
 
 const prepareSchema = schema => ({
 	...convertChoicesToProperties(schema),
-	type: schema.type || getTypeFromReference(schema),
+	type: getAvroType(schema.type) || getTypeFromReference(schema),
 });
+
+const getAvroType = type => {
+	if (type === 'object') {
+		return 'record';
+	}
+
+	return type;
+};
 
 const convertDescriptionToDoc = schema => {
 	const description = (schema.$ref && schema.refDescription) || schema.description;
@@ -255,7 +263,7 @@ const convertFixed = schema => {
 
 const convertArray = schema => {
 	if (_.isArray(schema.items)) {
-		const items = getUniqueItemsInArray(schema.items.map(convertSchema));
+		const items = getUniqueItemsInArray(schema.items.map(item => convertSchema(item)));
 		if (items.length === 1) {
 			return {
 				...schema,
