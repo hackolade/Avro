@@ -1,4 +1,5 @@
 const { AVRO_TYPES } = require("./constants");
+const { dependencies } = require("./appDependencies");
 
 let pluginConfiguration = {};
 let logger = {};
@@ -16,10 +17,10 @@ const initPluginConfiguration = (config, appLogger) => {
 };
 
 const getCustomPropertiesConfigMap = () => {
-    const entityCustomProperties = getCustomProperties(getEntityLevelConfig());
+    const entityCustomProperties = getCustomPropertiesConfig(getEntityLevelConfig());
 
     return AVRO_TYPES.reduce((typeToCustomProperties, type) => {
-        const customProperties = getCustomProperties(getFieldLevelConfig(type));
+        const customProperties = getCustomPropertiesConfig(getFieldLevelConfig(type));
         if (!customProperties.length) {
             return typeToCustomProperties;
         }
@@ -33,7 +34,7 @@ const getCustomPropertiesConfigMap = () => {
     });
 };
 
-const getCustomProperties = config => config.filter(property => property.includeInScript);
+const getCustomPropertiesConfig = config => config.filter(property => property.includeInScript);
 
 const filterConfigByDependency = (config, attributes) => {
     return config.filter(property => {
@@ -51,17 +52,27 @@ const filterConfigByDependency = (config, attributes) => {
 };
 
 const getCustomPropertiesKeywords = (config, attributes = {}) => {
-	return filterConfigByDependency(getCustomProperties(config), attributes).map(property => property.fieldKeyword);
+	return filterConfigByDependency(getCustomPropertiesConfig(config), attributes).map(property => property.fieldKeyword);
 };
 
-const getFieldLevelConfig = type => pluginConfiguration.fieldLevelConfig?.structure?.[type] || [];
+const getCustomProperties = (config, attributes = {}) => {
+	return dependencies.lodash.pick(attributes, getCustomPropertiesKeywords(config, attributes));
+};
+
+const getFieldLevelConfig = type => {
+    if (Array.isArray(type)) {
+        return type.flatMap(getFieldLevelConfig)
+    }
+
+    return pluginConfiguration.fieldLevelConfig?.structure?.[type] || [];
+};
 
 const getEntityLevelConfig = () => pluginConfiguration.entityLevelConfig?.[0]?.structure || [];
 
 
 module.exports = {
 	initPluginConfiguration,
-	getCustomPropertiesKeywords,
+    getCustomProperties,
 	getFieldLevelConfig,
 	getEntityLevelConfig,
 };

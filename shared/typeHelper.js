@@ -1,6 +1,5 @@
 const { dependencies } = require('./appDependencies');
 const { GENERAL_ATTRIBUTES } = require('./constants');
-const { getCustomPropertiesKeywords, getFieldLevelConfig } = require('./customProperties');
 
 let _;
 
@@ -38,7 +37,7 @@ const LOGICAL_TYPES_MAP = {
 
 const isNamedType = type => NAMED_TYPES.includes(type);
 
-const filterAttributes = (type, customProperties) => attributes => {
+const filterAttributes = type => attributes => {
 	_ = dependencies.lodash;
 
 	if (!LOGICAL_TYPES_MAP[attributes.type]?.includes(attributes.logicalType)) {
@@ -50,7 +49,6 @@ const filterAttributes = (type, customProperties) => attributes => {
 		...GENERAL_ATTRIBUTES,
 		...getLogicalTypeAttributes(type, attributes.logicalType),
 		...META_PROPERTIES,
-		...(customProperties || getCustomPropertiesKeywords(getFieldLevelConfig(type), attributes)),
 	]);
 };
 

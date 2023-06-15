@@ -7,8 +7,7 @@ const validateAvroScript = require('./helpers/validateAvroScript');
 const { formatAvroSchemaByType } = require('./helpers/formatAvroSchemaByType');
 const { resolveUdt, addDefinitions, resetDefinitionsUsage, resolveCollectionReferences } = require('./helpers/udtHelper');
 const convertSchema = require('./helpers/convertJsonSchemaToAvro');
-const { initPluginConfiguration } = require('../shared/customProperties');
-const { getCustomPropertiesKeywords, getEntityLevelConfig } = require('../shared/customProperties');
+const { initPluginConfiguration, getCustomProperties, getEntityLevelConfig, getFieldLevelConfig } = require('../shared/customProperties');
 let _;
 
 const generateModelScript = (data, logger, cb, app) => {
@@ -133,10 +132,12 @@ const getEntityData = (container, entityId) => {
 
 const convertJsonToAvro = (jsonSchema, schemaName) => {
 	jsonSchema = { ...jsonSchema, type: 'record' };
+	const customProperties = getCustomProperties(getEntityLevelConfig(), jsonSchema);
 	const avroSchema = {
-		...convertSchema(jsonSchema, getCustomPropertiesKeywords(getEntityLevelConfig(), jsonSchema)),
+		...convertSchema(jsonSchema),
 		name: schemaName,
 		type: 'record',
+		...customProperties,
 	};
 
 	return resolveUdt(reorderAvroSchema(avroSchema));
@@ -148,14 +149,20 @@ const setUserDefinedTypes = definitions => {
 
 const convertSchemaToUserDefinedTypes = definitionsSchema => {
 	definitionsSchema = parseJson(definitionsSchema);
-	const definitions = Object.keys(definitionsSchema.properties || {}).map(key => ({
-		name: prepareName(key),
-		schema: convertSchema(definitionsSchema.properties[key]),
-	}));
+	const definitions = Object.keys(definitionsSchema.properties || {}).map(key => {
+		const definition = definitionsSchema.properties[key];
+		const customProperties = getCustomProperties(getFieldLevelConfig(definition.type), definition);
 
-	return definitions.reduce((result, { name, schema }) => ({
+		return {
+			name: prepareName(key),
+			schema: convertSchema(definition),
+			customProperties,
+		}
+	});
+
+	return definitions.reduce((result, { name, schema, customProperties }) => ({
 		...result,
-		[name]: schema
+		[name]: { schema, customProperties },
 	}), {});
 };
 
