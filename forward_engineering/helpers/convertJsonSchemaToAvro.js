@@ -4,11 +4,12 @@ const { getUdtItem, convertSchemaToReference, addDefinitions } = require('./udtH
 const { reorderAttributes, filterMultipleTypes, prepareName, simplifySchema, getDefaultName, convertName, compareSchemasByStructure, } = require('./generalHelper');
 const convertChoicesToProperties = require('./convertChoicesToProperties');
 const { GENERAL_ATTRIBUTES, META_VALUES_KEY_MAP } = require('../../shared/constants');
+const { getFieldLevelConfig, getCustomProperties } = require('../../shared/customProperties');
 const DEFAULT_TYPE = 'string';
 
 let _;
 
-const convertSchema = (schema, customProperties) => {
+const convertSchema = schema => {
 	_ = dependencies.lodash;
 
 	schema = prepareSchema(schema);
@@ -23,7 +24,7 @@ const convertSchema = (schema, customProperties) => {
 	schema = convertMetaProperties(schema);
 
 	schema = convertType(schema);
-	schema = filterSchemaAttributes(schema, customProperties);
+	schema = filterSchemaAttributes(schema);
 	schema = reorderAttributes(schema);
 	schema = simplifySchema(schema);
 
@@ -165,12 +166,12 @@ const convertType = schema => {
 	}
 };
 
-const filterSchemaAttributes = (schema, customProperties) => {
+const filterSchemaAttributes = schema => {
 	if (_.isArray(schema)) {
 		return schema;
 	}
 
-	return filterAttributes(schema.type, customProperties)(schema);
+	return filterAttributes(schema.type)(schema);
 };
 
 const convertMultiple = schema => {
@@ -250,12 +251,16 @@ const convertFixed = schema => {
 	};
 
 	const schemaFromUdt = getUdtItem(name);
-	if (schemaFromUdt && compareSchemasByStructure(filterSchemaAttributes(convertedSchema), filterSchemaAttributes(schemaFromUdt))) {
+	if (schemaFromUdt && compareSchemasByStructure(filterSchemaAttributes(convertedSchema), filterSchemaAttributes(schemaFromUdt.schema))) {
 		return convertSchemaToReference(schema);
 	}
 
 	if (!schemaFromUdt) {
-		addDefinitions({ [name]:  { ...filterSchemaAttributes(convertedSchema), used: true } });
+		addDefinitions({ [name]:  {
+			schema: filterSchemaAttributes(convertedSchema),
+			customProperties: getCustomProperties(getFieldLevelConfig(schema.type), schema),
+			used: true,
+		}});
 	}
 
 	return convertedSchema;
@@ -286,6 +291,8 @@ const convertArray = schema => {
 const handleField = (name, field) => {
 	const { description, default: defaultValue, order, aliases, ...schema } = field;
 	const typeSchema = convertSchema(schema);
+	const udt = getUdtItem(typeSchema);
+	const customProperties = udt?.customProperties || getCustomProperties(getFieldLevelConfig(schema.type), schema);
 
 	return resolveFieldDefaultValue({
 		name: prepareName(name),
@@ -294,17 +301,18 @@ const handleField = (name, field) => {
 		doc: description,
 		order,
 		aliases,
+		...customProperties,
 	}, typeSchema);
 };
 
 const resolveFieldDefaultValue = (field, type) => {
 	let udtItem = _.isString(type) && getUdtItem(type);
 
-	if (!udtItem || !isNamedType(udtItem.type)) {
+	if (!udtItem || !isNamedType(udtItem.schema.type)) {
 		return field;
 	}
 
-	const defaultValue = field.default || udtItem.default;
+	const defaultValue = field.default || udtItem.schema.default;
 
 	return {
 		...field,
@@ -322,12 +330,16 @@ const convertRecord = schema => {
 	};
 
 	const schemaFromUdt = getUdtItem(name);
-	if (schemaFromUdt && compareSchemasByStructure(filterSchemaAttributes(convertedSchema), filterSchemaAttributes(schemaFromUdt))) {
+	if (schemaFromUdt && compareSchemasByStructure(filterSchemaAttributes(convertedSchema), filterSchemaAttributes(schemaFromUdt.schema))) {
 		return convertSchemaToReference(schema);
 	}
 
 	if (!schemaFromUdt) {
-		addDefinitions({ [name]:  { ...filterSchemaAttributes(convertedSchema), used: true } });
+		addDefinitions({ [name]:  {
+			schema: filterSchemaAttributes(convertedSchema),
+			customProperties: getCustomProperties(getFieldLevelConfig('record'), schema),
+			used: true,
+		}});
 	}
 
 	return convertedSchema;
@@ -346,12 +358,16 @@ const convertEnum = schema => {
 	};
 
 	const schemaFromUdt = getUdtItem(name);
-	if (schemaFromUdt && compareSchemasByStructure(filterSchemaAttributes(convertedSchema), filterSchemaAttributes(schemaFromUdt))) {
+	if (schemaFromUdt && compareSchemasByStructure(filterSchemaAttributes(convertedSchema), filterSchemaAttributes(schemaFromUdt.schema))) {
 		return convertSchemaToReference(schema);
 	}
 
 	if (!schemaFromUdt) {
-		addDefinitions({ [name]:  { ...filterSchemaAttributes(convertedSchema), symbolDefault: convertedSchema.symbolDefault, used: true } });
+		addDefinitions({ [name]:  {
+			schema: { ...filterSchemaAttributes(convertedSchema), symbolDefault: convertedSchema.symbolDefault },
+			customProperties: getCustomProperties(getFieldLevelConfig(schema.type), schema),
+			used: true,
+		}});
 	}
 
 	return {

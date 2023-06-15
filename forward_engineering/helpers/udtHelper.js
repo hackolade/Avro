@@ -53,19 +53,17 @@ const isDefinitionTypeValidForAvroDefinition = definition => {
 }
 
 const resolveSchemaUdt = schema => {
-	const type = _.isString(schema) ? schema : schema.type;
+	const type = _.isString(schema) || _.isArray(schema) ? schema : schema.type;
 	if (isNativeType(type)) {
 		return schema;
 	}
 
 	if (_.isString(schema)) {
-		const typeFromUdt = getTypeFromUdt(schema);
-	
-		return typeFromUdt;
+		return getTypeFromUdt(schema);
 	}
 
 	if (_.isArray(type)) {
-		return { ...schema, type: type.map(resolveSchemaUdt) };
+		return { ...(_.isArray(schema) ? {} : schema), type: type.map(resolveSchemaUdt) };
 	}
 
 	const typeFromUdt = getTypeFromUdt(type);
@@ -97,7 +95,8 @@ const getTypeFromUdt = type => {
 	    return getTypeWithNamespace(type);
 	}
 
-	let udtItem = resolveSymbolDefaultValue(getUdtItem(type));
+	const { schema } = getUdtItem(type) || {};
+	let udtItem = resolveSymbolDefaultValue(schema);
 
 	if (isDefinitionTypeValidForAvroDefinition(udtItem)) {
 		useUdt(type);
@@ -130,11 +129,11 @@ const getTypeWithNamespace = type => {
 		return type;
 	}
 
-	if (!udtItem.namespace) {
+	if (!udtItem.schema.namespace) {
 		return type;
 	}
 
-	return udtItem.namespace + '.' + type;
+	return udtItem.schema.namespace + '.' + type;
 };
 
 const convertNamedTypesToReferences = schema => {
@@ -143,7 +142,7 @@ const convertNamedTypesToReferences = schema => {
 	}
 
 	if (!udt[schema.name] || !isUdtUsed(schema.name)) {
-		udt[schema.name] = schema;
+		udt[schema.name] = { schema };
 	}
 
 	return simplifySchema(convertSchemaToReference(schema));
