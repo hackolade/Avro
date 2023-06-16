@@ -64,10 +64,12 @@ const getFieldLevelConfig = type => {
         return type.flatMap(getFieldLevelConfig)
     }
 
-    return pluginConfiguration.fieldLevelConfig?.structure?.[type] || [];
+    const customTabConfig = pluginConfiguration.fieldLevelConfig?.tabs?.filter(tab => tab.customTab).flatMap(tab => tab.structure?.[type] || []) || [];
+
+    return [ ...pluginConfiguration.fieldLevelConfig?.structure?.[type] || [], ...customTabConfig ];
 };
 
-const getEntityLevelConfig = () => pluginConfiguration.entityLevelConfig?.[0]?.structure || [];
+const getEntityLevelConfig = () => pluginConfiguration.entityLevelConfig?.flatMap(tab => tab?.structure || []) || [];
 
 
 module.exports = {
