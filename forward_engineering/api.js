@@ -131,7 +131,7 @@ const getEntityData = (container, entityId) => {
 }
 
 const convertJsonToAvro = (jsonSchema, schemaName) => {
-	jsonSchema = { ...jsonSchema, type: 'record' };
+	jsonSchema = { ...jsonSchema, name: schemaName, type: 'record' };
 	const customProperties = getCustomProperties(getEntityLevelConfig(), jsonSchema);
 	const avroSchema = {
 		...convertSchema(jsonSchema),

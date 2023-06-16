@@ -99,7 +99,7 @@ const compareSchemasByStructure = (schema1, schema2) => {
 	const propertiesToCompare = ['type', 'name', 'fields', 'items', 'values', 'logicalType', 'precision', 'scale', 'size'];
 
 	return _.isEqualWith(schema1, schema2, (schema1, schema2, key) => {
-		if (!propertiesToCompare.includes(key)) {
+		if (!_.isUndefined(key) && !propertiesToCompare.includes(key)) {
 			return true;
 		}
 	});
