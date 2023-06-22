@@ -99,9 +99,23 @@ const compareSchemasByStructure = (schema1, schema2) => {
 	const propertiesToCompare = ['type', 'name', 'fields', 'items', 'values', 'logicalType', 'precision', 'scale', 'size'];
 
 	return _.isEqualWith(schema1, schema2, (schema1, schema2, key) => {
-		if (!_.isUndefined(key) && !propertiesToCompare.includes(key)) {
+		if (
+			!_.isUndefined(key) && // if key is undefined, one of the objects is empty
+			!_.isNumber(key) && // if key is number, it's an array index
+			!propertiesToCompare.includes(key)
+		) { 
 			return true;
 		}
+
+		if (key === 'fields') {
+		/*
+			we don't care much about the exact structure of nested fields,
+			similarity is enough to detect should we
+			replace schemas by the same reference or rise a warning in validator 
+		*/
+			return schema1.length === schema2.length;
+		}
+		//if nothing is returned, _.isEqualWith will compare values by default
 	});
 };
 
