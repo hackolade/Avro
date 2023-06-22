@@ -113,7 +113,12 @@ const compareSchemasByStructure = (schema1, schema2) => {
 			similarity is enough to detect should we
 			replace schemas by the same reference or rise a warning in validator 
 		*/
-			return schema1.length === schema2.length;
+
+			return (
+				_.isArray(schema1) && _.isArray(schema2) && 
+				schema1.length === schema2.length &&
+				_.isEqual(schema1.map(schema => schema.name), schema2.map(schema => schema.name))
+			);
 		}
 		//if nothing is returned, _.isEqualWith will compare values by default
 	});
