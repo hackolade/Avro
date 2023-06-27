@@ -41,7 +41,7 @@ const prepareTypeFromUDT = (typeFromUdt) => {
 const isUdtUsed = type => {
 	const udtItem = getUdtItem(type);
 
-	return !udtItem || udtItem.used;
+	return !udtItem || udtItem.used || udtItem.isCollectionReference;
 };
 
 const isDefinitionTypeValidForAvroDefinition = definition => {
@@ -208,9 +208,19 @@ const resolveCollectionReferences = (entities, scriptType) => {
 			};
 		});
 
+		const jsonSchema = mapper(entity.jsonSchema);
+
+		addDefinitions(references.reduce((definitions, reference) => ({
+			...definitions,
+			[reference.name]: {
+				isCollectionReference: true,
+				schema: {},
+			}
+		}), {}));
+
 		return {
 			...entity,
-			jsonSchema: mapper(entity.jsonSchema),
+			jsonSchema,
 			references,
 		};
 	});

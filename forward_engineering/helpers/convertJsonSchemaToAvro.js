@@ -251,7 +251,9 @@ const convertFixed = schema => {
 	};
 
 	const schemaFromUdt = getUdtItem(name);
-	if (schemaFromUdt && compareSchemasByStructure(filterSchemaAttributes(convertedSchema), filterSchemaAttributes(schemaFromUdt.schema))) {
+	if (schemaFromUdt && !schemaFromUdt.isCollectionReference &&
+		compareSchemasByStructure(filterSchemaAttributes(convertedSchema), filterSchemaAttributes(schemaFromUdt.schema)
+	)) {
 		return convertSchemaToReference(schema);
 	}
 
@@ -330,7 +332,9 @@ const convertRecord = schema => {
 	};
 
 	const schemaFromUdt = getUdtItem(name);
-	if (schemaFromUdt && compareSchemasByStructure(filterSchemaAttributes(convertedSchema), filterSchemaAttributes(schemaFromUdt.schema))) {
+	if (schemaFromUdt && !schemaFromUdt.isCollectionReference &&
+		compareSchemasByStructure(filterSchemaAttributes(convertedSchema), filterSchemaAttributes(schemaFromUdt.schema)
+	)) {
 		return convertSchemaToReference(schema);
 	}
 
@@ -358,7 +362,9 @@ const convertEnum = schema => {
 	};
 
 	const schemaFromUdt = getUdtItem(name);
-	if (schemaFromUdt && compareSchemasByStructure(filterSchemaAttributes(convertedSchema), filterSchemaAttributes(schemaFromUdt.schema))) {
+	if (schemaFromUdt && !schemaFromUdt.isCollectionReference &&
+		compareSchemasByStructure(filterSchemaAttributes(convertedSchema), filterSchemaAttributes(schemaFromUdt.schema)
+	)) {
 		return convertSchemaToReference(schema);
 	}
 
