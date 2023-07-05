@@ -20,7 +20,7 @@ const SCRIPT_TYPES = {
 	COMMON: 'common',
 };
 
-const GENERAL_ATTRIBUTES = ['type', 'doc', 'order', 'default'];
+const GENERAL_ATTRIBUTES = ['type', 'doc', 'order', 'default', 'nullable'];
 
 const AVRO_TYPES = [
 	'string',

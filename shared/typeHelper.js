@@ -9,7 +9,7 @@ const TYPE_SPECIFIC_ATTRIBUTES = {
 	enum: ['name', 'aliases', 'namespace', 'symbols', 'symbolDefault'],
 	array: ['items'],
 	map: ['values'],
-	record: ['name', 'aliases', 'namespace', 'fields', 'nullable'],
+	record: ['name', 'aliases', 'namespace', 'fields'],
 	fixed: ['name', 'aliases', 'namespace', 'size', 'logicalType'],
 	string: ['logicalType'],
 	bytes: ['logicalType'],

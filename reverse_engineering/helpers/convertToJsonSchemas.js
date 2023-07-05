@@ -44,7 +44,7 @@ const convertSchema = ({ schema, namespace = EMPTY_NAMESPACE, avroFieldAttribute
 	}
 
 	const type = _.isString(schema) ? schema : schema.type;
-	const attributes =  setDefaultValue(_.isString(schema) ? {} : schema, fieldAttributes?.default);
+	const attributes = setDefaultValue(_.isString(schema) ? {} : schema, fieldAttributes?.default);
 	const field = convertType(namespace, type, getFieldAttributes({ attributes, type }));
 
 	if (!isNamedType(type)) {
@@ -102,8 +102,9 @@ const convertUnion = (namespace, types) => {
 
 	if (isNullableCollectionReference(types)) {
 		const [_nullType, collectionReference] = types;
-		setCollectionReferenceNullable(collectionReference);
-		return convertSchema({ schema: collectionReference, namespace });
+		const schema = convertSchema({ schema: collectionReference, namespace });
+
+		return { ...schema, nullable: true };
 	}
 
 	return { type: types.map(schema => convertSchema({ schema, namespace })) };
@@ -149,9 +150,11 @@ const convertField = namespace => field => {
 	const type = _.isArray(fieldTypeProperties.type) ?
 		fieldTypeProperties.type.map(({ type }) => type) : fieldTypeProperties.type;
 	const customProperties = getCustomProperties(getFieldLevelConfig(type), field);
+	let fieldAttributes = getFieldAttributes({ attributes: field });
+	fieldAttributes = fieldTypeProperties.nullable ?  _.omit(fieldAttributes, 'default') : fieldAttributes;
 
 	return {
-		...getFieldAttributes({ attributes: field }),
+		..._.omit(fieldAttributes, 'type'),
 		...customProperties,
 		...fieldTypeProperties,
 		name: field.name,
@@ -174,8 +177,7 @@ const convertArray = (namespace, attributes) => {
 
 const convertUserDefinedType = (namespace, type, attributes) => {
 	const name = getName({ name: type });
-	const collectionReference = getCollectionReference(name);
-	const ref = collectionReference ? `#collection/definitions/${name}` : type;
+	const ref = isCollectionReference(name) ? `#collection/definitions/${name}` : type;
 
 	return {
 		...attributes,
@@ -183,17 +185,11 @@ const convertUserDefinedType = (namespace, type, attributes) => {
 		definitionName: name,
 		name: name,
 		namespace: getNamespace({ name: type, namespace }),
-		...(collectionReference.nullable && { nullable: true })
 	};
 };
 
-const getCollectionReference = name => collectionReferences.find(reference => reference.name === name);
-const isNullableCollectionReference = unionSchema => unionSchema[0] === 'null' && getCollectionReference(unionSchema[1]);
-const setCollectionReferenceNullable = name => {
-	let reference = collectionReferences.find(reference => reference.name === name);
-
-	reference.nullable = true;
-};
+const isCollectionReference = name => !!collectionReferences.find(reference => reference.name === name);
+const isNullableCollectionReference = unionSchema => unionSchema[0] === 'null' && isCollectionReference(unionSchema[1]);
 
 const handleMultipleFields = items => items.map(item => {
 	if (!_.isArray(item.type)) {
