@@ -100,6 +100,12 @@ const convertUnion = (namespace, types) => {
 		return convertSchema({ schema: _.first(types), namespace });
 	}
 
+	if (isNullableCollectionReference(types)) {
+		const [_nullType, collectionReference] = types;
+		setCollectionReferenceNullable(collectionReference);
+		return convertSchema({ schema: collectionReference, namespace });
+	}
+
 	return { type: types.map(schema => convertSchema({ schema, namespace })) };
 };
 
@@ -168,7 +174,8 @@ const convertArray = (namespace, attributes) => {
 
 const convertUserDefinedType = (namespace, type, attributes) => {
 	const name = getName({ name: type });
-	const ref = collectionReferences.map(reference => reference.name === name) ? `#collection/definitions/${name}` : type;
+	const collectionReference = getCollectionReference(name);
+	const ref = collectionReference ? `#collection/definitions/${name}` : type;
 
 	return {
 		...attributes,
@@ -176,7 +183,16 @@ const convertUserDefinedType = (namespace, type, attributes) => {
 		definitionName: name,
 		name: name,
 		namespace: getNamespace({ name: type, namespace }),
+		...(collectionReference.nullable && { nullable: true })
 	};
+};
+
+const getCollectionReference = name => collectionReferences.find(reference => reference.name === name);
+const isNullableCollectionReference = unionSchema => unionSchema[0] === 'null' && getCollectionReference(unionSchema[1]);
+const setCollectionReferenceNullable = name => {
+	let reference = collectionReferences.find(reference => reference.name === name);
+
+	reference.nullable = true;
 };
 
 const handleMultipleFields = items => items.map(item => {

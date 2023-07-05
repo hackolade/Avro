@@ -31,10 +31,29 @@ const convertSchema = schema => {
 	return schema;
 };
 
-const prepareSchema = schema => ({
-	...convertChoicesToProperties(schema),
-	type: getAvroType(schema.type) || getTypeFromReference(schema),
-});
+const prepareSchema = schema => {
+	const typeSchema =  {
+		...convertChoicesToProperties(schema),
+		type: getAvroType(schema.type) || getTypeFromReference(schema),
+	};
+
+	if (!schema.$ref) {
+		return typeSchema;
+	}
+
+	const udt = getUdtItem(typeSchema.type);
+	if (udt?.isCollectionReference && typeSchema.nullable) {
+		return {
+			..._.omit(typeSchema, 'nullable'),
+			type: [
+				'null',
+				typeSchema.type
+			],
+		};
+	}
+
+	return typeSchema;
+};
 
 const getAvroType = type => {
 	if (type === 'object') {
@@ -101,7 +120,7 @@ const handleRequired = schema => {
 		...schema,
 		properties: Object.keys(schema.properties).reduce((result, key) => {
 			const property = schema.properties[key];
-			if (!schema.required.includes(key)) {
+			if (!schema.required.includes(key) || property.nullable) {
 				return { ...result, [key]: property };
 			}
 
