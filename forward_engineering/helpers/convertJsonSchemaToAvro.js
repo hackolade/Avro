@@ -34,7 +34,7 @@ const convertSchema = schema => {
 const prepareSchema = schema => {
 	const typeSchema =  {
 		...convertChoicesToProperties(schema),
-		type: schema.$ref ? getTypeFromReference(schema) : getAvroType(schema.type),
+		type: !schema.type || (schema.$ref && !schema.choice) ? getTypeFromReference(schema) : getAvroType(schema.type),
 	};
 
 	if (!schema.$ref) {
