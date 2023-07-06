@@ -97,8 +97,15 @@ const convertName = schema => {
 
 const compareSchemasByStructure = (schema1, schema2) => {
 	const propertiesToCompare = ['type', 'name', 'fields', 'items', 'values', 'logicalType', 'precision', 'scale', 'size'];
+	const removeEmptyValues = obj => {
+		if (!_.isPlainObject(obj)) {
+			return obj;
+		}
 
-	return _.isEqualWith(schema1, schema2, (schema1, schema2, key) => {
+		return _.pickBy(obj, value => value !== '' && !_.isUndefined(value));
+	};
+
+	return _.isEqualWith(removeEmptyValues(schema1), removeEmptyValues(schema2), (schema1, schema2, key) => {
 		if (
 			!_.isUndefined(key) && // if key is undefined, one of the objects is empty
 			!_.isNumber(key) && // if key is number, it's an array index
