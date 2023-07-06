@@ -860,7 +860,29 @@ making sure that you maintain a proper JSON format.
 				"template": "textarea"
 			},
 			"type",
-			"required",
+			{
+				"propertyName": "Required",
+				"propertyKeyword": "required",
+				"propertyType": "checkbox",
+				"enableForReference": true,
+				"template": "boolean",
+				"disabledOnCondition": {
+					"value": "collectionReference",
+					"key": "refType"
+				}
+			},
+			{
+				"propertyName": "Nullable",
+				"propertyKeyword": "nullable",
+				"enableForReference": true,
+				"shouldValidate": false,
+				"propertyType": "checkbox",
+				"template": "boolean",
+				"dependency": {
+					"value": "collectionReference",
+					"key": "refType"
+				}
+			},
 			{
 				"propertyName": "Default",
 				"propertyKeyword": "default",

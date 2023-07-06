@@ -204,7 +204,9 @@ const resolveCollectionReferences = (entities, scriptType) => {
 			}];
 
 			return {
+				...field,
 				$ref: `#/definitions/${definition.code || definition.collectionName}`,
+				default: field.nullable ? null : field.default,
 			};
 		});
 
