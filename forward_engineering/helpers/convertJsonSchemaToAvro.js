@@ -34,7 +34,7 @@ const convertSchema = schema => {
 const prepareSchema = schema => {
 	const typeSchema =  {
 		...convertChoicesToProperties(schema),
-		type: getAvroType(schema.type) || getTypeFromReference(schema),
+		type: schema.$ref ? getTypeFromReference(schema) : getAvroType(schema.type),
 	};
 
 	if (!schema.$ref) {
@@ -44,7 +44,7 @@ const prepareSchema = schema => {
 	const udt = getUdtItem(typeSchema.type);
 	if (udt?.isCollectionReference && typeSchema.nullable) {
 		return {
-			..._.omit(typeSchema, 'nullable'),
+			..._.omit(typeSchema, ['nullable', '$ref']),
 			type: [
 				'null',
 				typeSchema.type
