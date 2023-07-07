@@ -37,22 +37,17 @@ const prepareSchema = schema => {
 		type: !schema.type || (schema.$ref && !schema.choice) ? getTypeFromReference(schema) : getAvroType(schema.type),
 	};
 
-	if (!schema.$ref) {
-		return typeSchema;
+	if (!typeSchema.nullable) {
+		return _.omit(typeSchema, 'nullable');
 	}
 
-	const udt = getUdtItem(typeSchema.type);
-	if (udt?.isCollectionReference && typeSchema.nullable) {
-		return {
-			..._.omit(typeSchema, ['nullable', '$ref']),
-			type: [
-				'null',
-				typeSchema.type
-			],
-		};
-	}
-
-	return typeSchema;
+	return {
+		..._.omit(typeSchema, ['nullable', '$ref']),
+		type: [
+			'null',
+			typeSchema.type
+		],
+	};
 };
 
 const getAvroType = type => {
