@@ -71,17 +71,17 @@ const getConfluentSubjectName = ({ name, namespace, schemaType, schemaTopic, sch
 		return confluentSubjectName;
 	}
 
+	const fullName = [namespace, name].filter(Boolean).join('.');
 	const typePostfix = schemaType || '';
-	const containerPrefix = namespace || '';
 	const topicPrefix = schemaTopic || '';
 
 	switch(schemaNameStrategy){
 		case RECORD_NAME_STRATEGY:
-			return [containerPrefix, name, typePostfix].filter(Boolean).join('-');
+			return [fullName, typePostfix].filter(Boolean).join('-');
 		case TOPIC_NAME_STRATEGY:
 			return [topicPrefix || name, typePostfix].filter(Boolean).join('-');
 		case TOPIC_RECORD_NAME_STRATEGY:
-			return [topicPrefix, containerPrefix, name, typePostfix].filter(Boolean).join('-');
+			return [topicPrefix, fullName, typePostfix].filter(Boolean).join('-');
 		default:
 			return [name, typePostfix].filter(Boolean).join('-');
 	};
