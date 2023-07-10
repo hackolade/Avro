@@ -109,8 +109,8 @@ const inferSchemaNameStrategy = ({ name, namespace, confluentSubjectName, schema
 		return 'TopicNameStrategy';
 	}
 
-	if (_.first(splittedSubjectName) === namespace) {
-		splittedSubjectName = splittedSubjectName.slice(1);
+	if (namespace && splittedSubjectName?.startsWith(namespace + '.')) {
+		splittedSubjectName = splittedSubjectName.slice(namespace.length + 1);
 	}
 
 	const splittedRecordName = [...(name || '').split('-')].filter(Boolean);

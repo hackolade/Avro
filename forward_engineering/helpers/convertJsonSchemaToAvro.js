@@ -43,6 +43,7 @@ const prepareSchema = schema => {
 
 	return {
 		..._.omit(typeSchema, ['nullable', '$ref']),
+		default: null,
 		type: [
 			'null',
 			typeSchema.type
@@ -313,7 +314,7 @@ const handleField = (name, field) => {
 	return resolveFieldDefaultValue({
 		name: prepareName(name),
 		type: _.isArray(typeSchema.type) ? typeSchema.type : typeSchema,
-		default: defaultValue,
+		default: !_.isUndefined(defaultValue) ? defaultValue : typeSchema?.default,
 		doc: description,
 		order,
 		aliases,
