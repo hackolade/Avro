@@ -37,8 +37,11 @@ const LOGICAL_TYPES_MAP = {
 
 const isNamedType = type => NAMED_TYPES.includes(type);
 
-const filterAttributes = type => attributes => {
+const filterAttributes = (attributes, type) => {
 	_ = dependencies.lodash;
+	if (_.isArray(attributes)) {
+		return attributes;
+	}
 
 	if (!LOGICAL_TYPES_MAP[attributes.type]?.includes(attributes.logicalType)) {
 		attributes = _.omit(attributes, 'logicalType');

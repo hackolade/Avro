@@ -151,7 +151,7 @@ const convertNamedTypesToReferences = schema => {
 const convertSchemaToReference = schema => {
 	_ = dependencies.lodash;
 
-	const referenceAttributes = filterAttributes()(_.omit(schema, 'type'));
+	const referenceAttributes = filterAttributes(_.omit(schema, 'type'));
 
 	return reorderAttributes({ ...referenceAttributes, type: schema.name });
 };
