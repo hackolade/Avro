@@ -9,18 +9,18 @@ let _;
 const getFieldAttributes = ({ attributes = {}, type = '' }) => {
 	_ = dependencies.lodash;
 
-	return _.flow([
-	    filterAttributes(type),
-	    setNamespace(type),
-	    setSubtype(type),
-	    setDescriptionFromDoc,
-	    convertDefaultValue,
-	    setDurationSize,
-	    addMetaProperties,
-	])(attributes);
+	let fieldAttributes = filterAttributes(attributes, type);
+	fieldAttributes = setNamespace(fieldAttributes, type);
+	fieldAttributes = setSubtype(fieldAttributes, type);
+	fieldAttributes = setDescriptionFromDoc(fieldAttributes);
+	fieldAttributes = convertDefaultValue(fieldAttributes);
+	fieldAttributes = setDurationSize(fieldAttributes);
+	fieldAttributes = addMetaProperties(fieldAttributes);
+
+	return fieldAttributes;
 };
 
-const setNamespace = type => properties => {
+const setNamespace = (properties, type) => {
 	if (!isNamedType(type)) {
 		return properties;
 	}
@@ -32,7 +32,7 @@ const setNamespace = type => properties => {
 	};
 };
 
-const setSubtype = type => properties => {
+const setSubtype = (properties, type) => {
 	if (!properties.logicalType || !['fixed', 'bytes'].includes(type)) {
 		return properties
 	}

@@ -1,4 +1,5 @@
 const { dependencies } = require('../../shared/appDependencies');
+const { filterAttributes } = require('../../shared/typeHelper');
 
 let _;
 let nameIndex = 0;
@@ -95,40 +96,30 @@ const convertName = schema => {
 	return { ..._.omit(schema, nameProperties), name: prepareName(schema[nameKey])};
 };
 
+/**
+ * Compares two schemas by their structure. Equality is determined by comparing critical type properties and fields names (for records).
+ * 
+ * @param {Object} schema1
+ * @param {Object} schema2
+ * @returns {Boolean}
+ */
 const compareSchemasByStructure = (schema1, schema2) => {
-	const propertiesToCompare = ['type', 'name', 'fields', 'items', 'values', 'logicalType', 'precision', 'scale', 'size'];
-	const removeEmptyValues = obj => {
-		if (!_.isPlainObject(obj)) {
-			return obj;
-		}
+	schema1 = filterAttributes(schema1, schema1.type);
+	schema2 = filterAttributes(schema2, schema2.type);
+	const scalarPropertiesToCompare = ['type', 'name', 'logicalType', 'precision', 'scale', 'size'];
 
-		return _.pickBy(obj, value => value !== '' && !_.isUndefined(value));
-	};
+	const isEqualByProperties = _.isEqual(_.pick(schema1, scalarPropertiesToCompare), _.pick(schema2, scalarPropertiesToCompare));
+	if (!isEqualByProperties) {
+		return false;
+	}
 
-	return _.isEqualWith(removeEmptyValues(schema1), removeEmptyValues(schema2), (schema1, schema2, key) => {
-		if (
-			!_.isUndefined(key) && // if key is undefined, one of the objects is empty
-			!_.isNumber(key) && // if key is number, it's an array index
-			!propertiesToCompare.includes(key)
-		) { 
-			return true;
-		}
+	const hasStructure = schema1.fields || schema2.fields;
 
-		if (key === 'fields') {
-		/*
-			we don't care much about the exact structure of nested fields,
-			similarity is enough to detect should we
-			replace schemas by the same reference or rise a warning in validator 
-		*/
+	if (!hasStructure) {
+		return true;
+	}
 
-			return (
-				_.isArray(schema1) && _.isArray(schema2) && 
-				schema1.length === schema2.length &&
-				_.isEqual(schema1.map(schema => schema.name), schema2.map(schema => schema.name))
-			);
-		}
-		//if nothing is returned, _.isEqualWith will compare values by default
-	});
+	return _.isEqual(_.map(schema1.fields, 'name'), _.map(schema2.fields, 'name'));
 };
 
 module.exports = {
