@@ -276,7 +276,7 @@ const convertArray = schema => {
 
 	return {
 		...schema,
-		items: convertSchema(schema.items || {}),
+		items: convertSchema(schema.items || { type: DEFAULT_TYPE }),
 	};
 };
 
