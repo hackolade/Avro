@@ -135,6 +135,7 @@ const validateScript = (targetScript, logger) => {
 const validate = script => {
 	const entityName = parseJson(script).name;
 	try {
+		clearErrorsCollector();
 		avsc.parse(script);
 
 		if (_.isEmpty(avsc.errorsCollector)) {
