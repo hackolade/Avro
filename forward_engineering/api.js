@@ -89,7 +89,7 @@ const generateScript = (data, logger, cb, app) => {
 
 		const settings = getSettings({ containerData, entityData, modelData });
 		const script = getScript({
-			scriptType: options.origin === 'ui' ? getScriptType(options, modelData) : SCRIPT_TYPES.COMMON,
+			scriptType: getEntityScriptType(options),
 			needMinify: isMinifyNeeded(options),
 			settings,
 			avroSchema: convertJsonToAvro(parseJson(jsonSchema), settings.name),
@@ -119,6 +119,7 @@ const validate = (data, logger, cb, app) => {
 };
 
 const getScriptType = (options, modelData) => options?.targetScriptOptions?.keyword || options?.targetScriptOptions?.format || SCRIPT_TYPES[SCHEMA_REGISTRIES_KEYS[modelData?.schemaRegistryType]];
+const getEntityScriptType = options => options?.targetScriptOptions?.keyword || SCRIPT_TYPES.COMMON;
 
 const getEntityData = (container, entityId) => {
 	const containerData = _.first(_.get(container, 'containerData', []));
