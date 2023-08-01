@@ -888,7 +888,7 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "default",
 				"shouldValidate": true,
 				"validation": {
-					"regex": "^(\\s*)\\{"
+					"required": true
 				},
 				"propertyType": "details",
 				"template": "textAreaJson",
