@@ -2800,7 +2800,7 @@ function Field(schema, opts) {
 
   var value = schema['default'];
   
-  if (value === null) {
+  if (value === null && this.type.typeName === 'record') {
     Type.addError(new Error(f('invalid default for field %s: null is not a %s', this.name, this.type.typeName)));
   } else if (value !== undefined) {
     // We need to convert defaults back to a valid format (unions are
