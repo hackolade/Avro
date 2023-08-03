@@ -170,19 +170,30 @@ const resetDefinitionsUsage = () => {
 	}, {});
 };
 
-const resolveCollectionReferences = (entities, scriptType) => {
+const convertCollectionReferences = entities => {
 	_ = dependencies.lodash;
-
-	if (scriptType !== SCRIPT_TYPES.CONFLUENT_SCHEMA_REGISTRY) {
-		return entities;
-	}
 
 	const entitiesIds = entities.map(entity => entity.jsonSchema.GUID);
 	const entitiesWithReferences = entities.map(entity => {
 		let references = [];
 		const mapper = mapJsonSchema(field => {
-			if (!field.ref || !entitiesIds.includes(field.ref)) {
+			if (!field.ref) {
 				return field;
+			}
+
+			const isCollectionRef = !!field.parentCollectionName;
+			if (!entitiesIds.includes(field.ref)) {
+				if (!isCollectionRef) {
+					return field;
+				}
+				references = [...references, { name: field.parentCollectionName }];
+
+				return {
+					...field,
+					$ref: `#/definitions/${field.parentCollectionName}`,
+					namespace: field.namespace || field.parentBucketName,
+					default: field.nullable ? null : field.default,
+				};
 			}
 
 			const definition = entities.find(entity => entity.jsonSchema.GUID === field.ref).jsonSchema;
@@ -228,6 +239,34 @@ const resolveCollectionReferences = (entities, scriptType) => {
 	});
 
 	return topologicalSort(entitiesWithReferences);
+};
+
+const resolveNamespaceReferences = entities => {
+	_ = dependencies.lodash;
+
+	const entitiesWithReferences = entities.map(entity => {
+		const mapper = mapJsonSchema(field => {
+			if (!field.ref) {
+				return field;
+			}
+
+			const isCollectionRef = !!field.parentCollectionName;
+			if (!isCollectionRef) {
+				return field;
+			}
+
+			return _.omit(field, '$ref');
+		});
+
+		const jsonSchema = mapper(entity.jsonSchema);
+
+		return {
+			...entity,
+			jsonSchema,
+		};
+	});
+
+	return entitiesWithReferences;
 };
 
 const topologicalSort = allEntities => {
@@ -282,5 +321,6 @@ module.exports = {
    addDefinitions,
    convertSchemaToReference,
    resetDefinitionsUsage,
-   resolveCollectionReferences,
+   convertCollectionReferences,
+   resolveNamespaceReferences,
 };
