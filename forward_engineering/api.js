@@ -119,7 +119,7 @@ const validate = (data, logger, cb, app) => {
 };
 
 const getScriptType = (options, modelData) => options?.targetScriptOptions?.keyword || options?.targetScriptOptions?.format || SCRIPT_TYPES[SCHEMA_REGISTRIES_KEYS[modelData?.schemaRegistryType]];
-const getEntityScriptType = options => options?.targetScriptOptions?.keyword || SCRIPT_TYPES.COMMON;
+const getEntityScriptType = options => options.origin === 'ui' && options?.targetScriptOptions?.keyword || SCRIPT_TYPES.COMMON;
 
 const getEntityData = (container, entityId) => {
 	const containerData = _.first(_.get(container, 'containerData', []));
