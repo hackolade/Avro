@@ -47,6 +47,14 @@
   ],
   "additionalOptions": [
     {
+      "id": "resolveNamespaceReferences",
+      "value": false,
+      "name": "Resolve namespace references",
+      "level": {
+        "model": false
+      }
+    },
+    {
       "id": "minify",
       "value": false,
       "name": "Minify"

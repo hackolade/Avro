@@ -430,7 +430,10 @@ const getTypeFromReference = schema => {
 	}
 
 	if(_.includes(schema.$ref, '#')) {
-		return prepareName(_.last(schema.$ref.split('/')) || '');
+		const namespace = prepareName(schema.namespace || '');
+		const name = prepareName(_.last(schema.$ref.split('/')) || '');
+
+		return [namespace, name].filter(Boolean).join('.');
 	}
 
 	return schema.$ref;

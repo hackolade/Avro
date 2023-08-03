@@ -5,7 +5,7 @@ const { SCRIPT_TYPES, SCHEMA_REGISTRIES_KEYS } = require('../shared/constants');
 const { parseJson, prepareName } = require('./helpers/generalHelper');
 const validateAvroScript = require('./helpers/validateAvroScript');
 const { formatAvroSchemaByType } = require('./helpers/formatAvroSchemaByType');
-const { resolveUdt, addDefinitions, resetDefinitionsUsage, resolveCollectionReferences } = require('./helpers/udtHelper');
+const { resolveUdt, addDefinitions, resetDefinitionsUsage, convertCollectionReferences, resolveNamespaceReferences } = require('./helpers/udtHelper');
 const convertSchema = require('./helpers/convertJsonSchemaToAvro');
 const { initPluginConfiguration, getCustomProperties, getEntityLevelConfig, getFieldLevelConfig } = require('../shared/customProperties');
 let _;
@@ -31,7 +31,7 @@ const generateModelScript = (data, logger, cb, app) => {
 			.map(entityId => getEntityData(container, entityId)))
 			.map(entity => ({ ...entity, jsonSchema: parseJson(entity.jsonSchema) }));
 
-		const script = resolveCollectionReferences(entities, scriptType).map(entity => {
+		const script = handleCollectionReferences(entities, options).map(entity => {
 			try {
 				const {
 					containerData,
@@ -88,11 +88,12 @@ const generateScript = (data, logger, cb, app) => {
 		resetDefinitionsUsage();
 
 		const settings = getSettings({ containerData, entityData, modelData });
+		const resolvedJsonSchema = _.first(handleCollectionReferences([{ jsonSchema: parseJson(jsonSchema) }], options)).jsonSchema;
 		const script = getScript({
 			scriptType: getEntityScriptType(options),
 			needMinify: isMinifyNeeded(options),
 			settings,
-			avroSchema: convertJsonToAvro(parseJson(jsonSchema), settings.name),
+			avroSchema: convertJsonToAvro(resolvedJsonSchema, settings.name),
 		});
 
 		cb(null, script);
@@ -200,10 +201,24 @@ const getSettings = ({ containerData, entityData, modelData, references, }) => {
 	};
 };
 
+const handleCollectionReferences = (entities, options) => {
+	if (isResolveNamespaceReferenceNeeded(options)) {
+		return resolveNamespaceReferences(entities);
+	}
+
+	return convertCollectionReferences(entities);
+};
+
 const isMinifyNeeded = options => {
 	const additionalOptions = options?.additionalOptions || [];
 
 	return additionalOptions.find(option => option.id === 'minify')?.value;
+};
+
+const isResolveNamespaceReferenceNeeded = options => {
+	const additionalOptions = options?.additionalOptions || [];
+
+	return additionalOptions.find(option => option.id === 'resolveNamespaceReferences')?.value;
 };
 
 const getRootRecordName = entityData => prepareName(entityData.code || entityData.name || entityData.collectionName);
