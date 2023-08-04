@@ -23,6 +23,9 @@
 		"metaProps": []
 	},
 	"descriptor": [{
+		"defaultValues": {
+			"precision": 38
+		},
 		"schema": {
 			"subtype": "decimal"
 		},
