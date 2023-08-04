@@ -189,7 +189,7 @@ const convertUserDefinedType = (namespace, type, attributes) => {
 	};
 };
 
-const isCollectionReference = name => !!collectionReferences.find(reference => reference.name === name);
+const isCollectionReference = name => !!collectionReferences.find(reference => reference.name === name) || (name || '').split('.').length > 1;
 const isNullableCollectionReference = unionSchema => unionSchema[0] === 'null' && isCollectionReference(unionSchema[1]);
 
 const handleMultipleFields = items => items.map(item => {
