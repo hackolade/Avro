@@ -1,7 +1,7 @@
 const { dependencies } = require('../../shared/appDependencies');
 const { filterAttributes, isNamedType } = require('../../shared/typeHelper');
 const { getUdtItem, convertSchemaToReference, addDefinitions } = require('./udtHelper');
-const { reorderAttributes, filterMultipleTypes, prepareName, simplifySchema, getDefaultName, convertName, compareSchemasByStructure, } = require('./generalHelper');
+const { reorderAttributes, filterMultipleTypes, prepareName, simplifySchema, getDefaultName, convertName, compareSchemasByStructure, prepareNamespace, } = require('./generalHelper');
 const convertChoicesToProperties = require('./convertChoicesToProperties');
 const { GENERAL_ATTRIBUTES, META_VALUES_KEY_MAP } = require('../../shared/constants');
 const { getFieldLevelConfig, getCustomProperties } = require('../../shared/customProperties');
@@ -430,7 +430,7 @@ const getTypeFromReference = schema => {
 	}
 
 	if(_.includes(schema.$ref, '#')) {
-		const namespace = prepareName(schema.namespace || '');
+		const namespace = prepareNamespace(schema.namespace || '');
 		const name = prepareName(_.last(schema.$ref.split('/')) || '');
 
 		return [namespace, name].filter(Boolean).join('.');

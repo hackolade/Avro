@@ -177,7 +177,8 @@ const convertArray = (namespace, attributes) => {
 
 const convertUserDefinedType = (namespace, type, attributes) => {
 	const name = getName({ name: type });
-	const ref = isCollectionReference(name) ? `#collection/definitions/${name}` : type;
+	const hasNamespaceSpecified = (type || '').split('.').length > 1;
+	const ref = (isCollectionReference(name) || hasNamespaceSpecified) ? `#collection/definitions/${name}` : type;
 
 	return {
 		...attributes,
@@ -188,8 +189,8 @@ const convertUserDefinedType = (namespace, type, attributes) => {
 	};
 };
 
-const isCollectionReference = name => !!collectionReferences.find(reference => reference.name === name);
-const isNullableCollectionReference = unionSchema => unionSchema[0] === 'null' && isCollectionReference(unionSchema[1]);
+const isCollectionReference = name => !!collectionReferences.find(reference => reference.name === name) || name.split('.').length > 1;
+const isNullableCollectionReference = unionSchema => unionSchema[0] === 'null';
 
 const handleMultipleFields = items => items.map(item => {
 	if (!_.isArray(item.type)) {

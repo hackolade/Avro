@@ -58,6 +58,14 @@ const prepareName = name => {
 		.replace(VALID_FIRST_NAME_LETTER_REGEX, '_');
 };
 
+const prepareNamespace = namespace => {
+	if (!namespace) {
+		return '';
+	}
+
+	return namespace.split('.').map(prepareName).join('.');
+};
+
 const simplifySchema = schema => {
 	const filteredSchema = Object.keys(schema).reduce((filteredSchema, key) => {
 		if (_.isUndefined(schema[key])) {
@@ -127,6 +135,7 @@ module.exports = {
 	reorderAttributes,
 	filterMultipleTypes,
 	prepareName,
+	prepareNamespace,
 	simplifySchema,
 	getDefaultName,
 	convertName,
