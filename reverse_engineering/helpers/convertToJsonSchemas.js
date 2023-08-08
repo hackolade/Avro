@@ -67,7 +67,6 @@ const convertType = (parentNamespace, type, attributes) => {
 	const namespace = attributes.namespace || parentNamespace;
 
 	if (_.isArray(type)) {
-		debugger
 		return convertUnion(namespace, type);
 	}
 	if (isNumericType(type)) {
