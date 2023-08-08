@@ -67,6 +67,7 @@ const convertType = (parentNamespace, type, attributes) => {
 	const namespace = attributes.namespace || parentNamespace;
 
 	if (_.isArray(type)) {
+		debugger
 		return convertUnion(namespace, type);
 	}
 	if (isNumericType(type)) {
@@ -189,7 +190,8 @@ const convertUserDefinedType = (namespace, type, attributes) => {
 	};
 };
 
-const isCollectionReference = name => !!collectionReferences.find(reference => reference.name === name) || (name || '').split('.').length > 1;
+const isCollectionReference = name => _.isString(name)
+	&& (!!collectionReferences.find(reference => reference.name === name) || (name || '').split('.').length > 1);
 const isNullableCollectionReference = unionSchema => unionSchema[0] === 'null' && isCollectionReference(unionSchema[1]);
 
 const handleMultipleFields = items => items.map(item => {
