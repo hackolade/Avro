@@ -318,8 +318,7 @@ making sure that you maintain a proper JSON format.
 				"options": [
 					"",
 					"decimal"
-				],
-				"isTargetProperty": true
+				]
 			},
 			{
 				"propertyName": "Precision",
@@ -332,8 +331,7 @@ making sure that you maintain a proper JSON format.
 					"key": "subtype",
 					"value": "decimal"
 				},
-				"typeDecorator": true,
-				"isTargetProperty": true
+				"typeDecorator": true
 			},
 			{
 				"propertyName": "Scale",
@@ -346,8 +344,7 @@ making sure that you maintain a proper JSON format.
 					"key": "subtype",
 					"value": "decimal"
 				},
-				"typeDecorator": true,
-				"isTargetProperty": true
+				"typeDecorator": true
 			},
 			{
 				"propertyName": "Required",
@@ -490,8 +487,7 @@ making sure that you maintain a proper JSON format.
 				"dependency": {
 					"key": "mode",
 					"value": "int"
-				},
-				"isTargetProperty": true
+				}
 			},
 			{
 				"propertyName": "Logical type",
@@ -512,8 +508,7 @@ making sure that you maintain a proper JSON format.
 				"dependency": {
 					"key": "mode",
 					"value": "long"
-				},
-				"isTargetProperty": true
+				}
 			},
 			{
 				"propertyName": "Order",
@@ -865,7 +860,57 @@ making sure that you maintain a proper JSON format.
 				"template": "textarea"
 			},
 			"type",
-			"required",
+			{
+				"propertyName": "Required",
+				"propertyKeyword": "required",
+				"propertyType": "checkbox",
+				"enableForReference": true,
+				"template": "boolean",
+				"disabledOnCondition": {
+					"value": "collectionReference",
+					"key": "refType"
+				}
+			},
+			{
+				"propertyName": "Nullable",
+				"propertyKeyword": "nullable",
+				"enableForReference": true,
+				"shouldValidate": false,
+				"propertyType": "checkbox",
+				"template": "boolean",
+				"dependency": {
+					"value": "collectionReference",
+					"key": "refType"
+				}
+			},
+			{
+				"propertyName": "Default",
+				"propertyKeyword": "default",
+				"shouldValidate": true,
+				"validation": {
+					"required": true
+				},
+				"propertyType": "details",
+				"template": "textAreaJson",
+				"markdown": false,
+				"dependency": {
+					"type": "and",
+					"values": [
+						{
+							"key": "required",
+							"value": false
+						},
+						{
+							"type": "not",
+							"values": {
+								"level": "parent",
+								"key": "childType",
+								"value": "array"
+							}
+						}
+					]
+				}
+			},
 			{
 				"propertyName": "Type name",
 				"propertyKeyword": "typeName",
@@ -983,6 +1028,34 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "required",
 				"propertyType": "checkbox",
 				"template": "boolean"
+			},
+			{
+				"propertyName": "Default",
+				"propertyKeyword": "default",
+				"shouldValidate": true,
+				"validation": {
+					"required": true
+				},
+				"propertyType": "details",
+				"template": "textAreaJson",
+				"markdown": false,
+				"dependency": {
+					"type": "and",
+					"values": [
+						{
+							"key": "required",
+							"value": false
+						},
+						{
+							"type": "not",
+							"values": {
+								"level": "parent",
+								"key": "childType",
+								"value": "array"
+							}
+						}
+					]
+				}
 			},
 			{
 				"propertyName": "Aliases",
@@ -1106,6 +1179,34 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "required",
 				"propertyType": "checkbox",
 				"template": "boolean"
+			},
+			{
+				"propertyName": "Default",
+				"propertyKeyword": "default",
+				"shouldValidate": true,
+				"validation": {
+					"required": true
+				},
+				"propertyType": "details",
+				"template": "textAreaJson",
+				"markdown": false,
+				"dependency": {
+					"type": "and",
+					"values": [
+						{
+							"key": "required",
+							"value": false
+						},
+						{
+							"type": "not",
+							"values": {
+								"level": "parent",
+								"key": "childType",
+								"value": "array"
+							}
+						}
+					]
+				}
 			},
 			{
 				"propertyName": "Aliases",
@@ -1404,8 +1505,7 @@ making sure that you maintain a proper JSON format.
 					"",
 					"decimal",
 					"duration"
-				],
-				"isTargetProperty": true
+				]
 			},
 			{
 				"propertyName": "Precision",
@@ -1418,8 +1518,7 @@ making sure that you maintain a proper JSON format.
 					"key": "subtype",
 					"value": "decimal"
 				},
-				"typeDecorator": true,
-				"isTargetProperty": true
+				"typeDecorator": true
 			},
 			{
 				"propertyName": "Scale",
@@ -1432,8 +1531,7 @@ making sure that you maintain a proper JSON format.
 					"key": "subtype",
 					"value": "decimal"
 				},
-				"typeDecorator": true,
-				"isTargetProperty": true
+				"typeDecorator": true
 			},
 			{
 				"propertyName": "Namespace",

@@ -35,11 +35,13 @@ const LOGICAL_TYPES_MAP = {
 	string: ['uuid'],
 };
 
-
 const isNamedType = type => NAMED_TYPES.includes(type);
 
-const filterAttributes = type => attributes => {
+const filterAttributes = (attributes, type) => {
 	_ = dependencies.lodash;
+	if (_.isArray(attributes)) {
+		return attributes;
+	}
 
 	if (!LOGICAL_TYPES_MAP[attributes.type]?.includes(attributes.logicalType)) {
 		attributes = _.omit(attributes, 'logicalType');
@@ -49,7 +51,7 @@ const filterAttributes = type => attributes => {
 		...(TYPE_SPECIFIC_ATTRIBUTES[type] || []),
 		...GENERAL_ATTRIBUTES,
 		...getLogicalTypeAttributes(type, attributes.logicalType),
-		...META_PROPERTIES
+		...META_PROPERTIES,
 	]);
 };
 

@@ -2,6 +2,7 @@
 
 const { setDependencies, dependencies } = require('../shared/appDependencies');
 const { adaptJsonSchema } = require('./adaptJsonSchema');
+const { initPluginConfiguration } = require('../shared/customProperties');
 const convertToJsonSchemas = require('./helpers/convertToJsonSchemas');
 const { openAvroFile } = require('./helpers/fileHelper');
 const { getNamespace, handleErrorObject } = require('./helpers/generalHelper');
@@ -10,6 +11,7 @@ let _;
 
 const reFromFile = async (data, logger, callback, app) => {
 	setDependencies(app);
+	initPluginConfiguration(data.pluginConfiguration, logger);
 	_ = dependencies.lodash;
 	try {
 		const { filePath } = data;
@@ -71,7 +73,12 @@ const getPackages = (avroSchema, jsonSchemas) => {
 const inferSchemaNameStrategy = ({ name, namespace, confluentSubjectName, schemaTopic }) => {
 	let splittedSubjectName = (confluentSubjectName || '').split('-').filter(Boolean);
 	const endsWithSchemaType = ['key', 'value'].includes(_.last(splittedSubjectName));
-	const startsWithTopic = _.first(splittedSubjectName) === schemaTopic;
+	const startsWithTopic = _.first(splittedSubjectName) === schemaTopic && schemaTopic !== namespace + '.' + name;
+	const startsWithNamespace = namespace && _.first(splittedSubjectName)?.startsWith(namespace + '.');
+
+	if (startsWithNamespace) {
+		splittedSubjectName[0] = splittedSubjectName[0].slice(namespace.length + 1);
+	}
 
 	if (endsWithSchemaType) {
 		splittedSubjectName = splittedSubjectName.slice(0, -1);
@@ -87,10 +94,6 @@ const inferSchemaNameStrategy = ({ name, namespace, confluentSubjectName, schema
 		}
 
 		return 'TopicNameStrategy';
-	}
-
-	if (_.first(splittedSubjectName) === namespace) {
-		splittedSubjectName = splittedSubjectName.slice(1);
 	}
 
 	const splittedRecordName = [...(name || '').split('-')].filter(Boolean);

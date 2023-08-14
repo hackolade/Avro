@@ -1,4 +1,5 @@
 const { dependencies } = require('../../shared/appDependencies');
+const { filterAttributes } = require('../../shared/typeHelper');
 
 let _;
 let nameIndex = 0;
@@ -57,6 +58,14 @@ const prepareName = name => {
 		.replace(VALID_FIRST_NAME_LETTER_REGEX, '_');
 };
 
+const prepareNamespace = namespace => {
+	if (!namespace) {
+		return '';
+	}
+
+	return namespace.split('.').map(prepareName).join('.');
+};
+
 const simplifySchema = schema => {
 	const filteredSchema = Object.keys(schema).reduce((filteredSchema, key) => {
 		if (_.isUndefined(schema[key])) {
@@ -95,14 +104,30 @@ const convertName = schema => {
 	return { ..._.omit(schema, nameProperties), name: prepareName(schema[nameKey])};
 };
 
+/**
+ * Compares two schemas by their structure. Equality is determined by comparing critical type properties and fields names (for records).
+ * 
+ * @param {Object} schema1
+ * @param {Object} schema2
+ * @returns {Boolean}
+ */
 const compareSchemasByStructure = (schema1, schema2) => {
-	const propertiesToCompare = ['type', 'name', 'fields', 'items', 'values', 'logicalType', 'precision', 'scale', 'size'];
+	schema1 = filterAttributes(schema1, schema1.type);
+	schema2 = filterAttributes(schema2, schema2.type);
+	const scalarPropertiesToCompare = ['type', 'name', 'logicalType', 'precision', 'scale', 'size'];
 
-	return _.isEqualWith(schema1, schema2, (schema1, schema2, key) => {
-		if (!propertiesToCompare.includes(key)) {
-			return true;
-		}
-	});
+	const isEqualByProperties = _.isEqual(_.pick(schema1, scalarPropertiesToCompare), _.pick(schema2, scalarPropertiesToCompare));
+	if (!isEqualByProperties) {
+		return false;
+	}
+
+	const hasStructure = schema1.fields || schema2.fields;
+
+	if (!hasStructure) {
+		return true;
+	}
+
+	return _.isEqual(_.map(schema1.fields, 'name'), _.map(schema2.fields, 'name'));
 };
 
 module.exports = {
@@ -110,6 +135,7 @@ module.exports = {
 	reorderAttributes,
 	filterMultipleTypes,
 	prepareName,
+	prepareNamespace,
 	simplifySchema,
 	getDefaultName,
 	convertName,

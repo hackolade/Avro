@@ -17,9 +17,10 @@ const SCRIPT_TYPES = {
 	AZURE_SCHEMA_REGISTRY: 'azureSchemaRegistry',
 	PULSAR_SCHEMA_REGISTRY: 'pulsarSchemaRegistry',
 	SCHEMA_REGISTRY: 'schemaRegistry',
+	COMMON: 'common',
 };
 
-const GENERAL_ATTRIBUTES = ['type', 'doc', 'order', 'default'];
+const GENERAL_ATTRIBUTES = ['type', 'doc', 'order', 'default', 'nullable'];
 
 const AVRO_TYPES = [
 	'string',

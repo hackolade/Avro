@@ -2799,7 +2799,10 @@ function Field(schema, opts) {
   })(schema.order === undefined ? 'ascending' : schema.order);
 
   var value = schema['default'];
-  if (value !== undefined) {
+  
+  if (value === null && this.type.typeName === 'record') {
+    Type.addError(new Error(f('invalid default for field %s: null is not a %s', this.name, this.type.typeName)));
+  } else if (value !== undefined) {
     // We need to convert defaults back to a valid format (unions are
     // disallowed in default definitions, only the first type of each union is
     // allowed instead).
