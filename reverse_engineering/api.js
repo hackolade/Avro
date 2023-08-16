@@ -1,11 +1,11 @@
 'use strict'
 
 const { setDependencies, dependencies } = require('../shared/appDependencies');
+const { adaptJsonSchema } = require('./adaptJsonSchema');
 const { initPluginConfiguration } = require('../shared/customProperties');
-const jsonSchemaAdapter = require('./helpers/adaptJsonSchema');
 const convertToJsonSchemas = require('./helpers/convertToJsonSchemas');
 const { openAvroFile } = require('./helpers/fileHelper');
-const { getNamespace } = require('./helpers/generalHelper');
+const { getNamespace, handleErrorObject } = require('./helpers/generalHelper');
 
 let _;
 
@@ -32,25 +32,7 @@ const reFromFile = async (data, logger, callback, app) => {
 	}
 };
 
-const adaptJsonSchema = (data, logger, callback, app) => {
-	setDependencies(app);
-	_ = dependencies.lodash;
 
-	logger.log('info', 'Adaptation of JSON Schema started...', 'Adapt JSON Schema');
-	try {
-		const jsonSchema = JSON.parse(data.jsonSchema);
-		const adaptedJsonSchema = jsonSchemaAdapter.adaptJsonSchema(jsonSchema);
-
-		logger.log('info', 'Adaptation of JSON Schema finished.', 'Adapt JSON Schema');
-
-		callback(null, {
-			jsonSchema: JSON.stringify(adaptedJsonSchema),
-			jsonSchemaName: jsonSchemaAdapter.adaptJsonSchemaName(data.jsonSchemaName),
-		});
-	} catch(error) {
-		callback({ ...handleErrorObject(error), title: 'Adapt JSON Schema' });
-	}
-};
 
 const getPackages = (avroSchema, jsonSchemas) => {
 	const schemasData = getSchemasData(avroSchema);
@@ -138,7 +120,5 @@ const getSchemasData = avroSchema => {
 		confluentVersion: schema.version,
 	}));
 }
-
-const handleErrorObject = error => _.pick(error, ['title', 'message', 'stack']);
 
 module.exports = { reFromFile, adaptJsonSchema };
