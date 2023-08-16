@@ -56,7 +56,15 @@ const generateModelScript = (data, logger, cb, app) => {
 				return '';
 			}
 		});
-		cb(null, script.filter(Boolean).join('\n\n'));
+
+		const jsonData = combineJsonData(data.containers);
+		const resultScript = script.filter(Boolean).join('\n\n');
+		const isSampleGenerationRequired = includeSamplesToScript(data.options);
+		if (!isSampleGenerationRequired) {
+			return cb(null, resultScript);
+		}
+
+		return cb(null, getScriptAndSampleResponse(resultScript, jsonData));
 	} catch (err) {
 		logger.log('error', { message: err.message, stack: err.stack }, 'Avro model Forward-Engineering Error');
 		cb({ message: err.message, stack: err.stack });
@@ -96,7 +104,11 @@ const generateScript = (data, logger, cb, app) => {
 			avroSchema: convertJsonToAvro(resolvedJsonSchema, settings.name),
 		});
 
-		cb(null, script);
+		if (!includeSamplesToScript(data.options)) {
+			return cb(null, script);
+		}
+
+		return cb(null, getScriptAndSampleResponse(script, data.jsonData));
 	} catch (err) {
 		logger.log('error', { message: err.message, stack: err.stack }, 'Avro Forward-Engineering Error');
 		cb({ message: err.message, stack: err.stack });
@@ -108,7 +120,9 @@ const validate = (data, logger, cb, app) => {
 	initPluginConfiguration(data.pluginConfiguration);
 	_ = dependencies.lodash;
 
-	const targetScript = data.script;
+	const targetScript = _.isArray(data.script)
+		? _.first(data.script)?.script
+		: data.script;
 	const modelData = data.modelData[0] || {};
 	let scriptType = getScriptType(data, modelData);
 	if (!scriptType && targetScript.startsWith('POST /')) {
@@ -227,6 +241,27 @@ const reorderAvroSchema = avroSchema => setPropertyAsLast('fields')(avroSchema);
 
 const setPropertyAsLast = key => avroSchema => {
 	return { ..._.omit(avroSchema, key), [key]: avroSchema[key] };
+};
+
+const includeSamplesToScript = (options = {}) =>
+	(options.additionalOptions || []).find(option => option.id === 'INCLUDE_SAMPLES')?.value;
+
+const getScriptAndSampleResponse = (script, sample) => {
+	return [
+		{
+			title: 'Avro schemas',
+			script
+		},
+		{
+			title: 'Sample data',
+			script: sample,
+		},
+	]
+};
+
+const combineJsonData = (containersData) => {
+	const parsedData = containersData.flatMap(containerData => Object.values(containerData.jsonData)).map(JSON.parse);
+	return JSON.stringify(parsedData, null, 4);
 };
 
 module.exports = {
