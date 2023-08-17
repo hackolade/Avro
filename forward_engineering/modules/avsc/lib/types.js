@@ -2902,14 +2902,16 @@ function unqualify(name) {
  * @param namespace {String} Optional namespace.
  */
 function qualify(name, namespace) {
-  if (!isValidName(name)) {
-    Type.addError(new Error(f('invalid name: %j', name)));
-  }
   if (~name.indexOf('.')) {
     name = name.replace(/^\./, ''); // Allow absolute referencing.
   } else if (namespace) {
     name = namespace + '.' + name;
   }
+  name.split('.').forEach(function (part) {
+    if (!isValidName(part)) {
+      Type.addError(new Error(f('invalid name: %j', name)));
+    }
+  });
   var tail = unqualify(name);
   // Primitives are always in the global namespace.
   return isPrimitive(tail) ? tail : name;
