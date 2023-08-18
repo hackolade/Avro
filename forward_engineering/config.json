@@ -65,7 +65,7 @@
     {
       "id": "INCLUDE_SAMPLES",
       "value": true,
-      "name": "Include sample data",
+      "name": "Display sample data",
       "align": "right",
       "level": {
         "entity": true
