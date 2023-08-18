@@ -64,7 +64,7 @@
     },
     {
       "id": "INCLUDE_SAMPLES",
-      "value": true,
+      "value": false,
       "name": "Display sample data",
       "align": "right",
       "level": {
