@@ -2,6 +2,7 @@
 
 const { setDependencies, dependencies } = require('../shared/appDependencies');
 const { initPluginConfiguration } = require('../shared/customProperties');
+const mapJsonSchema = require('../shared/mapJsonSchema');
 const jsonSchemaAdapter = require('./helpers/adaptJsonSchema');
 const convertToJsonSchemas = require('./helpers/convertToJsonSchemas');
 const { openAvroFile } = require('./helpers/fileHelper');
@@ -63,6 +64,19 @@ const getPackages = (avroSchema, jsonSchemas) => {
 			confluentSubjectName,
 			schemaTopic,
 		});
+		let references = [];
+		mapJsonSchema(field => {
+			if (!field.$ref) {
+				return field;
+			}
+
+			const COLLECTION_REFERENCE_PREFIX = '#collection/definitions/';
+			const isCollectionRef = field.$ref.startsWith(COLLECTION_REFERENCE_PREFIX);
+			if (isCollectionRef) {
+				references = [...references, field.$ref.slice(COLLECTION_REFERENCE_PREFIX.length)];
+			}
+			return field;
+		})(jsonSchema);
 
 		return {
 			objectNames: {
@@ -84,6 +98,7 @@ const getPackages = (avroSchema, jsonSchemas) => {
 				confluentVersion: confluentVersion,
 				...(schemaNameStrategy && { schemaNameStrategy }), 
 			}),
+			references,
 		};
 	});
 };
