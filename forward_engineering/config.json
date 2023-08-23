@@ -5,6 +5,9 @@
   "resolvedDefinitions": false,
   "validation": true,
   "applyScriptToInstance": true,
+  "splitView": {
+    "byAdditionalOptions": ["INCLUDE_SAMPLES"]
+  },
   "useScriptFormatDropdown": true,
   "options": [
     {
@@ -58,6 +61,15 @@
       "id": "minify",
       "value": false,
       "name": "Minify"
+    },
+    {
+      "id": "INCLUDE_SAMPLES",
+      "value": false,
+      "name": "Display sample data",
+      "align": "right",
+      "level": {
+        "entity": true
+      }
     }
   ],
   "level": {
