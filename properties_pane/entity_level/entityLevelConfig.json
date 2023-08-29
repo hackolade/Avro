@@ -161,9 +161,6 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "schemaNameStrategy",
 				"propertyTooltip": "Select from list of options",
 				"propertyType": "select",
-				"validation": {
-					"required": true
-				},
 				"options": [
 					"",
 					"TopicNameStrategy",
@@ -233,11 +230,47 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "text",
 				"propertyTooltip": "This property is automatically assembled during forward-engineering, or populated during reverse-engineering from CSR.",
 				"dependency": {
-					"level": "model",
-					"key": "schemaRegistryType",
-					"value": "Confluent Schema Registry"
+					"type": "and",
+					"values": [{
+						"level": "model",
+						"key": "schemaRegistryType",
+						"value": "Confluent Schema Registry"
+					}, { "type": "not", "values": [{
+						"type": "or",
+						"values": [
+							{ "key": "schemaNameStrategy", "value": "" },
+							{ "key": "schemaNameStrategy", "exist": false }
+						]}]
+					}]
+				}
+			},
+			{
+				"propertyName": "Subject",
+				"propertyKeyword": "confluentSubjectName",
+				"shouldValidate": true,
+				"validation": {
+					"required": true,
+					"regex": "^[a-zA-Z0-9\\._\\-]+$"
 				},
-				"disabled": true
+				"propertyType": "text",
+				"propertyTooltip": "This property is automatically assembled during forward-engineering, or populated during reverse-engineering from CSR.",
+				"dependency": {
+					"type": "and",
+					"values": [{
+						"level": "model",
+						"key": "schemaRegistryType",
+						"value": "Confluent Schema Registry"
+					}, {
+						"type": "or",
+						"values": [{
+							"key": "schemaNameStrategy",
+							"value": ""
+						}, {
+							"key": "schemaNameStrategy",
+							"exist": false
+						}]
+					}]
+				}
 			},
 			{
 				"propertyName": "Compatibility type",
