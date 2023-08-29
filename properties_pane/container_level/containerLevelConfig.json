@@ -123,8 +123,7 @@ making sure that you maintain a proper JSON format.
 				"propertyName": "Namespace",
 				"propertyKeyword": "name",
 				"shouldValidate": true,
-				"propertyType": "text",
-				"regex": "^[A-Za-z_][A-Za-z0-9_.]*$"
+				"propertyType": "text"
 			},
 			{
 				"propertyName": "Technical name",

@@ -5,17 +5,18 @@ let _;
 const PROPERTIES_LIKE = [ 'properties', 'definitions', 'patternProperties' ];
 const ITEMS_LIKE = [ 'items', 'oneOf', 'allOf', 'anyOf', 'not' ];
 
-const mapJsonSchema = callback => jsonSchema => {
+const mapJsonSchema = (callback, path = []) => jsonSchema => {
 	_ = dependencies.lodash;
 	if (!_.isPlainObject(jsonSchema)) {
 		return jsonSchema;
 	}
 
-	const mapper = mapJsonSchema(callback);
+	const currentPath = [ ...path, jsonSchema.GUID ];
+	const mapper = mapJsonSchema(callback, currentPath);
 	const jsonSchemaWithNewProperties = applyTo(PROPERTIES_LIKE, { ...jsonSchema }, mapProperties(mapper));
 	const newJsonSchema = applyTo(ITEMS_LIKE, jsonSchemaWithNewProperties, mapItems(mapper));
 
-	return callback(newJsonSchema);
+	return callback(newJsonSchema, currentPath);
 };
 
 const mapProperties = mapper => properties => Object.keys(properties).reduce((newProperties, key) => ({

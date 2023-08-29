@@ -176,7 +176,7 @@ const convertCollectionReferences = entities => {
 	const entitiesIds = entities.map(entity => entity.jsonSchema.GUID);
 	const entitiesWithReferences = entities.map(entity => {
 		let references = [];
-		const mapper = mapJsonSchema(field => {
+		const mapper = mapJsonSchema((field, path) => {
 			if (!field.ref) {
 				return field;
 			}
@@ -211,6 +211,7 @@ const convertCollectionReferences = entities => {
 			references = [...references, {
 				name: definitionName,
 				subject,
+				path,
 				version: getConfluentSchemaVersion(definition.confluentVersion),
 			}];
 
@@ -234,12 +235,24 @@ const convertCollectionReferences = entities => {
 		return {
 			...entity,
 			jsonSchema,
-			references,
+			references: filterReferencesByPath(references).map(reference => _.omit(reference, 'path')),
 		};
 	});
 
 	return topologicalSort(entitiesWithReferences);
 };
+
+const filterReferencesByPath = references => references.filter(currentReference => {
+	const rootReference = references.find(reference => {
+		if (!reference.path || (reference.path.length >= currentReference.path.length)) {
+			return false;
+		}
+
+		return reference.path.every((path, index) => path === currentReference.path[index]);
+	});
+
+	return !rootReference;
+});
 
 const resolveNamespaceReferences = entities => {
 	_ = dependencies.lodash;
