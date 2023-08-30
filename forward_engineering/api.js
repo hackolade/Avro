@@ -244,7 +244,7 @@ const setPropertyAsLast = key => avroSchema => {
 };
 
 const includeSamplesToScript = (options = {}) =>
-	(options.additionalOptions || []).find(option => option.id === 'INCLUDE_SAMPLES')?.value;
+	!options?.targetScriptOptions?.cliOnly && (options.additionalOptions || []).find(option => option.id === 'INCLUDE_SAMPLES')?.value;
 
 const getScriptAndSampleResponse = (script, sample) => {
 	return [
