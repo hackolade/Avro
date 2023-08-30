@@ -74,7 +74,7 @@ const updateRef = ({ name, namespace, description, definitionName, $ref, nullabl
 		return { name, description, $ref, nullable };
 	}
 
-	return { name, description, $ref, hackoladeMeta: { restrictExternalReferenceCreation: true } };
+	return { name, description, $ref, hackoladeMeta: { restrictExternalReferenceCreation: true }, type: 'reference', };
 };
 
 const findDefinition = (namespace, name) => definitions[namespace]?.[name];
