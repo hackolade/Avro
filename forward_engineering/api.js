@@ -151,9 +151,9 @@ const convertJsonToAvro = (jsonSchema, schemaName) => {
 	const customProperties = getCustomProperties(getEntityLevelConfig(), jsonSchema);
 	const schema = convertSchema(jsonSchema);
 	const avroSchema = {
-		...(_.isString(schema) ? { type: schema } : schema),
+		...(!_.isString(schema) && schema),
 		name: schemaName,
-		type: 'record',
+		type: (_.isString(schema) ? schema : 'record'),
 		...customProperties,
 	};
 
