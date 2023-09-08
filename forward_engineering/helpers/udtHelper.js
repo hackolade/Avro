@@ -197,7 +197,7 @@ const convertCollectionReferences = entities => {
 			}
 
 			const definition = entities.find(entity => entity.jsonSchema.GUID === field.ref).jsonSchema;
-			const definitionName = definition.code || definition.collectionName;
+			const definitionName = definition.code || definition.collectionName || definition.name;
 
 			const subject = getConfluentSubjectName({
 				name: definitionName,
@@ -217,7 +217,7 @@ const convertCollectionReferences = entities => {
 
 			return {
 				...field,
-				$ref: `#/definitions/${definition.code || definition.collectionName}`,
+				$ref: `#/definitions/${definitionName}`,
 				default: field.nullable ? null : field.default,
 			};
 		});
@@ -235,20 +235,25 @@ const convertCollectionReferences = entities => {
 		return {
 			...entity,
 			jsonSchema,
-			references: filterReferencesByPath(references).map(reference => _.omit(reference, 'path')),
+			references: filterReferencesByPath(entity, references).map(reference => _.omit(reference, 'path')),
 		};
 	});
 
 	return topologicalSort(entitiesWithReferences);
 };
 
-const filterReferencesByPath = references => references.filter(currentReference => {
+const filterReferencesByPath = (entity, references) => references.filter(currentReference => {
+	const isRecursive = _.last(currentReference.path) === entity?.jsonSchema?.GUID;
+	if (isRecursive) {
+		return false;
+	}
+
 	const rootReference = references.find(reference => {
-		if (!reference.path || (reference.path.length >= currentReference.path.length)) {
+		if (!reference.path || (reference.path.length >= currentReference.path?.length)) {
 			return false;
 		}
 
-		return reference.path.every((path, index) => path === currentReference.path[index]);
+		return reference.path.every((path, index) => path === currentReference.path?.[index]);
 	});
 
 	return !rootReference;
