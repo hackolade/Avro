@@ -52,7 +52,7 @@
     {
       "id": "resolveNamespaceReferences",
       "value": false,
-      "name": "Resolve namespace references",
+      "name": "Resolve namespace refs",
       "level": {
         "model": false
       }
