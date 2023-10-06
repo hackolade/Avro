@@ -12,8 +12,13 @@ let udt = {};
 
 const getUdtItem = type => {
 	_ = dependencies.lodash;
+	if (!_.isString(type)) {
+		return;
+	}
 
-	return _.clone(udt[type]);
+	const definitionName = _.last(type.split('.'));
+
+	return _.clone(udt[definitionName]);
 };
 
 const resolveUdt = avroSchema => {
