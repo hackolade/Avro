@@ -81,22 +81,19 @@
           "name": "Confluent API Schema",
           "keyword": "confluentSchemaRegistry",
           "mode": "json",
-          "isApplicationHandler": true,
-          "cliOnly": true
+          "isApplicationHandler": true
         },
         {
           "name": "Azure Schema Registry",
           "keyword": "azureSchemaRegistry",
           "mode": "json",
-          "isApplicationHandler": true,
-          "cliOnly": true
+          "isApplicationHandler": true
         },
         {
           "name": "Pulsar Schema Registry",
           "keyword": "pulsarSchemaRegistry",
           "mode": "json",
-          "isApplicationHandler": true,
-          "cliOnly": true
+          "isApplicationHandler": true
         }
       ]
     }
