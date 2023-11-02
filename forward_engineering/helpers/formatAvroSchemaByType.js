@@ -24,8 +24,6 @@ const getFormatter = scriptType => {
 	switch (scriptType) {
 		case SCRIPT_TYPES.CONFLUENT_SCHEMA_REGISTRY:
 			return formatConfluentSchema;
-		case SCRIPT_TYPES.SCHEMA_REGISTRY:
-			return formatSchemaRegistry;
 		case SCRIPT_TYPES.AZURE_SCHEMA_REGISTRY:
 			return formatAzureSchemaRegistry;
 		case SCRIPT_TYPES.PULSAR_SCHEMA_REGISTRY:

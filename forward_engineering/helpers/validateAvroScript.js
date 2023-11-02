@@ -44,8 +44,6 @@ const parseScript = (script, scriptType) =>{
 			return parseAzureScript(script);
 		case SCRIPT_TYPES.PULSAR_SCHEMA_REGISTRY:
 			return parsePulsarScript(script);
-		case SCRIPT_TYPES.SCHEMA_REGISTRY:
-			return [{ script: parseJson(script).schema }]
 		default:
 			return [{ script }]
 	}
