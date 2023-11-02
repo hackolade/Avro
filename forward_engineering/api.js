@@ -98,7 +98,7 @@ const generateScript = (data, logger, cb, app) => {
 		const settings = getSettings({ containerData, entityData, modelData });
 		const resolvedJsonSchema = _.first(handleCollectionReferences([{ jsonSchema: parseJson(jsonSchema) }], options)).jsonSchema;
 		const script = getScript({
-			scriptType: getEntityScriptType(options),
+			scriptType: getEntityScriptType(options, modelData),
 			needMinify: isMinifyNeeded(options),
 			settings,
 			avroSchema: convertJsonToAvro(resolvedJsonSchema, settings.name),
@@ -133,8 +133,20 @@ const validate = (data, logger, cb, app) => {
 	return cb(null, validationMessages);
 };
 
-const getScriptType = (options, modelData) => options?.targetScriptOptions?.keyword || options?.targetScriptOptions?.format || SCRIPT_TYPES[SCHEMA_REGISTRIES_KEYS[modelData?.schemaRegistryType]];
-const getEntityScriptType = options => options.origin === 'ui' && options?.targetScriptOptions?.keyword || SCRIPT_TYPES.COMMON;
+const getScriptType = (options, modelData) => {
+	if (options?.targetScriptOptions?.keyword === SCRIPT_TYPES.SCHEMA_REGISTRY) {
+		return SCRIPT_TYPES[SCHEMA_REGISTRIES_KEYS[modelData?.schemaRegistryType]];
+	}
+
+	return options?.targetScriptOptions?.keyword || options?.targetScriptOptions?.format || SCRIPT_TYPES[SCHEMA_REGISTRIES_KEYS[modelData?.schemaRegistryType]];
+}
+const getEntityScriptType = (options, modelData) => {
+	if (options?.targetScriptOptions?.keyword === SCRIPT_TYPES.SCHEMA_REGISTRY) {
+		return SCRIPT_TYPES[SCHEMA_REGISTRIES_KEYS[modelData?.schemaRegistryType]];
+	}
+
+	return options?.targetScriptOptions?.keyword || SCRIPT_TYPES.COMMON;
+}
 
 const getEntityData = (container, entityId) => {
 	const containerData = _.first(_.get(container, 'containerData', []));

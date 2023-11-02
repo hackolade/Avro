@@ -8,25 +8,31 @@
   "splitView": {
     "byAdditionalOptions": ["INCLUDE_SAMPLES"]
   },
-  "useScriptFormatDropdown": true,
   "options": [
     {
       "name": "Avro Schema",
-      "keyword": "avroSchema",
-      "disableApplyScriptToInstance": true,
-      "cliOnly": true
+      "keyword": "avroSchema"
     },
     {
       "name": "Schema Registry",
       "keyword": "schemaRegistry",
-      "disableApplyScriptToInstance": true,
-      "cliOnly": true,
-      "hidden": true
+      "fileExtensions": [
+        {
+          "value": "json",
+          "label": "json"
+        }
+      ]
     },
     {
       "name": "Azure Schema Registry",
       "keyword": "azureSchemaRegistry",
       "isApplicationHandler": true,
+      "fileExtensions": [
+        {
+          "value": "json",
+          "label": "json"
+        }
+      ],
       "cliOnly": true
     },
     {
@@ -35,8 +41,8 @@
       "isApplicationHandler": true,
       "fileExtensions": [
         {
-          "value": "txt",
-          "label": "txt"
+          "value": "json",
+          "label": "json"
         }
       ],
       "cliOnly": true
@@ -45,6 +51,12 @@
       "name": "Pulsar Schema Registry",
       "keyword": "pulsarSchemaRegistry",
       "isApplicationHandler": true,
+      "fileExtensions": [
+        {
+          "value": "json",
+          "label": "json"
+        }
+      ],
       "cliOnly": true
     }
   ],
