@@ -95,8 +95,8 @@ const generateScript = (data, logger, cb, app) => {
 		setUserDefinedTypes(internalDefinitions);
 		resetDefinitionsUsage();
 
-		const settings = getSettings({ containerData, entityData, modelData });
-		const resolvedJsonSchema = _.first(handleCollectionReferences([{ jsonSchema: parseJson(jsonSchema) }], options)).jsonSchema;
+		const { references, jsonSchema: resolvedJsonSchema } = _.first(handleCollectionReferences([{ jsonSchema: parseJson(jsonSchema) }], options)) || {};
+		const settings = getSettings({ containerData, entityData, modelData, references });
 		const script = getScript({
 			scriptType: getEntityScriptType(options, modelData),
 			needMinify: isMinifyNeeded(options),

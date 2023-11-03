@@ -187,26 +187,20 @@ const convertCollectionReferences = entities => {
 			}
 
 			const isCollectionRef = !!field.parentCollectionName;
+			let definition;
 			if (!entitiesIds.includes(field.ref)) {
 				if (!isCollectionRef) {
 					return field;
 				}
-				references = [...references, { name: field.parentCollectionName }];
-
-				return {
-					...field,
-					$ref: `#/definitions/${field.parentCollectionName}`,
-					namespace: field.namespace || field.parentBucketName,
-					default: field.nullable ? null : field.default,
-				};
+				definition = field.parentCollection || {};
+			} else {
+				definition = entities.find(entity => entity.jsonSchema.GUID === field.ref).jsonSchema;
 			}
-
-			const definition = entities.find(entity => entity.jsonSchema.GUID === field.ref).jsonSchema;
-			const definitionName = definition.code || definition.collectionName || definition.name;
+			const definitionName = prepareName(definition.code || definition.collectionName || definition.name || field.parentCollectionName);
 
 			const subject = getConfluentSubjectName({
 				name: definitionName,
-				namespace: definition.bucketName,
+				namespace: definition.bucketName || field.parentBucketName,
 				schemaType: definition.schemaType,
 				schemaTopic: definition.schemaTopic,
 				schemaNameStrategy: definition.schemaNameStrategy,
