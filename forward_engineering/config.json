@@ -64,7 +64,7 @@
     {
       "id": "resolveNamespaceReferences",
       "value": false,
-      "name": "Resolve namespace refs",
+      "name": "Resolve entity refs",
       "level": {
         "model": false
       }
