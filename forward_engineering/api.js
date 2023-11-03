@@ -232,7 +232,7 @@ const handleCollectionReferences = (entities, options) => {
 		return resolveNamespaceReferences(entities);
 	}
 
-	return convertCollectionReferences(entities);
+	return convertCollectionReferences(entities, options);
 };
 
 const isMinifyNeeded = options => {

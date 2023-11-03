@@ -175,7 +175,7 @@ const resetDefinitionsUsage = () => {
 	}, {});
 };
 
-const convertCollectionReferences = entities => {
+const convertCollectionReferences = (entities, options) => {
 	_ = dependencies.lodash;
 
 	const entitiesIds = entities.map(entity => entity.jsonSchema.GUID);
@@ -214,9 +214,12 @@ const convertCollectionReferences = entities => {
 				version: getConfluentSchemaVersion(definition.confluentVersion),
 			}];
 
+			const addNamespace = !entitiesIds.includes(field.ref) && options?.targetScriptOptions?.keyword !== SCRIPT_TYPES.SCHEMA_REGISTRY;
+
 			return {
 				...field,
 				$ref: `#/definitions/${definitionName}`,
+				namespace: addNamespace && (field.namespace || field.parentBucketName),
 				default: field.nullable ? null : field.default,
 			};
 		});
