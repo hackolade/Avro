@@ -244,7 +244,7 @@ const isMinifyNeeded = options => {
 const isResolveNamespaceReferenceNeeded = options => {
 	const additionalOptions = options?.additionalOptions || [];
 
-	return additionalOptions.find(option => option.id === 'resolveNamespaceReferences')?.value;
+	return additionalOptions.find(option => option.id === 'resolveEntityReferences')?.value;
 };
 
 const getRootRecordName = entityData => prepareName(entityData.code || entityData.name || entityData.collectionName);

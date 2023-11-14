@@ -62,7 +62,7 @@
   ],
   "additionalOptions": [
     {
-      "id": "resolveNamespaceReferences",
+      "id": "resolveEntityReferences",
       "value": false,
       "name": "Resolve entity refs",
       "level": {
