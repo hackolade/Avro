@@ -2,7 +2,7 @@ const { dependencies } = require('../../shared/appDependencies');
 const { isNamedType } = require('../../shared/typeHelper');
 const getFieldAttributes = require('./getFieldAttributes');
 const { getNamespace, getName, EMPTY_NAMESPACE } = require('./generalHelper');
-const { addDefinition, resolveRootReference, getDefinitions, filterUnusedDefinitions, updateRefs } = require('./referencesHelper');
+const { addDefinition, resolveRootReference, getDefinitions, filterUnusedDefinitions, updateRefs} = require('./referencesHelper');
 const { getEntityLevelConfig, getFieldLevelConfig, getCustomProperties } = require('../../shared/customProperties');
 
 const DEFAULT_FIELD_NAME = 'New_field';
@@ -97,7 +97,9 @@ const convertType = (parentNamespace, type, attributes) => {
 
 const convertUnion = (namespace, types) => {
 	if (types.length === 1) {
-		return convertSchema({ schema: _.first(types), namespace });
+		return isCollectionReference(_.first(types)) ? 
+		convertUserDefinedType(namespace, _.first(types), {}) : 
+		convertSchema({ schema: _.first(types), namespace });
 	}
 
 	if (isNullableCollectionReference(types)) {
@@ -107,7 +109,10 @@ const convertUnion = (namespace, types) => {
 		return { ...schema, nullable: true };
 	}
 
-	return { type: types.map(schema => convertSchema({ schema, namespace })) };
+	return { type: types.map(schema => 
+		isCollectionReference(schema) ? 
+		convertUserDefinedType(namespace, schema, {}) : 
+		convertSchema({ schema, namespace })) };
 };
 
 const convertNumeric = (type, attributes) => ({ ...attributes, type: 'number', mode: type });
@@ -225,11 +230,16 @@ const getOneOf = field => ({
 	...field,
 	type: 'choice',
 	choice: 'oneOf',
-	items: field.type.map(typeData => ({
-		type: 'record',
-		subschema: true,
-		properties: { [field.name || DEFAULT_FIELD_NAME]: _.omit(typeData, 'name') },
-	})),
+	items: field.type.map(typeData => {
+		const isTypeOriginatedFromReference = typeData.$ref
+		const typeProperties = isTypeOriginatedFromReference ? typeData : { [field.name || DEFAULT_FIELD_NAME]: _.omit(typeData, 'name') }
+
+		return {
+			...typeProperties, 
+			type: 'record',
+			subschema: true,
+		}
+	}),
 });
 
 const getMapSubtype = values => _.isString(values) ? `map<${values}>` : ''

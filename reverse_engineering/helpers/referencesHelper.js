@@ -65,13 +65,13 @@ const sortDefinitionsNames = (schema, definitionsNames) => Object.keys(schema.de
 
 const updateRefs = mapJsonSchema(field => field.$ref ? updateRef(field) : field);
 
-const updateRef = ({ name, namespace, description, definitionName, $ref, nullable }) => {
+const updateRef = ({ name, namespace, description, definitionName, $ref, nullable, subschema }) => {
 	if (findDefinition(namespace, definitionName)) {
 		return { name, description, $ref: `#/definitions/${definitionName}`};
 	}
 
 	if ($ref.startsWith('#collection/')) {
-		return { name, description, $ref, nullable };
+		return { name, description, $ref, nullable, subschema };
 	}
 
 	return { name, description, $ref, hackoladeMeta: { restrictExternalReferenceCreation: true }, type: 'reference', };
