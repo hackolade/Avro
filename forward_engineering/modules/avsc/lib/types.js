@@ -1184,7 +1184,7 @@ function UnionType(schema, opts) {
       Type.addError(new Error('unions cannot be directly nested'));
     }
     var branch = type.branchName;
-    if (this._branchIndices[branch] !== undefined) {
+    if (branch && this._branchIndices[branch] !== undefined) {
       Type.addError(new Error(f('duplicate union branch name: %j', branch)));
     }
     this._branchIndices[branch] = i;

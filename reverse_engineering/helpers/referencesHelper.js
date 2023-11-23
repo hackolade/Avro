@@ -78,11 +78,13 @@ const updateRef = ({ name, namespace, description, definitionName, $ref, nullabl
 };
 
 const findDefinition = (namespace, name) => definitions[namespace]?.[name];
+const isBareUnionSchema = (schema, type) => !schema.fields && !type && schema.references
 
 module.exports = {
 	addDefinition,
 	resolveRootReference,
 	getDefinitions,
 	filterUnusedDefinitions,
-	updateRefs
+	updateRefs,
+	isBareUnionSchema,
 };

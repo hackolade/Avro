@@ -2,7 +2,7 @@ const { dependencies } = require('../../shared/appDependencies');
 const { isNamedType } = require('../../shared/typeHelper');
 const getFieldAttributes = require('./getFieldAttributes');
 const { getNamespace, getName, EMPTY_NAMESPACE } = require('./generalHelper');
-const { addDefinition, resolveRootReference, getDefinitions, filterUnusedDefinitions, updateRefs} = require('./referencesHelper');
+const { addDefinition, resolveRootReference, getDefinitions, filterUnusedDefinitions, updateRefs, isBareUnionSchema} = require('./referencesHelper');
 const { getEntityLevelConfig, getFieldLevelConfig, getCustomProperties } = require('../../shared/customProperties');
 
 const DEFAULT_FIELD_NAME = 'New_field';
@@ -46,6 +46,10 @@ const convertSchema = ({ schema, namespace = EMPTY_NAMESPACE, avroFieldAttribute
 	const type = _.isString(schema) ? schema : schema.type;
 	const attributes = setDefaultValue(_.isString(schema) ? {} : schema, fieldAttributes?.default);
 	const field = convertType(namespace, type, getFieldAttributes({ attributes, type }));
+
+	if (isBareUnionSchema(schema, type)) {
+		return convertSchemaWithBareUnion(namespace, schema)
+	}
 
 	if (!isNamedType(type)) {
 		return field;
@@ -94,6 +98,29 @@ const convertType = (parentNamespace, type, attributes) => {
 			return convertUserDefinedType(namespace, type, attributes);
 	}
 };
+
+const convertSchemaWithBareUnion = (namespace, schema) => {
+	const DEFAULT_SCHEMA_WITH_BARE_UNION_NAME = 'AllTypes'
+	const bareUnionSchemaUsedTypes = schema.references.map(({name}) => name)
+	const parsedSchemaNamespace = (schema?.schemaTopic || schema?.confluentSubjectName || '').split('.').slice(0, -1).join('.')
+	const schemaNamespace = parsedSchemaNamespace ?? namespace
+	const schemaWithFilteredIndexedProperties = Object.fromEntries(Object.entries(schema).filter(([propName, _]) => isNaN(parseInt(propName))))
+
+	const bareUnionSchema = {
+		...schemaWithFilteredIndexedProperties,
+		name: DEFAULT_SCHEMA_WITH_BARE_UNION_NAME,
+		type: "record",
+		namespace: schemaNamespace,
+		fields: [
+			{
+				"name": "oneOf",
+				type: bareUnionSchemaUsedTypes
+			}
+		]
+	}
+
+	return convertSchema({schema: bareUnionSchema, namespace: schemaNamespace, avroFieldAttributes: {}})
+}
 
 const convertUnion = (namespace, types) => {
 	if (types.length === 1) {
