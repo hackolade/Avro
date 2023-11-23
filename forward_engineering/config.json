@@ -6,7 +6,9 @@
   "validation": true,
   "applyScriptToInstance": true,
   "splitView": {
-    "byAdditionalOptions": ["INCLUDE_SAMPLES"]
+    "byAdditionalOptions": [
+      "INCLUDE_SAMPLES"
+    ]
   },
   "options": [
     {
@@ -81,6 +83,14 @@
       "align": "right",
       "level": {
         "entity": true
+      }
+    },
+    {
+      "id": "skipGroupBucketsToSubdirectories",
+      "value": true,
+      "name": "Skip namespace subdirectory grouping",
+      "level": {
+        "model": false
       }
     }
   ],
