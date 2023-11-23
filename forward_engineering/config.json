@@ -86,9 +86,9 @@
       }
     },
     {
-      "id": "skipGroupBucketsToSubdirectories",
+      "id": "useBucketNameAsPartOfFileName",
       "value": true,
-      "name": "Skip namespace subdirectory grouping",
+      "name": "Use namespace as part of file name",
       "level": {
         "model": false
       }
