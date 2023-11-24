@@ -5,6 +5,7 @@
   "resolvedDefinitions": false,
   "validation": true,
   "applyScriptToInstance": true,
+  "enableUseContainerNameAsPartOfFileName": true,
   "splitView": {
     "byAdditionalOptions": [
       "INCLUDE_SAMPLES"
@@ -86,7 +87,7 @@
       }
     },
     {
-      "id": "useBucketNameAsPartOfFileName",
+      "id": "useContainerNameAsPartOfFileName",
       "value": true,
       "name": "Use namespace as part of file name",
       "level": {
