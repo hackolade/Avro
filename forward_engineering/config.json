@@ -86,7 +86,7 @@
       }
     },
     {
-      "id": "useBucketNameAsPartOfFileName",
+      "id": "useContainerNameAsPartOfFileName",
       "value": true,
       "name": "Use namespace as part of file name",
       "level": {
