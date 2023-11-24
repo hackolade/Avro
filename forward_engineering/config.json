@@ -5,6 +5,7 @@
   "resolvedDefinitions": false,
   "validation": true,
   "applyScriptToInstance": true,
+  "enableUseContainerNameAsPartOfFileName": true,
   "splitView": {
     "byAdditionalOptions": [
       "INCLUDE_SAMPLES"
