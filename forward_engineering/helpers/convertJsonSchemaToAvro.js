@@ -57,9 +57,15 @@ const prepareSchema = schema => {
 	};
 };
 
-const isBareUnionSchema = (schema) => schema.oneOf && Object.values(schema.properties).every(property => property.$ref)
-const convertBareUnionSchema = (schema) => Object.entries(schema.properties).map(([propertyName, propertyValue]) => 
-propertyValue.confluentSubjectName ?? `${propertyValue.parentBucketName || schema.parentBucketName}.${propertyName}`)
+const isBareUnionSchema = (schema) => {
+	const schemaProperties = Object.values(schema.properties ?? {})
+	if (!schema.oneOf?.length || !schemaProperties?.length) {
+		return false
+	}
+
+	return schema.oneOf.length === schemaProperties.length && schemaProperties.every(property => property.$ref || property.definitionRefs?.length > 0)
+}
+const convertBareUnionSchema = (schema) => Object.entries(schema.properties ?? {}).map(([propertyName, propertyValue]) => propertyValue.confluentSubjectName ?? `${propertyValue.parentBucketName || schema.parentBucketName}.${propertyName}`)
 
 const getAvroType = type => {
 	if (type === 'object') {
@@ -204,7 +210,7 @@ const convertMultiple = schema => {
 			return simplifySchema({ ..._.omit(typeSchema, GENERAL_ATTRIBUTES), type: typeSchema.type });
 		}
 
-		const fieldType = type.type || getTypeFromReference(type) || DEFAULT_TYPE;
+		const fieldType = type.type || getTypeFromReference(_, type) || DEFAULT_TYPE;
 		const typeAttributes = _.omit({ ...schema, ...type }, GENERAL_ATTRIBUTES);
 
 		return convertSchema({
