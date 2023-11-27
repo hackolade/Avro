@@ -40,7 +40,7 @@ const convertSchema = schema => {
 const prepareSchema = schema => {
 	const typeSchema =  {
 		...convertChoicesToProperties(schema),
-		type: !schema.type || (schema.$ref && !schema.choice) ? getTypeFromReference(_, schema) : getAvroType(schema.type),
+		type: !schema.type || (schema.$ref && !schema.choice) ? getTypeFromReference(schema) : getAvroType(schema.type),
 	};
 
 	if (!typeSchema.nullable) {
@@ -210,7 +210,7 @@ const convertMultiple = schema => {
 			return simplifySchema({ ..._.omit(typeSchema, GENERAL_ATTRIBUTES), type: typeSchema.type });
 		}
 
-		const fieldType = type.type || getTypeFromReference(_, type) || DEFAULT_TYPE;
+		const fieldType = type.type || getTypeFromReference(type) || DEFAULT_TYPE;
 		const typeAttributes = _.omit({ ...schema, ...type }, GENERAL_ATTRIBUTES);
 
 		return convertSchema({

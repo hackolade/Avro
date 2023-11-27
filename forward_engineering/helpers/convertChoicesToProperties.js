@@ -13,7 +13,7 @@ const convertChoicesToProperties = schema => {
 	return CHOICES.reduce((schema, choice) => convertChoiceToProperties(schema, choice), schema);
 };
 
-const subSchemaIsReferenceFromDatabase = subSchema => subSchema.$ref
+const subSchemaIsEntityReference = subSchema => subSchema.$ref
 const convertChoiceToProperties = (schema, choice) => {
 	if (!schema[choice]) {
 		return schema;
@@ -24,10 +24,10 @@ const convertChoiceToProperties = (schema, choice) => {
 	}
 
 	const allSubSchemaFields = schema[choice].map(convertChoicesToProperties).flatMap(subSchema => {
-		if (subSchemaIsReferenceFromDatabase(subSchema)) {
+		if (subSchemaIsEntityReference(subSchema)) {
 			return [{
 				...subSchema,
-				type: getTypeFromReference(_, subSchema)
+				type: getTypeFromReference(subSchema)
 			}]
 		}
 
