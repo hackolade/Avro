@@ -100,20 +100,21 @@ const convertType = (parentNamespace, type, attributes) => {
 };
 
 const convertSchemaWithBareUnion = (namespace, schema) => {
-	const DEFAULT_SCHEMA_WITH_BARE_UNION_NAME = 'AllTypes'
+	const schemaFullNameComponents = (schema?.schemaTopic || schema?.confluentSubjectName || '').split('.')
+	const [schemaName] = schemaFullNameComponents.slice(-1)
+	const parsedSchemaNamespace = schemaFullNameComponents.slice(0, -1).join('.')
+	
 	const bareUnionSchemaUsedTypes = schema.references.map(({name}) => name)
-	const parsedSchemaNamespace = (schema?.schemaTopic || schema?.confluentSubjectName || '').split('.').slice(0, -1).join('.')
 	const schemaNamespace = parsedSchemaNamespace ?? namespace
 	const schemaWithFilteredIndexedProperties = Object.fromEntries(Object.entries(schema).filter(([propName, _]) => isNaN(parseInt(propName))))
 
 	const bareUnionSchema = {
 		...schemaWithFilteredIndexedProperties,
-		name: DEFAULT_SCHEMA_WITH_BARE_UNION_NAME,
+		name: schemaName,
 		type: "record",
 		namespace: schemaNamespace,
 		fields: [
 			{
-				"name": "oneOf",
 				type: bareUnionSchemaUsedTypes
 			}
 		]
