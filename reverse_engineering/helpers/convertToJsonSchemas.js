@@ -17,7 +17,8 @@ const convertToJsonSchemas = avroSchema => {
 
 	collectionReferences = avroSchema.references || [];
 	const convertedSchema = convertSchema({ schema: avroSchema });
-	const jsonSchemas = _.isArray(convertedSchema.type) ? convertedSchema.type : [ convertedSchema ];
+	const normalizedConvertedSchema = _.isArray(convertedSchema) ? convertedSchema : [ convertedSchema ]
+	const jsonSchemas = _.isArray(convertedSchema.type) ? convertedSchema.type : normalizedConvertedSchema;
 
 	return jsonSchemas.map((schema, index) => {
 		const relatedAvroSchema = _.isArray(avroSchema) ? avroSchema[index] : avroSchema;
@@ -48,7 +49,11 @@ const convertSchema = ({ schema, namespace = EMPTY_NAMESPACE, avroFieldAttribute
 	const field = convertType(namespace, type, getFieldAttributes({ attributes, type }));
 
 	if (isBareUnionSchema(schema, type)) {
-		return convertSchemaWithBareUnion(namespace, schema)
+		if (bareUnionSchemaIncludesOnlyReferences(schema)) {
+			return convertBareUnionSchemaWithReferences(namespace, schema)
+		} else if (bareUnionSchemaIncludesOnlyDefinitionRecords(schema)) {
+			return convertBareUnionSchemaWithRecordDefinitions(namespace, schema)
+		}
 	}
 
 	if (!isNamedType(type)) {
@@ -99,19 +104,20 @@ const convertType = (parentNamespace, type, attributes) => {
 	}
 };
 
-const convertSchemaWithBareUnion = (namespace, schema) => {
+const convertBareUnionSchemaWithReferences = (namespace, schema) => {
+	const bareUnionSchemaType = 'record'
 	const schemaFullNameComponents = (schema?.schemaTopic || schema?.confluentSubjectName || '').split('.')
 	const [schemaName] = schemaFullNameComponents.slice(-1)
 	const parsedSchemaNamespace = schemaFullNameComponents.slice(0, -1).join('.')
 	
-	const bareUnionSchemaUsedTypes = schema.references.map(({name}) => name)
 	const schemaNamespace = parsedSchemaNamespace ?? namespace
-	const schemaWithFilteredIndexedProperties = Object.fromEntries(Object.entries(schema).filter(([propName, _]) => isNaN(parseInt(propName))))
+	const schemaWithoutUnionOptions = Object.fromEntries(Object.entries(schema).filter(([name, _]) => isNaN(parseInt(name))))
+	const bareUnionSchemaUsedTypes = schema.references.map(({name}) => convertUserDefinedType(schemaNamespace, name, {}))
 
 	const bareUnionSchema = {
-		...schemaWithFilteredIndexedProperties,
+		...schemaWithoutUnionOptions,
 		name: schemaName,
-		type: "record",
+		type: bareUnionSchemaType,
 		namespace: schemaNamespace,
 		fields: [
 			{
@@ -120,14 +126,51 @@ const convertSchemaWithBareUnion = (namespace, schema) => {
 		]
 	}
 
-	return convertSchema({schema: bareUnionSchema, namespace: schemaNamespace, avroFieldAttributes: {}})
+	const attributes = getFieldAttributes({ attributes: bareUnionSchema, type: bareUnionSchemaType })
+	const schemaFields = (attributes.fields || []).map(item => getBareUnionSchemaOneOf(item))
+
+	const convertedBareUnionSchema = {
+		..._.omit(attributes, 'fields'),
+		type: bareUnionSchemaType,
+		properties: convertArrayToJsonSchemaObject(schemaFields),
+		required: getRequired(schemaFields),
+	};
+
+	return addDefinition(schemaNamespace, setDefaultValue(convertedBareUnionSchema, {}));
+}
+
+const convertBareUnionSchemaWithRecordDefinitions = (namespace, schema) => {
+	const recordDefinitionType = 'record'
+	const parsedSchemaNamespace = (schema?.schemaTopic || schema?.confluentSubjectName || '').split('.').slice(0, -1).join('.')
+	
+	const schemaNamespace = parsedSchemaNamespace ?? namespace
+	const unionOptionsKeysInSchema = Object.keys(schema).filter(key => !isNaN(parseInt(key)))
+	return unionOptionsKeysInSchema.map(key => {
+		const attributes = getFieldAttributes({ attributes: schema[key], type: recordDefinitionType })
+		const field = convertType(namespace, recordDefinitionType, getFieldAttributes({ attributes, type: recordDefinitionType }));
+
+		return addDefinition(schemaNamespace, field);
+	})
+}
+
+const isReferenceUnionOption = option => _.isString(option) && isCollectionReference(option)
+const isRecordDefinitionUnionOption = option => _.isObject(option) && option.type === 'record'
+
+const bareUnionSchemaIncludesOnlyReferences = schema => {
+	const unionOptionsKeysInSchema = Object.keys(schema).filter(key => !isNaN(parseInt(key)))
+
+	return unionOptionsKeysInSchema.every(optionKey => isReferenceUnionOption(schema[optionKey]))
+}
+
+const bareUnionSchemaIncludesOnlyDefinitionRecords = schema => {
+	const unionOptionsKeysInSchema = Object.keys(schema).filter(key => !isNaN(parseInt(key)))
+
+	return unionOptionsKeysInSchema.every(optionKey => isRecordDefinitionUnionOption(schema[optionKey]))
 }
 
 const convertUnion = (namespace, types) => {
 	if (types.length === 1) {
-		return isCollectionReference(_.first(types)) ? 
-		convertUserDefinedType(namespace, _.first(types), {}) : 
-		convertSchema({ schema: _.first(types), namespace });
+		return convertSchema({ schema: _.first(types), namespace });
 	}
 
 	if (isNullableCollectionReference(types)) {
@@ -137,10 +180,7 @@ const convertUnion = (namespace, types) => {
 		return { ...schema, nullable: true };
 	}
 
-	return { type: types.map(schema => 
-		isCollectionReference(schema) ? 
-		convertUserDefinedType(namespace, schema, {}) : 
-		convertSchema({ schema, namespace })) };
+	return { type: types.map(schema => convertSchema({ schema, namespace })) }
 };
 
 const convertNumeric = (type, attributes) => ({ ...attributes, type: 'number', mode: type });
@@ -255,6 +295,17 @@ const setSchemaRootAttributes = customProperties => schema => ({
 const setSchemaName = schema => _.omit({ ...schema, title: getName(schema) }, ['namespace', 'name']);
 
 const getOneOf = field => ({
+	...field,
+	type: 'choice',
+	choice: 'oneOf',
+	items: field.type.map(typeData => ({
+		type: 'record',
+		subschema: true,
+		properties: { [field.name || DEFAULT_FIELD_NAME]: _.omit(typeData, 'name') },
+	})),
+});
+
+const getBareUnionSchemaOneOf = field => ({
 	...field,
 	type: 'choice',
 	choice: 'oneOf',

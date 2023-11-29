@@ -37,9 +37,13 @@ const reFromFile = async (data, logger, callback, app) => {
 
 const getPackages = (avroSchema, jsonSchemas) => {
 	const schemasData = getSchemasData(avroSchema);
+	const isAvroSchemaSplittedIntoMultipleJsonSchemas = schemasData.length === 1 && jsonSchemas.length > 1
+	const singleNamespaceForOneAvroSchemaSplittedIntoMultipleJsonSchemas = schemasData[0]?.namespace
 
 	return jsonSchemas.map((jsonSchema, index) => {
 		const { namespace, schemaType, schemaGroupName, confluentSubjectName, schemaTopic, confluentVersion } = schemasData[index] || {};
+		const schemaNamespace = isAvroSchemaSplittedIntoMultipleJsonSchemas ? singleNamespaceForOneAvroSchemaSplittedIntoMultipleJsonSchemas : namespace
+
 		const schemaNameStrategy = inferSchemaNameStrategy({
 			name: jsonSchema.title,
 			namespace,
@@ -65,10 +69,10 @@ const getPackages = (avroSchema, jsonSchemas) => {
 				collectionName: jsonSchema.title,
 			},
 			doc: {
-				dbName: namespace || '',
+				dbName: schemaNamespace || '',
 				collectionName: jsonSchema.title,
 				bucketInfo: {
-					name: namespace || '',
+					name: schemaNamespace || '',
 				},
 			},
 			jsonSchema: JSON.stringify({

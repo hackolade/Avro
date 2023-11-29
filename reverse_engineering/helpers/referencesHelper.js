@@ -2,7 +2,6 @@ const { dependencies } = require('../../shared/appDependencies');
 const mapJsonSchema = require('../../shared/mapJsonSchema');
 const { getNamespace, getName, EMPTY_NAMESPACE } = require('./generalHelper');
 
-let _;
 let definitions = { [EMPTY_NAMESPACE]: [] };
 
 const resolveRootReference = schema => {
@@ -19,17 +18,16 @@ const getDefinitions = () => Object.keys(definitions).reduce((jsonDefinitions, n
 }), {});
 
 const addDefinition = (namespace, definition) => {
-	_ = dependencies.lodash;
 
 	const name = definition.name;
-	_.set(definitions, [namespace, name], definition);
+	dependencies.lodash.set(definitions, [namespace, name], definition);
 
 	return {
 		definitionName: name,
 		$ref: name,
 		name,
 		namespace,
-		...(!_.isUndefined(definition.default) && { default: definition.default }),
+		...(!dependencies.lodash.isUndefined(definition.default) && { default: definition.default }),
 	};
 };
 
@@ -78,7 +76,7 @@ const updateRef = ({ name, namespace, description, definitionName, $ref, nullabl
 };
 
 const findDefinition = (namespace, name) => definitions[namespace]?.[name];
-const isBareUnionSchema = (schema, type) => !schema.fields && !type && schema.references
+const isBareUnionSchema = (schema, type) => !schema.fields && !type && Object.keys(schema).some(key => !isNaN(parseInt(key)))
 
 module.exports = {
 	addDefinition,
