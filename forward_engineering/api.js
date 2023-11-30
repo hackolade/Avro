@@ -4,7 +4,7 @@ const { setDependencies, dependencies } = require('../shared/appDependencies');
 const { SCRIPT_TYPES, SCHEMA_REGISTRIES_KEYS } = require('../shared/constants');
 const { parseJson, prepareName } = require('./helpers/generalHelper');
 const validateAvroScript = require('./helpers/validateAvroScript');
-const { formatAvroSchemaByType } = require('./helpers/formatAvroSchemaByType');
+const { formatAvroSchemaByType, getConfluentSubjectName } = require('./helpers/formatAvroSchemaByType');
 const { resolveUdt, addDefinitions, resetDefinitionsUsage, convertCollectionReferences, resolveNamespaceReferences } = require('./helpers/udtHelper');
 const convertSchema = require('./helpers/convertJsonSchemaToAvro');
 const { initPluginConfiguration, getCustomProperties, getEntityLevelConfig, getFieldLevelConfig } = require('../shared/customProperties');
@@ -100,12 +100,23 @@ const generateScript = (data, logger, cb, app) => {
 		const script = getScript({
 			scriptType: getEntityScriptType(options, modelData),
 			needMinify: isMinifyNeeded(options),
+			isJsonFormat: options.origin !== 'ui',
 			settings,
 			avroSchema: convertJsonToAvro(resolvedJsonSchema, settings.name),
 		});
 
-		if (!includeSamplesToScript(data.options)) {
-			return cb(null, script);
+		if (!includeSamplesToScript(options)) {
+			const isSchemaRegistry = options?.targetScriptOptions?.keyword === SCRIPT_TYPES.SCHEMA_REGISTRY;
+			if (!isSchemaRegistry) {
+				return cb(null, script);
+			}
+
+			return cb(null, [
+				{
+					title: 'Avro schemas',
+					fileName: getConfluentSubjectName(settings),
+					script
+				}]);
 		}
 
 		return cb(null, getScriptAndSampleResponse(script, data.jsonData));
@@ -198,12 +209,14 @@ const convertSchemaToUserDefinedTypes = definitionsSchema => {
 const getScript = ({
 	settings,
 	scriptType,
+	isJsonFormat,
 	needMinify,
 	avroSchema,
 }) => {
 	return formatAvroSchemaByType({
 		avroSchema,
 		scriptType,
+		isJsonFormat,
 		needMinify,
 		settings,
 	});
