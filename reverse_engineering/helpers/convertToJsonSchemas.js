@@ -48,10 +48,13 @@ const convertSchema = ({ schema, namespace = EMPTY_NAMESPACE, avroFieldAttribute
 	const attributes = setDefaultValue(_.isString(schema) ? {} : schema, fieldAttributes?.default);
 	const field = convertType(namespace, type, getFieldAttributes({ attributes, type }));
 
+	/*Here schema which consists only of a union (simply, array of options) is handled and adapted for appropriate structure in the app**/
 	if (isBareUnionSchema(schema, type)) {
 		if (bareUnionSchemaIncludesOnlyReferences(schema)) {
+			/** This handler takes care about union which options are all references */
 			return convertBareUnionSchemaWithReferences(namespace, schema)
 		} else if (bareUnionSchemaIncludesOnlyDefinitionRecords(schema)) {
+			/** This handler takes care about union which options are all records defined inside the union itself */
 			return convertBareUnionSchemaWithRecordDefinitions(namespace, schema)
 		}
 	}
