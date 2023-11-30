@@ -4,7 +4,7 @@ const { setDependencies, dependencies } = require('../shared/appDependencies');
 const { SCRIPT_TYPES, SCHEMA_REGISTRIES_KEYS } = require('../shared/constants');
 const { parseJson, prepareName } = require('./helpers/generalHelper');
 const validateAvroScript = require('./helpers/validateAvroScript');
-const { formatAvroSchemaByType } = require('./helpers/formatAvroSchemaByType');
+const { formatAvroSchemaByType, getConfluentSubjectName } = require('./helpers/formatAvroSchemaByType');
 const { resolveUdt, addDefinitions, resetDefinitionsUsage, convertCollectionReferences, resolveNamespaceReferences } = require('./helpers/udtHelper');
 const convertSchema = require('./helpers/convertJsonSchemaToAvro');
 const { initPluginConfiguration, getCustomProperties, getEntityLevelConfig, getFieldLevelConfig } = require('../shared/customProperties');
@@ -94,18 +94,37 @@ const generateScript = (data, logger, cb, app) => {
 		setUserDefinedTypes(modelDefinitions)
 		setUserDefinedTypes(internalDefinitions);
 		resetDefinitionsUsage();
+		const isFromUi = options.origin === 'ui';
 
 		const { references, jsonSchema: resolvedJsonSchema } = _.first(handleCollectionReferences([{ jsonSchema: parseJson(jsonSchema) }], options)) || {};
 		const settings = getSettings({ containerData, entityData, modelData, references });
 		const script = getScript({
 			scriptType: getEntityScriptType(options, modelData),
 			needMinify: isMinifyNeeded(options),
+			isJsonFormat: !isFromUi,
 			settings,
 			avroSchema: convertJsonToAvro(resolvedJsonSchema, settings.name),
 		});
 
-		if (!includeSamplesToScript(data.options)) {
-			return cb(null, script);
+		if (!includeSamplesToScript(options)) {
+			const scriptType = options?.targetScriptOptions?.keyword;
+			const isCliSchemaRegistryFormat = !isFromUi && [
+				SCRIPT_TYPES.CONFLUENT_SCHEMA_REGISTRY,
+				SCRIPT_TYPES.AZURE_SCHEMA_REGISTRY,
+				SCRIPT_TYPES.PULSAR_SCHEMA_REGISTRY,
+			].includes(scriptType);
+
+			const isSchemaRegistry = scriptType === SCRIPT_TYPES.SCHEMA_REGISTRY || isCliSchemaRegistryFormat;
+			if (!isSchemaRegistry) {
+				return cb(null, script);
+			}
+
+			return cb(null, [
+				{
+					title: 'Avro schemas',
+					fileName: getConfluentSubjectName(settings),
+					script
+				}]);
 		}
 
 		return cb(null, getScriptAndSampleResponse(script, data.jsonData));
@@ -201,12 +220,14 @@ const convertSchemaToUserDefinedTypes = definitionsSchema => {
 const getScript = ({
 	settings,
 	scriptType,
+	isJsonFormat,
 	needMinify,
 	avroSchema,
 }) => {
 	return formatAvroSchemaByType({
 		avroSchema,
 		scriptType,
+		isJsonFormat,
 		needMinify,
 		settings,
 	});

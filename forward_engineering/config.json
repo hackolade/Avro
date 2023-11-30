@@ -5,7 +5,6 @@
   "resolvedDefinitions": false,
   "validation": true,
   "applyScriptToInstance": true,
-  "enableUseContainerNameAsPartOfFileName": true,
   "splitView": {
     "byAdditionalOptions": [
       "INCLUDE_SAMPLES"
@@ -84,14 +83,6 @@
       "align": "right",
       "level": {
         "entity": true
-      }
-    },
-    {
-      "id": "useContainerNameAsPartOfFileName",
-      "value": true,
-      "name": "Use namespace as part of file name",
-      "level": {
-        "model": false
       }
     }
   ],
