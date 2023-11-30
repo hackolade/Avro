@@ -312,16 +312,11 @@ const getBareUnionSchemaOneOf = field => ({
 	...field,
 	type: 'choice',
 	choice: 'oneOf',
-	items: field.type.map(typeData => {
-		const isTypeOriginatedFromReference = typeData.$ref
-		const typeProperties = isTypeOriginatedFromReference ? typeData : { [field.name || DEFAULT_FIELD_NAME]: _.omit(typeData, 'name') }
-
-		return {
-			...typeProperties, 
-			type: 'record',
-			subschema: true,
-		}
-	}),
+	items: field.type.map(typeData => ({
+		...typeData, 
+		type: 'record',
+		subschema: true,
+	})),
 });
 
 const getMapSubtype = values => _.isString(values) ? `map<${values}>` : ''
