@@ -94,19 +94,27 @@ const generateScript = (data, logger, cb, app) => {
 		setUserDefinedTypes(modelDefinitions)
 		setUserDefinedTypes(internalDefinitions);
 		resetDefinitionsUsage();
+		const isFromUi = options.origin === 'ui';
 
 		const { references, jsonSchema: resolvedJsonSchema } = _.first(handleCollectionReferences([{ jsonSchema: parseJson(jsonSchema) }], options)) || {};
 		const settings = getSettings({ containerData, entityData, modelData, references });
 		const script = getScript({
 			scriptType: getEntityScriptType(options, modelData),
 			needMinify: isMinifyNeeded(options),
-			isJsonFormat: options.origin !== 'ui',
+			isJsonFormat: !isFromUi,
 			settings,
 			avroSchema: convertJsonToAvro(resolvedJsonSchema, settings.name),
 		});
 
 		if (!includeSamplesToScript(options)) {
-			const isSchemaRegistry = options?.targetScriptOptions?.keyword === SCRIPT_TYPES.SCHEMA_REGISTRY;
+			const scriptType = options?.targetScriptOptions?.keyword;
+			const isCliSchemaRegistryFormat = !isFromUi && [
+				SCRIPT_TYPES.CONFLUENT_SCHEMA_REGISTRY,
+				SCRIPT_TYPES.AZURE_SCHEMA_REGISTRY,
+				SCRIPT_TYPES.PULSAR_SCHEMA_REGISTRY,
+			].includes(scriptType);
+
+			const isSchemaRegistry = scriptType === SCRIPT_TYPES.SCHEMA_REGISTRY || isCliSchemaRegistryFormat;
 			if (!isSchemaRegistry) {
 				return cb(null, script);
 			}
