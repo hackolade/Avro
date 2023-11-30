@@ -4,7 +4,7 @@ const { reorderAttributes } = require('./generalHelper');
 
 let _;
 
-const formatAvroSchemaByType = ({ scriptType, settings, needMinify, avroSchema }) => {
+const formatAvroSchemaByType = ({ scriptType, settings, needMinify, isJsonFormat, avroSchema }) => {
 	_ = dependencies.lodash;
 
 	const formatter = getFormatter(scriptType);
@@ -12,6 +12,7 @@ const formatAvroSchemaByType = ({ scriptType, settings, needMinify, avroSchema }
 	return formatter({
 		settings,
 		needMinify,
+		isJsonFormat,
 		avroSchema: reorderAttributes({
 			...avroSchema,
 			name: settings.name,
@@ -33,7 +34,7 @@ const getFormatter = scriptType => {
 	}
 };
 
-const formatConfluentSchema = ({ settings, needMinify, avroSchema }) => {
+const formatConfluentSchema = ({ settings, needMinify, isJsonFormat, avroSchema }) => {
 	const {
 		name,
 		namespace,
@@ -48,6 +49,7 @@ const formatConfluentSchema = ({ settings, needMinify, avroSchema }) => {
 
 	return getConfluentPostQuery({
 		schema: needMinify ? JSON.stringify(avroSchema) : avroSchema,
+		isJsonFormat,
 		name,
 		namespace,
 		confluentSubjectName,
@@ -93,38 +95,51 @@ const getConfluentPostQuery = ({
 	schemaNameStrategy,
 	confluentSubjectName,
 	confluentCompatibility,
+	isJsonFormat,
 	references,
 	schema,
 }) => {
-	const subjectName = getConfluentSubjectName({ name, namespace, schemaType, schemaTopic, schemaNameStrategy, confluentSubjectName })
+	const subjectName = getConfluentSubjectName({ name, namespace, schemaType, schemaTopic, schemaNameStrategy, confluentSubjectName });
 	const compatibilityRequest = confluentCompatibility ? `PUT /config/${subjectName} HTTP/1.1\n{ "compatibility": "${confluentCompatibility}" }\n\n` : '';
-
-	return `${compatibilityRequest}POST /subjects/${subjectName}/versions\n${JSON.stringify(
+	const requestBody = JSON.stringify(
 		{ schema, schemaType: 'AVRO', ...(!_.isEmpty(references) && { references: _.uniqBy(references, 'name') }) },
 		null,
 		4
-	)}`;
+	);
+
+	if (isJsonFormat) {
+		return requestBody;
+	}
+
+	return `${compatibilityRequest}POST /subjects/${subjectName}/versions\n${requestBody}`;
 };
 
-const formatSchemaRegistry = ({ needMinify, avroSchema }) => {
-	return JSON.stringify({ schema: JSON.stringify(avroSchema) }, null, needMinify ? 0 : 4);
-};
-
-const formatAzureSchemaRegistry = ({ settings, needMinify, avroSchema }) => {
+const formatAzureSchemaRegistry = ({ settings, needMinify, isJsonFormat, avroSchema }) => {
 	const { schemaGroupName, name } = settings;
 
-	return `PUT /${schemaGroupName}/schemas/${name}?api-version=2020-09-01-preview\n${stringifyCommon(needMinify, avroSchema)}`;
+	const requestBody = stringifyCommon(needMinify, avroSchema);
+
+	if (isJsonFormat) {
+		return requestBody;
+	}
+
+	return `PUT /${schemaGroupName}/schemas/${name}?api-version=2020-09-01-preview\n${requestBody}`;
 };
 
-const formatPulsarSchemaRegistry = ({ settings, needMinify, avroSchema }) => {
+const formatPulsarSchemaRegistry = ({ settings, needMinify, isJsonFormat, avroSchema }) => {
 	const { persistence, namespace, topic } = settings;
 	const bodyObject = {
 		type: 'AVRO',
 		data: avroSchema,
 		properties: {}
 	};
+	const requestBody = stringifyCommon(needMinify, bodyObject);
 
-	return `POST /${persistence}/${namespace}/${topic}/schema\n${stringifyCommon(needMinify, bodyObject)}`;
+	if (isJsonFormat) {
+		return requestBody;
+	}
+
+	return `POST /${persistence}/${namespace}/${topic}/schema\n${requestBody}`;
 };
 
 const formatCommon = ({ needMinify, avroSchema }) => {
