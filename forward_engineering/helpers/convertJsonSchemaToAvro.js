@@ -58,7 +58,7 @@ const prepareSchema = schema => {
 };
 
 const isBareUnionSchema = (schema) => {
-	if (!schema?.oneOf?.length || schema?.properties?.length) {
+	if (!schema?.oneOf?.length || Object.values(schema?.properties ?? {}).length) {
 		return false
 	}
 
