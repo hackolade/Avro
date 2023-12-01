@@ -13,7 +13,7 @@ const formatAvroSchemaByType = ({ scriptType, settings, needMinify, isJsonFormat
 		settings,
 		needMinify,
 		isJsonFormat,
-		avroSchema: reorderAttributes({
+		avroSchema: _.isArray(avroSchema) ? avroSchema : reorderAttributes({
 			...avroSchema,
 			name: settings.name,
 			namespace: settings.namespace || avroSchema.namespace

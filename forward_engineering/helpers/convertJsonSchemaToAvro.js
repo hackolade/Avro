@@ -58,14 +58,13 @@ const prepareSchema = schema => {
 };
 
 const isBareUnionSchema = (schema) => {
-	const schemaProperties = Object.values(schema.properties ?? {})
-	if (!schema.oneOf?.length || !schemaProperties?.length) {
+	if (!schema?.oneOf?.length || schema?.properties?.length) {
 		return false
 	}
 
-	return schema.oneOf.length === schemaProperties.length && schemaProperties.every(property => property.$ref || property.definitionRefs?.length > 0)
+	return schema.oneOf.every(option => option.$ref)
 }
-const convertBareUnionSchema = (schema) => Object.entries(schema.properties ?? {}).map(([propertyName, propertyValue]) => propertyValue.confluentSubjectName ?? `${propertyValue.parentBucketName || schema.parentBucketName}.${propertyName}`)
+const convertBareUnionSchema = (schema) => schema.oneOf.map(({confluentSubjectName, parentBucketName, name}) => confluentSubjectName ?? `${parentBucketName || schema.bucketName}.${name}`)
 
 const getAvroType = type => {
 	if (type === 'object') {
