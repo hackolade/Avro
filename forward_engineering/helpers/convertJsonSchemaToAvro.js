@@ -62,7 +62,7 @@ const isBareUnionSchema = (schema) => {
 		return false
 	}
 
-	return schema.oneOf.every(option => option.$ref)
+	return schema.oneOf.every(option => option.$ref || option.ref)
 }
 const convertBareUnionSchema = (schema) => schema.oneOf.map(({confluentSubjectName, parentBucketName, name}) => confluentSubjectName ?? `${parentBucketName || schema.bucketName}.${name}`)
 
