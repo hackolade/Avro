@@ -1,5 +1,8 @@
 const { dependencies } = require('../../shared/appDependencies');
 const { filterMultipleTypes, prepareName, getDefaultName, convertName, } = require('./generalHelper');
+const getTypeFromReference = require('./getTypeFromReference');
+const { AVRO_TYPES } = require('../../shared/constants');
+
 let _;
 
 const CHOICES = ['oneOf', 'anyOf', 'allOf'];
@@ -10,6 +13,7 @@ const convertChoicesToProperties = schema => {
 	return CHOICES.reduce((schema, choice) => convertChoiceToProperties(schema, choice), schema);
 };
 
+const subSchemaIsEntityReference = subSchema => subSchema.$ref
 const convertChoiceToProperties = (schema, choice) => {
 	if (!schema[choice]) {
 		return schema;
@@ -20,6 +24,13 @@ const convertChoiceToProperties = (schema, choice) => {
 	}
 
 	const allSubSchemaFields = schema[choice].map(convertChoicesToProperties).flatMap(subSchema => {
+		if (subSchemaIsEntityReference(subSchema)) {
+			return [{
+				...subSchema,
+				type: getTypeFromReference(subSchema)
+			}]
+		}
+
 		if (subSchema.type === 'array') {
 			return subSchema.items;
 		}
@@ -118,7 +129,10 @@ const addPropertiesFromChoices = (properties, choiceProperties) => {
 		return properties || {};
 	}
 
-	const propertiesEntries = Object.entries(properties || {}).map(([key, property], index) => {
+	const typesUsedInChoicesProperties = Object.values(choiceProperties).flatMap(({type}) => type).filter(type => !AVRO_TYPES.includes(type))
+	const propertiesEntries = Object.entries(properties || {})
+	.filter(([key, _]) => !typesUsedInChoicesProperties.includes(key))
+	.map(([key, property], index) => {
 		return [ key, { ...property, choiceMeta: { index }} ];
 	});
 

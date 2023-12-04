@@ -2,7 +2,7 @@ const { dependencies } = require('../../shared/appDependencies');
 const { isNamedType } = require('../../shared/typeHelper');
 const getFieldAttributes = require('./getFieldAttributes');
 const { getNamespace, getName, EMPTY_NAMESPACE } = require('./generalHelper');
-const { addDefinition, resolveRootReference, getDefinitions, filterUnusedDefinitions, updateRefs } = require('./referencesHelper');
+const { addDefinition, resolveRootReference, getDefinitions, filterUnusedDefinitions, updateRefs, isBareUnionSchema} = require('./referencesHelper');
 const { getEntityLevelConfig, getFieldLevelConfig, getCustomProperties } = require('../../shared/customProperties');
 
 const DEFAULT_FIELD_NAME = 'New_field';
@@ -17,7 +17,8 @@ const convertToJsonSchemas = avroSchema => {
 
 	collectionReferences = avroSchema.references || [];
 	const convertedSchema = convertSchema({ schema: avroSchema });
-	const jsonSchemas = _.isArray(convertedSchema.type) ? convertedSchema.type : [ convertedSchema ];
+	const normalizedConvertedSchema = _.isArray(convertedSchema) ? convertedSchema : [ convertedSchema ]
+	const jsonSchemas = _.isArray(convertedSchema.type) ? convertedSchema.type : normalizedConvertedSchema;
 
 	return jsonSchemas.map((schema, index) => {
 		const relatedAvroSchema = _.isArray(avroSchema) ? avroSchema[index] : avroSchema;
@@ -46,6 +47,17 @@ const convertSchema = ({ schema, namespace = EMPTY_NAMESPACE, avroFieldAttribute
 	const type = _.isString(schema) ? schema : schema.type;
 	const attributes = setDefaultValue(_.isString(schema) ? {} : schema, fieldAttributes?.default);
 	const field = convertType(namespace, type, getFieldAttributes({ attributes, type }));
+
+	/*Here schema which consists only of a union (simply, array of options) is handled and adapted for appropriate structure in the app**/
+	if (isBareUnionSchema(schema, type)) {
+		if (bareUnionSchemaIncludesOnlyReferences(schema)) {
+			/** This handler takes care about union which options are all references */
+			return convertBareUnionSchemaWithReferences(namespace, schema)
+		} else if (bareUnionSchemaIncludesOnlyDefinitionRecords(schema)) {
+			/** This handler takes care about union which options are all records defined inside the union itself */
+			return convertBareUnionSchemaWithRecordDefinitions(namespace, schema)
+		}
+	}
 
 	if (!isNamedType(type)) {
 		return field;
@@ -95,6 +107,70 @@ const convertType = (parentNamespace, type, attributes) => {
 	}
 };
 
+const convertBareUnionSchemaWithReferences = (namespace, schema) => {
+	const bareUnionSchemaType = 'record'
+	const schemaFullNameComponents = (schema?.schemaTopic || schema?.confluentSubjectName || '').split('.')
+	const [schemaName] = schemaFullNameComponents.slice(-1)
+	const parsedSchemaNamespace = schemaFullNameComponents.slice(0, -1).join('.')
+	
+	const schemaNamespace = parsedSchemaNamespace ?? namespace
+	const schemaWithoutUnionOptions = Object.fromEntries(Object.entries(schema).filter(([name, _]) => isNaN(parseInt(name))))
+	const bareUnionSchemaUsedTypes = schema.references.map(({name}) => convertUserDefinedType(schemaNamespace, name, {}))
+
+	const bareUnionSchema = {
+		...schemaWithoutUnionOptions,
+		name: schemaName,
+		type: bareUnionSchemaType,
+		namespace: schemaNamespace,
+		fields: [
+			{
+				type: bareUnionSchemaUsedTypes
+			}
+		]
+	}
+
+	const attributes = getFieldAttributes({ attributes: bareUnionSchema, type: bareUnionSchemaType })
+	const schemaFields = (attributes.fields || []).map(item => getBareUnionSchemaOneOf(item))
+
+	const convertedBareUnionSchema = {
+		..._.omit(attributes, 'fields'),
+		type: bareUnionSchemaType,
+		properties: convertArrayToJsonSchemaObject(schemaFields),
+		required: getRequired(schemaFields),
+	};
+
+	return addDefinition(schemaNamespace, setDefaultValue(convertedBareUnionSchema, {}));
+}
+
+const convertBareUnionSchemaWithRecordDefinitions = (namespace, schema) => {
+	const recordDefinitionType = 'record'
+	const parsedSchemaNamespace = (schema?.schemaTopic || schema?.confluentSubjectName || '').split('.').slice(0, -1).join('.')
+	
+	const schemaNamespace = parsedSchemaNamespace ?? namespace
+	const unionOptionsKeysInSchema = Object.keys(schema).filter(key => !isNaN(parseInt(key)))
+	return unionOptionsKeysInSchema.map(key => {
+		const attributes = getFieldAttributes({ attributes: schema[key], type: recordDefinitionType })
+		const field = convertType(namespace, recordDefinitionType, getFieldAttributes({ attributes, type: recordDefinitionType }));
+
+		return addDefinition(schemaNamespace, field);
+	})
+}
+
+const isReferenceUnionOption = option => _.isString(option) && isCollectionReference(option)
+const isRecordDefinitionUnionOption = option => _.isObject(option) && option.type === 'record'
+
+const bareUnionSchemaIncludesOnlyReferences = schema => {
+	const unionOptionsKeysInSchema = Object.keys(schema).filter(key => !isNaN(parseInt(key)))
+
+	return unionOptionsKeysInSchema.every(optionKey => isReferenceUnionOption(schema[optionKey]))
+}
+
+const bareUnionSchemaIncludesOnlyDefinitionRecords = schema => {
+	const unionOptionsKeysInSchema = Object.keys(schema).filter(key => !isNaN(parseInt(key)))
+
+	return unionOptionsKeysInSchema.every(optionKey => isRecordDefinitionUnionOption(schema[optionKey]))
+}
+
 const convertUnion = (namespace, types) => {
 	if (types.length === 1) {
 		return convertSchema({ schema: _.first(types), namespace });
@@ -107,7 +183,7 @@ const convertUnion = (namespace, types) => {
 		return { ...schema, nullable: true };
 	}
 
-	return { type: types.map(schema => convertSchema({ schema, namespace })) };
+	return { type: types.map(schema => convertSchema({ schema, namespace })) }
 };
 
 const convertNumeric = (type, attributes) => ({ ...attributes, type: 'number', mode: type });
@@ -229,6 +305,17 @@ const getOneOf = field => ({
 		type: 'record',
 		subschema: true,
 		properties: { [field.name || DEFAULT_FIELD_NAME]: _.omit(typeData, 'name') },
+	})),
+});
+
+const getBareUnionSchemaOneOf = field => ({
+	...field,
+	type: 'choice',
+	choice: 'oneOf',
+	items: field.type.map(typeData => ({
+		...typeData, 
+		type: 'record',
+		subschema: true,
 	})),
 });
 

@@ -5,12 +5,18 @@ const { reorderAttributes, filterMultipleTypes, prepareName, simplifySchema, get
 const convertChoicesToProperties = require('./convertChoicesToProperties');
 const { GENERAL_ATTRIBUTES, META_VALUES_KEY_MAP } = require('../../shared/constants');
 const { getFieldLevelConfig, getCustomProperties } = require('../../shared/customProperties');
+const getTypeFromReference = require('./getTypeFromReference');
+
 const DEFAULT_TYPE = 'string';
 
 let _;
 
 const convertSchema = schema => {
 	_ = dependencies.lodash;
+
+	if (isBareUnionSchema(schema)) {
+		return convertBareUnionSchema(schema)
+	}
 
 	schema = prepareSchema(schema);
 
@@ -50,6 +56,15 @@ const prepareSchema = schema => {
 		],
 	};
 };
+
+const isBareUnionSchema = (schema) => {
+	if (!schema?.oneOf?.length || Object.values(schema?.properties ?? {}).length) {
+		return false
+	}
+
+	return schema.oneOf.every(option => option.$ref || option.ref)
+}
+const convertBareUnionSchema = (schema) => schema.oneOf.map(({confluentSubjectName, parentBucketName, name}) => confluentSubjectName ?? `${parentBucketName || schema.bucketName}.${name}`)
 
 const getAvroType = type => {
 	if (type === 'object') {
@@ -422,21 +437,6 @@ const getDefault = schema => {
 	}
 
 	return value;
-};
-
-const getTypeFromReference = schema => {
-	if (!schema.$ref) {
-		return;
-	}
-
-	if(_.includes(schema.$ref, '#')) {
-		const namespace = schema.namespace || '';
-		const name = prepareName(_.last(schema.$ref.split('/')) || '');
-
-		return [namespace, name].filter(Boolean).join('.');
-	}
-
-	return schema.$ref;
 };
 
 const getMetaProperties = (metaProperties) => {
