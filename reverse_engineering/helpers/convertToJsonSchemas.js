@@ -113,7 +113,7 @@ const convertBareUnionSchemaWithReferences = (namespace, schema) => {
 	const [schemaName] = schemaFullNameComponents.slice(-1)
 	const parsedSchemaNamespace = schemaFullNameComponents.slice(0, -1).join('.')
 	
-	const schemaNamespace = parsedSchemaNamespace ?? namespace
+	const schemaNamespace = parsedSchemaNamespace || namespace || EMPTY_NAMESPACE
 	const schemaWithoutUnionOptions = Object.fromEntries(Object.entries(schema).filter(([name, _]) => isNaN(parseInt(name))))
 	const bareUnionSchemaUsedTypes = schema.references.map(({name}) => convertUserDefinedType(schemaNamespace, name, {}))
 
