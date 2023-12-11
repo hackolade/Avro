@@ -1,6 +1,3 @@
-# This GitHub action reports a fake test success in order to allow a PR to be added to the merge queue without executing
-# tests first. This action is triggered when the button "Merge when ready" is clicked for a PR.
-# See https://app.gitbook.com/o/HBtg1gLTy0nw4NaX0MaV/s/bfdwYZ4RTsNHasAMVAKe/
 name: PR tests
 on:
   pull_request:
@@ -13,7 +10,6 @@ jobs:
     steps:
       - uses: LouisBrunner/checks-action@v1.6.1
         with:
-          # The name below needs to match the name of the real test job on TeamCity
           name: Run PR tests (Plugins) (Plugins)
           conclusion: success
           token: ${{ secrets.GITHUB_TOKEN }}
