@@ -197,10 +197,11 @@ const convertCollectionReferences = (entities, options) => {
 				definition = entities.find(entity => entity.jsonSchema.GUID === field.ref).jsonSchema;
 			}
 			const definitionName = prepareName(definition.code || definition.collectionName || definition.name || field.parentCollectionName);
+			const namespace = definition.bucketName || field.parentBucketName;
 
 			const subject = getConfluentSubjectName({
 				name: definitionName,
-				namespace: definition.bucketName || field.parentBucketName,
+				namespace,
 				schemaType: definition.schemaType,
 				schemaTopic: definition.schemaTopic,
 				schemaNameStrategy: definition.schemaNameStrategy,
@@ -209,12 +210,13 @@ const convertCollectionReferences = (entities, options) => {
 
 			references = [...references, {
 				name: definitionName,
+				namespace,
 				subject,
 				path,
 				version: getConfluentSchemaVersion(definition.confluentVersion),
 			}];
 
-			const addNamespace = !entitiesIds.includes(field.ref) && options?.targetScriptOptions?.keyword !== SCRIPT_TYPES.SCHEMA_REGISTRY;
+			const addNamespace = !entitiesIds.includes(field.ref);
 
 			return {
 				...field,
@@ -237,7 +239,10 @@ const convertCollectionReferences = (entities, options) => {
 		return {
 			...entity,
 			jsonSchema,
-			references: filterReferencesByPath(entity, references).map(reference => _.omit(reference, 'path')),
+			references: filterReferencesByPath(entity, references).map(reference => _.omit({
+				...reference,
+				name: [reference.namespace, reference.name].filter(Boolean).join('.'),
+			}, ['path', 'namespace'])),
 		};
 	});
 
