@@ -48,8 +48,9 @@ const formatConfluentSchema = ({ settings, needMinify, isJsonFormat, avroSchema 
 	} = settings;
 
 	return getConfluentPostQuery({
-		schema: needMinify ? JSON.stringify(avroSchema) : avroSchema,
+		schema: avroSchema,
 		isJsonFormat,
+		needMinify,
 		name,
 		namespace,
 		confluentSubjectName,
@@ -95,23 +96,23 @@ const getConfluentPostQuery = ({
 	schemaNameStrategy,
 	confluentSubjectName,
 	confluentCompatibility,
+	needMinify,
 	isJsonFormat,
 	references,
 	schema,
 }) => {
 	const subjectName = getConfluentSubjectName({ name, namespace, schemaType, schemaTopic, schemaNameStrategy, confluentSubjectName });
 	const compatibilityRequest = confluentCompatibility ? `PUT /config/${subjectName} HTTP/1.1\n{ "compatibility": "${confluentCompatibility}" }\n\n` : '';
-	const requestBody = JSON.stringify(
-		{ schema, schemaType: 'AVRO', ...(!_.isEmpty(references) && { references: _.uniqBy(references, 'name') }) },
-		null,
-		4
-	);
+	const requestBody = { schema, schemaType: 'AVRO', ...(!_.isEmpty(references) && { references: _.uniqBy(references, 'name') }) };
 
 	if (isJsonFormat) {
-		return requestBody;
+		return stringifyCommon(needMinify, {
+			...requestBody,
+			schema: JSON.stringify(schema),
+		});
 	}
 
-	return `${compatibilityRequest}POST /subjects/${subjectName}/versions\n${requestBody}`;
+	return `${compatibilityRequest}POST /subjects/${subjectName}/versions\n${stringifyCommon(needMinify, requestBody)}`;
 };
 
 const formatAzureSchemaRegistry = ({ settings, needMinify, isJsonFormat, avroSchema }) => {
