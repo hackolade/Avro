@@ -216,12 +216,10 @@ const convertCollectionReferences = (entities, options) => {
 				version: getConfluentSchemaVersion(definition.confluentVersion),
 			}];
 
-			const addNamespace = !entitiesIds.includes(field.ref);
-
 			return {
 				...field,
 				$ref: `#/definitions/${definitionName}`,
-				namespace: addNamespace && (field.namespace || field.parentBucketName),
+				namespace: field.namespace || field.parentBucketName,
 				default: field.nullable ? null : field.default,
 			};
 		});
