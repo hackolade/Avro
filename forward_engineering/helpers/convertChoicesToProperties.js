@@ -55,7 +55,11 @@ const convertChoiceToProperties = (schema, choice) => {
 				type: [],
 				choiceMeta
 			};
-		const multipleTypeAttributes = { ...field, name: prepareName(field.name || fieldName) };
+		const multipleTypeAttributes = {
+			...field,
+			type: field.$ref ? getTypeFromReference(field) : field.type,
+			name: prepareName(field.name || fieldName),
+		};
 		const multipleTypes = filterMultipleTypes(ensureArray(multipleField.type).concat(multipleTypeAttributes));
 		const type = _.isArray(multipleTypes) ? multipleTypes.map(typeSchema => typeSchema?.type || typeSchema) : multipleTypes?.type || multipleTypes;
 		const defaultFromSubschema = index === 0 ? multipleTypeAttributes.default : undefined;
