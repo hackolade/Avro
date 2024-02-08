@@ -1745,7 +1745,12 @@ making sure that you maintain a proper JSON format.
 				"propertyValidate": false,
 				"propertyType": "text",
 				"enableForReference": true,
-				"readonly": false
+				"readonly": false,
+				// it is used to override the dependency in the application
+				"dependency": {
+					"key": "type",
+					"value": "reference"
+				}
 			},
 			{
 				"propertyName": "Aliases",
