@@ -123,7 +123,7 @@ const resolveSymbolDefaultValue = udtItem => {
 
 	return {
 		..._.omit(udtItem, 'symbolDefault'),
-		default: udtItem.symbolDefault,
+		default: udtItem.default ?? udtItem.symbolDefault,
 	};
 };
 

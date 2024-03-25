@@ -139,19 +139,22 @@ making sure that you maintain a proper JSON format.
 				"validation": {
 					"required": true
 				},
-				"dependency": { 
-					"type": "and", 
-					"values": [{
-						"key": "required",
-						"value": false
-					}, {
-						"type": "not",
-						"values": {
-							"level": "parent",
-							"key": "childType",
-							"value": "array"
+				"dependency": {
+					"type": "and",
+					"values": [
+						{
+							"key": "required",
+							"value": false
+						},
+						{
+							"type": "not",
+							"values": {
+								"level": "parent",
+								"key": "childType",
+								"value": "array"
+							}
 						}
-					}]
+					]
 				}
 			},
 			{
@@ -159,11 +162,13 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "default",
 				"shouldValidate": true,
 				"propertyType": "text",
-				"dependency": [{
-					"level": "parent",
-					"key": "childType",
-					"value": "array"
-				}]
+				"dependency": [
+					{
+						"level": "parent",
+						"key": "childType",
+						"value": "array"
+					}
+				]
 			},
 			{
 				"propertyName": "Logical type",
@@ -173,10 +178,7 @@ making sure that you maintain a proper JSON format.
 				},
 				"shouldValidate": false,
 				"propertyType": "select",
-				"options": [
-					"",
-					"uuid"
-				]
+				"options": ["", "uuid"]
 			},
 			{
 				"propertyName": "Order",
@@ -184,11 +186,7 @@ making sure that you maintain a proper JSON format.
 				"shouldValidate": false,
 				"propertyTooltip": "Select from list of options",
 				"propertyType": "select",
-				"options": [
-					"ascending",
-					"descending",
-					"ignore"
-				]
+				"options": ["ascending", "descending", "ignore"]
 			},
 			{
 				"propertyName": "Aliases",
@@ -219,7 +217,7 @@ making sure that you maintain a proper JSON format.
 						"propertyKeyword": "metaValue",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": ""
 						}
@@ -236,10 +234,10 @@ making sure that you maintain a proper JSON format.
 							"java.lang.Float",
 							"java.math.BigDecimal"
 						],
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "avro.java.string"
-						}					
+						}
 					},
 					{
 						"propertyName": "Value",
@@ -247,7 +245,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for element",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-element"
 						}
@@ -258,7 +256,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for element class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-element-class"
 						}
@@ -269,7 +267,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-class"
 						}
@@ -280,7 +278,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for key class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-key-class"
 						}
@@ -315,10 +313,7 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "subtype",
 				"shouldValidate": false,
 				"propertyType": "select",
-				"options": [
-					"",
-					"decimal"
-				]
+				"options": ["", "decimal"]
 			},
 			{
 				"propertyName": "Precision",
@@ -368,19 +363,14 @@ making sure that you maintain a proper JSON format.
 						"propertyName": "Key",
 						"propertyKeyword": "metaKey",
 						"propertyType": "select",
-						"options": [
-							"java-element",
-							"java-element-class",
-							"java-class",
-							"java-key-class"
-						]
+						"options": ["java-element", "java-element-class", "java-class", "java-key-class"]
 					},
 					{
 						"propertyName": "Value",
 						"propertyKeyword": "metaValue",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": ""
 						}
@@ -391,7 +381,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for element",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-element"
 						}
@@ -402,7 +392,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for element class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-element-class"
 						}
@@ -413,7 +403,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-class"
 						}
@@ -424,7 +414,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for key class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-key-class"
 						}
@@ -452,23 +442,21 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "mode",
 				"shouldValidate": false,
 				"propertyType": "select",
-				"options": [
-					"int",
-					"long",
-					"float",
-					"double"
-				],
+				"options": ["int", "long", "float", "double"],
 				"data": "options",
 				"valueType": "string",
 				"dependency": {
 					"type": "not",
-					"values": [{
-						"key": "childType",
-						"value": "bytes"
-					},{
-						"key": "childType",
-						"value": "fixed"
-					}]
+					"values": [
+						{
+							"key": "childType",
+							"value": "bytes"
+						},
+						{
+							"key": "childType",
+							"value": "fixed"
+						}
+					]
 				}
 			},
 			{
@@ -479,11 +467,7 @@ making sure that you maintain a proper JSON format.
 				},
 				"shouldValidate": false,
 				"propertyType": "select",
-				"options": [
-					"",
-					"date",
-					"time-millis"
-				],
+				"options": ["", "date", "time-millis"],
 				"dependency": {
 					"key": "mode",
 					"value": "int"
@@ -516,11 +500,7 @@ making sure that you maintain a proper JSON format.
 				"shouldValidate": false,
 				"propertyTooltip": "Select from list of options",
 				"propertyType": "select",
-				"options": [
-					"ascending",
-					"descending",
-					"ignore"
-				]
+				"options": ["ascending", "descending", "ignore"]
 			},
 			"required",
 			{
@@ -531,19 +511,22 @@ making sure that you maintain a proper JSON format.
 				"validation": {
 					"required": true
 				},
-				"dependency": { 
-					"type": "and", 
-					"values": [{
-						"key": "required",
-						"value": false
-					}, {
-						"type": "not",
-						"values": {
-							"level": "parent",
-							"key": "childType",
-							"value": "array"
+				"dependency": {
+					"type": "and",
+					"values": [
+						{
+							"key": "required",
+							"value": false
+						},
+						{
+							"type": "not",
+							"values": {
+								"level": "parent",
+								"key": "childType",
+								"value": "array"
+							}
 						}
-					}]
+					]
 				}
 			},
 			{
@@ -551,11 +534,13 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "default",
 				"shouldValidate": true,
 				"propertyType": "numeric",
-				"dependency": [{
-					"level": "parent",
-					"key": "childType",
-					"value": "array"
-				}]
+				"dependency": [
+					{
+						"level": "parent",
+						"key": "childType",
+						"value": "array"
+					}
+				]
 			},
 			{
 				"propertyName": "Aliases",
@@ -573,19 +558,14 @@ making sure that you maintain a proper JSON format.
 						"propertyName": "Key",
 						"propertyKeyword": "metaKey",
 						"propertyType": "select",
-						"options": [
-							"java-element",
-							"java-element-class",
-							"java-class",
-							"java-key-class"
-						]
+						"options": ["java-element", "java-element-class", "java-class", "java-key-class"]
 					},
 					{
 						"propertyName": "Value",
 						"propertyKeyword": "metaValue",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": ""
 						}
@@ -596,7 +576,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for element",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-element"
 						}
@@ -607,7 +587,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for element class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-element-class"
 						}
@@ -618,7 +598,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-class"
 						}
@@ -629,7 +609,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for key class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-key-class"
 						}
@@ -669,27 +649,26 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "default",
 				"shouldValidate": true,
 				"propertyType": "select",
-				"options": [
-					"",
-					"true",
-					"false"
-				],
+				"options": ["", "true", "false"],
 				"validation": {
 					"required": true
 				},
-				"dependency": { 
-					"type": "and", 
-					"values": [{
-						"key": "required",
-						"value": false
-					}, {
-						"type": "not",
-						"values": {
-							"level": "parent",
-							"key": "childType",
-							"value": "array"
+				"dependency": {
+					"type": "and",
+					"values": [
+						{
+							"key": "required",
+							"value": false
+						},
+						{
+							"type": "not",
+							"values": {
+								"level": "parent",
+								"key": "childType",
+								"value": "array"
+							}
 						}
-					}]
+					]
 				}
 			},
 			{
@@ -697,16 +676,14 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "default",
 				"shouldValidate": true,
 				"propertyType": "select",
-				"options": [
-					"",
-					"true",
-					"false"
-				],
-				"dependency": [{
-					"level": "parent",
-					"key": "childType",
-					"value": "array"
-				}]
+				"options": ["", "true", "false"],
+				"dependency": [
+					{
+						"level": "parent",
+						"key": "childType",
+						"value": "array"
+					}
+				]
 			},
 			{
 				"propertyName": "Aliases",
@@ -724,19 +701,14 @@ making sure that you maintain a proper JSON format.
 						"propertyName": "Key",
 						"propertyKeyword": "metaKey",
 						"propertyType": "select",
-						"options": [
-							"java-element",
-							"java-element-class",
-							"java-class",
-							"java-key-class"
-						]
+						"options": ["java-element", "java-element-class", "java-class", "java-key-class"]
 					},
 					{
 						"propertyName": "Value",
 						"propertyKeyword": "metaValue",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": ""
 						}
@@ -747,7 +719,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for element",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-element"
 						}
@@ -758,7 +730,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for element class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-element-class"
 						}
@@ -769,7 +741,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-class"
 						}
@@ -780,7 +752,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for key class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-key-class"
 						}
@@ -812,19 +784,22 @@ making sure that you maintain a proper JSON format.
 				"validation": {
 					"enum": [null, "null", ""]
 				},
-				"dependency": { 
-					"type": "and", 
-					"values": [{
-						"key": "required",
-						"value": false
-					}, {
-						"type": "not",
-						"values": {
-							"level": "parent",
-							"key": "childType",
-							"value": "array"
+				"dependency": {
+					"type": "and",
+					"values": [
+						{
+							"key": "required",
+							"value": false
+						},
+						{
+							"type": "not",
+							"values": {
+								"level": "parent",
+								"key": "childType",
+								"value": "array"
+							}
 						}
-					}]
+					]
 				}
 			},
 			{
@@ -835,11 +810,13 @@ making sure that you maintain a proper JSON format.
 				"validation": {
 					"enum": [null, "null", ""]
 				},
-				"dependency": [{
-					"level": "parent",
-					"key": "childType",
-					"value": "array"
-				}]
+				"dependency": [
+					{
+						"level": "parent",
+						"key": "childType",
+						"value": "array"
+					}
+				]
 			},
 			"dependencies",
 			"comments"
@@ -940,19 +917,14 @@ making sure that you maintain a proper JSON format.
 						"propertyName": "Key",
 						"propertyKeyword": "metaKey",
 						"propertyType": "select",
-						"options": [
-							"java-element",
-							"java-element-class",
-							"java-class",
-							"java-key-class"
-						]
+						"options": ["java-element", "java-element-class", "java-class", "java-key-class"]
 					},
 					{
 						"propertyName": "Value",
 						"propertyKeyword": "metaValue",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": ""
 						}
@@ -963,7 +935,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for element",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-element"
 						}
@@ -974,7 +946,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for element class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-element-class"
 						}
@@ -985,7 +957,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-class"
 						}
@@ -996,7 +968,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for key class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-key-class"
 						}
@@ -1073,19 +1045,14 @@ making sure that you maintain a proper JSON format.
 						"propertyName": "Key",
 						"propertyKeyword": "metaKey",
 						"propertyType": "select",
-						"options": [
-							"java-element",
-							"java-element-class",
-							"java-class",
-							"java-key-class"
-						]
+						"options": ["java-element", "java-element-class", "java-class", "java-key-class"]
 					},
 					{
 						"propertyName": "Value",
 						"propertyKeyword": "metaValue",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": ""
 						}
@@ -1096,7 +1063,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for element",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-element"
 						}
@@ -1107,7 +1074,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for element class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-element-class"
 						}
@@ -1118,7 +1085,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-class"
 						}
@@ -1129,7 +1096,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for key class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-key-class"
 						}
@@ -1224,19 +1191,14 @@ making sure that you maintain a proper JSON format.
 						"propertyName": "Key",
 						"propertyKeyword": "metaKey",
 						"propertyType": "select",
-						"options": [
-							"java-element",
-							"java-element-class",
-							"java-class",
-							"java-key-class"
-						]
+						"options": ["java-element", "java-element-class", "java-class", "java-key-class"]
 					},
 					{
 						"propertyName": "Value",
 						"propertyKeyword": "metaValue",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": ""
 						}
@@ -1247,7 +1209,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for element",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-element"
 						}
@@ -1258,7 +1220,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for element class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-element-class"
 						}
@@ -1269,7 +1231,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-class"
 						}
@@ -1280,7 +1242,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for key class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-key-class"
 						}
@@ -1317,19 +1279,24 @@ making sure that you maintain a proper JSON format.
 					"required": true,
 					"in": "symbols"
 				},
-				"dependency": { 
-					"type": "and", 
-					"values": [{
-						"key": "required",
-						"value": false
-					}, {
-						"type": "not",
-						"values": {
-							"level": "parent",
-							"key": "childType",
-							"value": "array"
+				"dependency": {
+					"type": "and",
+					"values": [
+						{
+							"key": "required",
+							"value": false
+						},
+						{
+							"type": "not",
+							"values": [
+								{
+									"level": "parent",
+									"key": "childType",
+									"value": "array"
+								}
+							]
 						}
-					}]
+					]
 				}
 			},
 			{
@@ -1341,15 +1308,13 @@ making sure that you maintain a proper JSON format.
 					"in": "symbols"
 				},
 				"propertyType": "text",
-				"dependency": [{
-					"level": "parent",
-					"key": "childType",
-					"value": "array"
-				}, {
-					"level": "parent",
-					"key": "type",
-					"value": "definitions"
-				}]
+				"dependency": [
+					{
+						"level": "parent",
+						"key": "childType",
+						"value": "array"
+					}
+				]
 			},
 			{
 				"propertyName": "Type name",
@@ -1395,19 +1360,14 @@ making sure that you maintain a proper JSON format.
 						"propertyName": "Key",
 						"propertyKeyword": "metaKey",
 						"propertyType": "select",
-						"options": [
-							"java-element",
-							"java-element-class",
-							"java-class",
-							"java-key-class"
-						]
+						"options": ["java-element", "java-element-class", "java-class", "java-key-class"]
 					},
 					{
 						"propertyName": "Value",
 						"propertyKeyword": "metaValue",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": ""
 						}
@@ -1418,7 +1378,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for element",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-element"
 						}
@@ -1429,7 +1389,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for element class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-element-class"
 						}
@@ -1440,7 +1400,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-class"
 						}
@@ -1451,7 +1411,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for key class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-key-class"
 						}
@@ -1501,11 +1461,7 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "subtype",
 				"shouldValidate": false,
 				"propertyType": "select",
-				"options": [
-					"",
-					"decimal",
-					"duration"
-				]
+				"options": ["", "decimal", "duration"]
 			},
 			{
 				"propertyName": "Precision",
@@ -1584,19 +1540,14 @@ making sure that you maintain a proper JSON format.
 						"propertyName": "Key",
 						"propertyKeyword": "metaKey",
 						"propertyType": "select",
-						"options": [
-							"java-element",
-							"java-element-class",
-							"java-class",
-							"java-key-class"
-						]
+						"options": ["java-element", "java-element-class", "java-class", "java-key-class"]
 					},
 					{
 						"propertyName": "Value",
 						"propertyKeyword": "metaValue",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": ""
 						}
@@ -1607,7 +1558,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for element",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-element"
 						}
@@ -1618,7 +1569,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for element class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-element-class"
 						}
@@ -1629,7 +1580,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-class"
 						}
@@ -1640,7 +1591,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for key class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-key-class"
 						}
@@ -1661,7 +1612,8 @@ making sure that you maintain a proper JSON format.
 				"propertyTooltip": "Popup for multi-line text entry",
 				"propertyType": "details",
 				"template": "textarea"
-			},{
+			},
+			{
 				"propertyName": "Required",
 				"propertyKeyword": "required",
 				"propertyType": "checkbox",
@@ -1675,13 +1627,16 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "details",
 				"template": "textarea",
 				"markdown": false,
-				"dependency": [{
-					"key": "required",
-					"value": false
-				}, {
-					"key": "required",
-					"exist": false
-				}]
+				"dependency": [
+					{
+						"key": "required",
+						"value": false
+					},
+					{
+						"key": "required",
+						"exist": false
+					}
+				]
 			},
 			"comments"
 		],
@@ -1700,13 +1655,16 @@ making sure that you maintain a proper JSON format.
 				"validation": {
 					"required": true
 				},
-				"dependency": [{
-					"key": "required",
-					"value": false
-				}, {
-					"key": "required",
-					"exist": false
-				}]
+				"dependency": [
+					{
+						"key": "required",
+						"value": false
+					},
+					{
+						"key": "required",
+						"exist": false
+					}
+				]
 			},
 			{
 				"propertyName": "Doc",
@@ -1771,19 +1729,14 @@ making sure that you maintain a proper JSON format.
 						"propertyName": "Key",
 						"propertyKeyword": "metaKey",
 						"propertyType": "select",
-						"options": [
-							"java-element",
-							"java-element-class",
-							"java-class",
-							"java-key-class"
-						]
+						"options": ["java-element", "java-element-class", "java-class", "java-key-class"]
 					},
 					{
 						"propertyName": "Value",
 						"propertyKeyword": "metaValue",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": ""
 						}
@@ -1794,7 +1747,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for element",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-element"
 						}
@@ -1805,7 +1758,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for element class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-element-class"
 						}
@@ -1816,7 +1769,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-class"
 						}
@@ -1827,7 +1780,7 @@ making sure that you maintain a proper JSON format.
 						"propertyNameFull": "Meta value for key class",
 						"propertyTooltip": "",
 						"propertyType": "text",
-						"dependency": { 
+						"dependency": {
 							"key": "metaKey",
 							"value": "java-key-class"
 						}
