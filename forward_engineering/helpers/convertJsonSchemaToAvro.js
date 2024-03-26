@@ -206,7 +206,13 @@ const convertMultiple = schema => {
 				return typeSchema;
 			}
 
-			return simplifySchema({ ..._.omit(typeSchema, GENERAL_ATTRIBUTES), type: typeSchema.type });
+			const redundantAttributes =
+				typeSchema.type === 'enum' ? _.without(GENERAL_ATTRIBUTES, 'default') : GENERAL_ATTRIBUTES;
+
+			return simplifySchema({
+				..._.omit(typeSchema, redundantAttributes),
+				type: typeSchema.type,
+			});
 		}
 
 		const fieldType = type.type || getTypeFromReference(type) || DEFAULT_TYPE;
@@ -304,7 +310,7 @@ const handleField = (name, field) => {
 	return resolveFieldDefaultValue({
 		name: prepareName(name),
 		type: _.isArray(typeSchema.type) ? typeSchema.type : typeSchema,
-		default: !_.isUndefined(defaultValue) ? defaultValue : typeSchema?.default,
+		default: !_.isUndefined(defaultValue) || typeSchema?.type === 'enum' ? defaultValue : typeSchema?.default,
 		doc: field.$ref ? refDescription : description,
 		order,
 		aliases,
@@ -316,6 +322,10 @@ const resolveFieldDefaultValue = (field, type) => {
 	let udtItem = _.isString(type) && getUdtItem(type);
 
 	if (!udtItem || !isNamedType(udtItem.schema.type)) {
+		return field;
+	}
+
+	if(udtItem.schema.type === 'enum') {
 		return field;
 	}
 
