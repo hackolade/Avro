@@ -206,10 +206,8 @@ const convertMultiple = schema => {
 				return typeSchema;
 			}
 
-			const redundantAttributes = _.reject(
-				GENERAL_ATTRIBUTES,
-				attribute => attribute === 'default' && typeSchema.type === 'enum',
-			);
+			const redundantAttributes =
+				typeSchema.type === 'enum' ? _.without(GENERAL_ATTRIBUTES, 'default') : GENERAL_ATTRIBUTES;
 
 			return simplifySchema({
 				..._.omit(typeSchema, redundantAttributes),
