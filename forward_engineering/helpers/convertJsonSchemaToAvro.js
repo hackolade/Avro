@@ -137,7 +137,7 @@ const handleRequired = schema => {
 
 			return {
 				...result,
-				[key]: _.omit(property, 'default'),
+				[key]: { ..._.omit(property, 'default'), required: true },
 			};
 		}, {}),
 	};
@@ -302,7 +302,7 @@ const convertArray = schema => {
 };
 
 const handleField = (name, field) => {
-	const { description, refDescription, default: defaultValue, order, aliases, ...schema } = field;
+	const { description, refDescription, default: __defaultValue, order, aliases, ...schema } = field;
 	const typeSchema = convertSchema(schema);
 	const udt = getUdtItem(typeSchema);
 	const customProperties = udt?.customProperties || getCustomProperties(getFieldLevelConfig(schema.type), schema);
@@ -310,13 +310,25 @@ const handleField = (name, field) => {
 	return resolveFieldDefaultValue({
 		name: prepareName(name),
 		type: _.isArray(typeSchema.type) ? typeSchema.type : typeSchema,
-		default: !_.isUndefined(defaultValue) || typeSchema?.type === 'enum' ? defaultValue : typeSchema?.default,
+		default: getEnumDefaultValue(field, udt, typeSchema),
 		doc: field.$ref ? refDescription : description,
 		order,
 		aliases,
 		...customProperties,
 	}, typeSchema);
 };
+
+const getEnumDefaultValue = (field, udt, typeSchema) => {
+	if (!_.isUndefined(field?.default) || typeSchema?.type === 'enum') {
+		return field?.default;
+	}
+
+	if (field?.$ref && !field?.required && udt?.originalSchema?.type === 'enum') {
+		return udt?.originalSchema?.default;
+	}
+	
+	return typeSchema?.default;
+}
 
 const resolveFieldDefaultValue = (field, type) => {
 	let udtItem = _.isString(type) && getUdtItem(type);
@@ -392,6 +404,7 @@ const convertNamedType = (schema, schemaTypeKeysMap = {}) => {
 		addDefinitions({ [name]:  {
 			schema: { ...filterSchemaAttributes(schema), ..._.pick(schema, schemaTypeSpecificKeys) },
 			customProperties: getCustomProperties(getFieldLevelConfig(schema.type)),
+			originalSchema: schema,
 			used: true,
 		}});
 	}

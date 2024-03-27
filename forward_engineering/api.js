@@ -207,13 +207,14 @@ const convertSchemaToUserDefinedTypes = definitionsSchema => {
 		return {
 			name: prepareName(key),
 			schema: convertSchema(definition),
+			originalSchema: definition,
 			customProperties,
 		}
 	});
 
-	return definitions.reduce((result, { name, schema, customProperties }) => ({
+	return definitions.reduce((result, { name, schema, customProperties, originalSchema }) => ({
 		...result,
-		[name]: { schema, customProperties },
+		[name]: { schema, customProperties, originalSchema },
 	}), {});
 };
 

@@ -231,6 +231,7 @@ const convertCollectionReferences = (entities, options) => {
 			[reference.name]: {
 				isCollectionReference: true,
 				schema: {},
+				originalSchema: {},
 			}
 		}), {}));
 
