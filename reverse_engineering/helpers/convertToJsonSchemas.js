@@ -35,6 +35,8 @@ const convertToJsonSchemas = avroSchema => {
 };
 
 const convertSchema = ({ schema, namespace = EMPTY_NAMESPACE, avroFieldAttributes = {} }) => {
+	schema = setSymbolDefault(schema);
+
 	const fieldAttributes = getFieldAttributes({ attributes: avroFieldAttributes });
 	if (_.isArray(schema)) {
 		return convertUnion(namespace, schema);
@@ -52,10 +54,10 @@ const convertSchema = ({ schema, namespace = EMPTY_NAMESPACE, avroFieldAttribute
 	if (isBareUnionSchema(schema, type)) {
 		if (bareUnionSchemaIncludesOnlyReferences(schema)) {
 			/** This handler takes care about union which options are all references */
-			return convertBareUnionSchemaWithReferences(namespace, schema)
+			return convertBareUnionSchemaWithReferences(namespace, schema);
 		} else if (bareUnionSchemaIncludesOnlyDefinitionRecords(schema)) {
 			/** This handler takes care about union which options are all records defined inside the union itself */
-			return convertBareUnionSchemaWithRecordDefinitions(namespace, schema)
+			return convertBareUnionSchemaWithRecordDefinitions(namespace, schema);
 		}
 	}
 
@@ -72,7 +74,15 @@ const convertSchema = ({ schema, namespace = EMPTY_NAMESPACE, avroFieldAttribute
 };
 
 const setDefaultValue = (properties, defaultValue) => {
-	return { ...properties, ...(defaultValue && { default: properties.default || defaultValue })};
+	return { ...properties, ...(defaultValue && { default: properties.default || defaultValue }) };
+};
+
+const setSymbolDefault = schema => {
+	if (schema?.type !== 'enum') {
+		return schema;
+	}
+
+	return { ..._.omit(schema, 'default'), symbolDefault: schema.default };
 };
 
 const convertType = (parentNamespace, type, attributes) => {
@@ -188,11 +198,7 @@ const convertUnion = (namespace, types) => {
 
 const convertNumeric = (type, attributes) => ({ ...attributes, type: 'number', mode: type });
 
-const convertEnum = attributes => ({
-	..._.omit(attributes, 'default'),
-	...( attributes.default && { symbolDefault: attributes.default }),
-	type: 'enum',
-});
+const convertEnum = attributes => ({ ...attributes, type: 'enum' });
 
 const convertPrimitive = (type, attributes) => ({ ...attributes, type });
 
