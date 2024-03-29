@@ -1349,7 +1349,10 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "Symbol default",
 				"propertyKeyword": "symbolDefault",
-				"propertyType": "text"
+				"propertyType": "text",
+				"validation": {
+					"in": "symbols"
+				}
 			},
 			{
 				"propertyName": "Meta properties",
