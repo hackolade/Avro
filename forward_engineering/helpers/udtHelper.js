@@ -165,6 +165,10 @@ const addDefinitions = definitions => {
 	udt = { ...udt, ...definitions };
 };
 
+const clearDefinitions = () => {
+	udt = {};
+}
+
 const resetDefinitionsUsage = () => {
 	_ = dependencies.lodash;
 
@@ -343,6 +347,7 @@ module.exports = {
    resolveUdt,
    getUdtItem,
    addDefinitions,
+   clearDefinitions,
    convertSchemaToReference,
    resetDefinitionsUsage,
    convertCollectionReferences,

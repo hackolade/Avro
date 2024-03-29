@@ -5,9 +5,21 @@ const { SCRIPT_TYPES, SCHEMA_REGISTRIES_KEYS } = require('../shared/constants');
 const { parseJson, prepareName } = require('./helpers/generalHelper');
 const validateAvroScript = require('./helpers/validateAvroScript');
 const { formatAvroSchemaByType, getConfluentSubjectName } = require('./helpers/formatAvroSchemaByType');
-const { resolveUdt, addDefinitions, resetDefinitionsUsage, convertCollectionReferences, resolveNamespaceReferences } = require('./helpers/udtHelper');
+const {
+    resolveUdt,
+    addDefinitions,
+    resetDefinitionsUsage,
+    convertCollectionReferences,
+    resolveNamespaceReferences,
+    clearDefinitions,
+} = require('./helpers/udtHelper');
 const convertSchema = require('./helpers/convertJsonSchemaToAvro');
-const { initPluginConfiguration, getCustomProperties, getEntityLevelConfig, getFieldLevelConfig } = require('../shared/customProperties');
+const {
+    initPluginConfiguration,
+    getCustomProperties,
+    getEntityLevelConfig,
+    getFieldLevelConfig,
+} = require('../shared/customProperties');
 let _;
 
 const generateModelScript = (data, logger, cb, app) => {
@@ -23,8 +35,8 @@ const generateModelScript = (data, logger, cb, app) => {
 		const scriptType = getScriptType(data, modelData) || SCRIPT_TYPES.CONFLUENT_SCHEMA_REGISTRY;
 		const needMinify = isMinifyNeeded(options);
 
-		setUserDefinedTypes(externalDefinitions);
-		setUserDefinedTypes(modelDefinitions);
+		const convertedExternalDefinitions = convertSchemaToUserDefinedTypes(externalDefinitions)
+		const convertedModelDefinitions = convertSchemaToUserDefinedTypes(modelDefinitions)
 
 		const entities = (containers || [])
 			.flatMap(container => container.entities
@@ -40,6 +52,10 @@ const generateModelScript = (data, logger, cb, app) => {
 					internalDefinitions,
 					references,
 				} = entity;
+
+				clearDefinitions();
+				addDefinitions(convertedExternalDefinitions);
+				addDefinitions(convertedModelDefinitions);
 				setUserDefinedTypes(internalDefinitions);
 				resetDefinitionsUsage();
 
