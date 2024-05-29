@@ -2,7 +2,13 @@ const fs = require('fs');
 const path = require('path');
 const avro = require('avsc');
 const snappy = require('snappyjs');
-const ALLOWED_EXTENSIONS = ['.avro', '.avsc', '.confluent-avro', '.azureSchemaRegistry-avro','.pulsarSchemaRegistry-avro'];
+const ALLOWED_EXTENSIONS = [
+	'.avro',
+	'.avsc',
+	'.confluent-avro',
+	'.azureSchemaRegistry-avro',
+	'.pulsarSchemaRegistry-avro',
+];
 const SNAPPY_CHECKSUM_LENGTH = 4;
 
 const openAvroFile = async path => {
@@ -11,20 +17,21 @@ const openAvroFile = async path => {
 	return JSON.parse(content);
 };
 
-const getFileContent = path => new Promise((resolve, reject) => {
-	const extension = getExtension(path);
-	const respond = (err, content) => err ? reject(err) : resolve(content);
+const getFileContent = path =>
+	new Promise((resolve, reject) => {
+		const extension = getExtension(path);
+		const respond = (err, content) => (err ? reject(err) : resolve(content));
 
-	if (!ALLOWED_EXTENSIONS.includes(extension)) {
-		return respond(new Error(`The file ${path} is not recognized as Avro Schema or Data.`));
-	}
+		if (!ALLOWED_EXTENSIONS.includes(extension)) {
+			return respond(new Error(`The file ${path} is not recognized as Avro Schema or Data.`));
+		}
 
-	if (extension === '.avro') {
-		return readAvroData(path, respond);
-	}
+		if (extension === '.avro') {
+			return readAvroData(path, respond);
+		}
 
-	fs.readFile(path, 'utf-8', respond);
-});
+		fs.readFile(path, 'utf-8', respond);
+	});
 
 const readAvroData = (filePath, cb) => {
 	const codecs = {

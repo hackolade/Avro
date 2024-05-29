@@ -10,21 +10,21 @@
  */
 
 var fs = require('fs'),
-    path = require('path');
+	path = require('path');
 
 /** Default (asynchronous) file loading function for assembling IDLs. */
 function createImportHook() {
-  var imports = {};
-  return function (fpath, kind, cb) {
-    fpath = path.resolve(fpath);
-    if (imports[fpath]) {
-      // Already imported, return nothing to avoid duplicating attributes.
-      process.nextTick(cb);
-      return;
-    }
-    imports[fpath] = true;
-    fs.readFile(fpath, {encoding: 'utf8'}, cb);
-  };
+	var imports = {};
+	return function (fpath, kind, cb) {
+		fpath = path.resolve(fpath);
+		if (imports[fpath]) {
+			// Already imported, return nothing to avoid duplicating attributes.
+			process.nextTick(cb);
+			return;
+		}
+		imports[fpath] = true;
+		fs.readFile(fpath, { encoding: 'utf8' }, cb);
+	};
 }
 
 /**
@@ -36,23 +36,22 @@ function createImportHook() {
  * throw rather than return the error to the callback).
  */
 function createSyncImportHook() {
-  var imports = {};
-  return function (fpath, kind, cb) {
-    fpath = path.resolve(fpath);
-    if (imports[fpath]) {
-      cb();
-    } else {
-      imports[fpath] = true;
-      cb(null, fs.readFileSync(fpath, {encoding: 'utf8'}));
-    }
-  };
+	var imports = {};
+	return function (fpath, kind, cb) {
+		fpath = path.resolve(fpath);
+		if (imports[fpath]) {
+			cb();
+		} else {
+			imports[fpath] = true;
+			cb(null, fs.readFileSync(fpath, { encoding: 'utf8' }));
+		}
+	};
 }
 
-
 module.exports = {
-  createImportHook: createImportHook,
-  createSyncImportHook: createSyncImportHook,
-  // Proxy a few methods to better shim them for browserify.
-  existsSync: fs.existsSync,
-  readFileSync: fs.readFileSync
+	createImportHook: createImportHook,
+	createSyncImportHook: createSyncImportHook,
+	// Proxy a few methods to better shim them for browserify.
+	existsSync: fs.existsSync,
+	readFileSync: fs.readFileSync,
 };

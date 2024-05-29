@@ -1,7 +1,15 @@
 const { dependencies } = require('../../shared/appDependencies');
 const { filterAttributes, isNamedType } = require('../../shared/typeHelper');
 const { getUdtItem, convertSchemaToReference, addDefinitions } = require('./udtHelper');
-const { reorderAttributes, filterMultipleTypes, prepareName, simplifySchema, getDefaultName, convertName, compareSchemasByStructure, } = require('./generalHelper');
+const {
+	reorderAttributes,
+	filterMultipleTypes,
+	prepareName,
+	simplifySchema,
+	getDefaultName,
+	convertName,
+	compareSchemasByStructure,
+} = require('./generalHelper');
 const convertChoicesToProperties = require('./convertChoicesToProperties');
 const { GENERAL_ATTRIBUTES, META_VALUES_KEY_MAP } = require('../../shared/constants');
 const { getFieldLevelConfig, getCustomProperties } = require('../../shared/customProperties');
@@ -15,7 +23,7 @@ const convertSchema = schema => {
 	_ = dependencies.lodash;
 
 	if (isBareUnionSchema(schema)) {
-		return convertBareUnionSchema(schema)
+		return convertBareUnionSchema(schema);
 	}
 
 	schema = prepareSchema(schema);
@@ -38,7 +46,7 @@ const convertSchema = schema => {
 };
 
 const prepareSchema = schema => {
-	const typeSchema =  {
+	const typeSchema = {
 		...convertChoicesToProperties(schema),
 		type: !schema.type || (schema.$ref && !schema.choice) ? getTypeFromReference(schema) : getAvroType(schema.type),
 	};
@@ -50,21 +58,22 @@ const prepareSchema = schema => {
 	return {
 		..._.omit(typeSchema, ['nullable', '$ref']),
 		default: null,
-		type: [
-			'null',
-			typeSchema.type
-		],
+		type: ['null', typeSchema.type],
 	};
 };
 
-const isBareUnionSchema = (schema) => {
+const isBareUnionSchema = schema => {
 	if (!schema?.oneOf?.length || Object.values(schema?.properties ?? {}).length) {
-		return false
+		return false;
 	}
 
-	return schema.oneOf.every(option => option.$ref || option.ref)
-}
-const convertBareUnionSchema = (schema) => schema.oneOf.map(({confluentSubjectName, parentBucketName, name}) => confluentSubjectName ?? `${parentBucketName || schema.bucketName}.${name}`)
+	return schema.oneOf.every(option => option.$ref || option.ref);
+};
+const convertBareUnionSchema = schema =>
+	schema.oneOf.map(
+		({ confluentSubjectName, parentBucketName, name }) =>
+			confluentSubjectName ?? `${parentBucketName || schema.bucketName}.${name}`,
+	);
 
 const getAvroType = type => {
 	if (type === 'object') {
@@ -94,7 +103,7 @@ const convertDefault = schema => {
 
 	return {
 		...schema,
-		default: defaultValue
+		default: defaultValue,
 	};
 };
 
@@ -146,13 +155,13 @@ const handleRequired = schema => {
 const convertProperties = schema => {
 	if (!schema.properties) {
 		return schema;
-	};
+	}
 
 	const propertiesKey = schema.type === 'map' ? 'values' : 'fields';
 
 	return {
 		...schema,
-		[propertiesKey]: schema.properties
+		[propertiesKey]: schema.properties,
 	};
 };
 
@@ -172,7 +181,7 @@ const convertType = schema => {
 		return convertMultiple(schema);
 	}
 
-	switch(schema.type) {
+	switch (schema.type) {
 		case 'string':
 		case 'boolean':
 		case 'null':
@@ -199,30 +208,32 @@ const convertType = schema => {
 const filterSchemaAttributes = schema => filterAttributes(schema, schema.type);
 
 const convertMultiple = schema => {
-	const type = filterMultipleTypes(schema.type.map(type => {
-		if(_.isString(type)) {
-			const typeSchema = convertSchema({ ...schema, type });
-			if (_.isString(typeSchema)) {
-				return typeSchema;
+	const type = filterMultipleTypes(
+		schema.type.map(type => {
+			if (_.isString(type)) {
+				const typeSchema = convertSchema({ ...schema, type });
+				if (_.isString(typeSchema)) {
+					return typeSchema;
+				}
+
+				const redundantAttributes =
+					typeSchema.type === 'enum' ? _.without(GENERAL_ATTRIBUTES, 'default') : GENERAL_ATTRIBUTES;
+
+				return simplifySchema({
+					..._.omit(typeSchema, redundantAttributes),
+					type: typeSchema.type,
+				});
 			}
 
-			const redundantAttributes =
-				typeSchema.type === 'enum' ? _.without(GENERAL_ATTRIBUTES, 'default') : GENERAL_ATTRIBUTES;
+			const fieldType = type.type || getTypeFromReference(type) || DEFAULT_TYPE;
+			const typeAttributes = _.omit({ ...schema, ...type }, GENERAL_ATTRIBUTES);
 
-			return simplifySchema({
-				..._.omit(typeSchema, redundantAttributes),
-				type: typeSchema.type,
+			return convertSchema({
+				...typeAttributes,
+				type: fieldType,
 			});
-		}
-
-		const fieldType = type.type || getTypeFromReference(type) || DEFAULT_TYPE;
-		const typeAttributes = _.omit({ ...schema, ...type }, GENERAL_ATTRIBUTES);
-
-		return convertSchema({
-			...typeAttributes,
-			type: fieldType,
-		});
-	}));
+		}),
+	);
 
 	let union = filterSchemaAttributes(_.omit(schema, 'type'));
 	union = reorderAttributes(union);
@@ -251,11 +262,10 @@ const getLogicalTypeProperties = schema => {
 				...(schema.precision && { precision: schema.precision }),
 				...(schema.scale && { scale: schema.scale }),
 			};
-		default: 
+		default:
 			return { logicalType };
-	};
+	}
 };
-
 
 const convertMap = schema => {
 	return {
@@ -307,15 +317,18 @@ const handleField = (name, field) => {
 	const udt = getUdtItem(typeSchema);
 	const customProperties = udt?.customProperties || getCustomProperties(getFieldLevelConfig(schema.type), schema);
 
-	return resolveFieldDefaultValue({
-		name: prepareName(name),
-		type: _.isArray(typeSchema.type) ? typeSchema.type : typeSchema,
-		default: getEnumDefaultValue(field, udt, typeSchema),
-		doc: field.$ref ? refDescription : description,
-		order,
-		aliases,
-		...customProperties,
-	}, typeSchema);
+	return resolveFieldDefaultValue(
+		{
+			name: prepareName(name),
+			type: _.isArray(typeSchema.type) ? typeSchema.type : typeSchema,
+			default: getEnumDefaultValue(field, udt, typeSchema),
+			doc: field.$ref ? refDescription : description,
+			order,
+			aliases,
+			...customProperties,
+		},
+		typeSchema,
+	);
 };
 
 const getEnumDefaultValue = (field, udt, typeSchema) => {
@@ -326,9 +339,9 @@ const getEnumDefaultValue = (field, udt, typeSchema) => {
 	if (field?.$ref && !field?.required && udt?.originalSchema?.type === 'enum') {
 		return udt?.originalSchema?.default;
 	}
-	
+
 	return typeSchema?.default;
-}
+};
 
 const resolveFieldDefaultValue = (field, type) => {
 	let udtItem = _.isString(type) && getUdtItem(type);
@@ -337,7 +350,7 @@ const resolveFieldDefaultValue = (field, type) => {
 		return field;
 	}
 
-	if(udtItem.schema.type === 'enum') {
+	if (udtItem.schema.type === 'enum') {
 		return field;
 	}
 
@@ -361,12 +374,12 @@ const convertRecord = schema => {
  * Handler for named types (record, enum, fixed).
  * If this type is already defined, compare it with existing definition and return reference to it if they are equal.
  * If this type is not defined adds it to definitions.
- * 
- * 
- * @param {Object} schema 
+ *
+ *
+ * @param {Object} schema
  * @param {Object.<string, string>} [schemaTypeKeysMap] key map for properties on the schema type level which may have
- * collisions with the field level. For example: 
- * 
+ * collisions with the field level. For example:
+ *
  * record field with enum type schema may have default that provides default value for this field
  * and also default on the type schema level that provides default value from symbols list
  * {
@@ -379,9 +392,9 @@ const convertRecord = schema => {
  * 	  "symbols": ["symbol1", "symbol2"]
  * 	}
  * }
- * 
- * we use property named "symbolDefault" to distinguish this schema type default from field default 
- * 
+ *
+ * we use property named "symbolDefault" to distinguish this schema type default from field default
+ *
  * example of usage: { symbolDefault: 'default'}
  * key of this property is our custom property name on the schema type level, value is the Avro name of this property
  * @returns {Object}
@@ -394,19 +407,21 @@ const convertNamedType = (schema, schemaTypeKeysMap = {}) => {
 
 	if (
 		isAlreadyDefined &&
-		compareSchemasByStructure(schema, schemaFromUdt.schema) 
+		compareSchemasByStructure(schema, schemaFromUdt.schema)
 		// if schemas are not equal, model is not valid for Avro. There will be a validation error
 	) {
 		return convertSchemaToReference(schema);
 	}
 
 	if (!schemaFromUdt) {
-		addDefinitions({ [name]:  {
-			schema: { ...filterSchemaAttributes(schema), ..._.pick(schema, schemaTypeSpecificKeys) },
-			customProperties: getCustomProperties(getFieldLevelConfig(schema.type)),
-			originalSchema: schema,
-			used: true,
-		}});
+		addDefinitions({
+			[name]: {
+				schema: { ...filterSchemaAttributes(schema), ..._.pick(schema, schemaTypeSpecificKeys) },
+				customProperties: getCustomProperties(getFieldLevelConfig(schema.type)),
+				originalSchema: schema,
+				used: true,
+			},
+		});
 	}
 
 	return {
@@ -429,10 +444,10 @@ const convertNumber = schema => {
 	return {
 		...schema,
 		type: schema.mode || 'int',
-	}; 
+	};
 };
 
-const getUniqueItemsInArray = (items) => {
+const getUniqueItemsInArray = items => {
 	return _.uniqWith(items, (item1, item2) => {
 		item1 = normalizeSchema(item1);
 		item2 = normalizeSchema(item2);
@@ -444,7 +459,7 @@ const getUniqueItemsInArray = (items) => {
 	});
 };
 
-const normalizeSchema = schema => _.isString(schema) ? { type: schema } : schema;
+const normalizeSchema = schema => (_.isString(schema) ? { type: schema } : schema);
 
 const getDefault = schema => {
 	const defaultTypeSchema = _.isArray(schema.type) ? _.first(schema.type) : schema.type;
@@ -462,7 +477,7 @@ const getDefault = schema => {
 	return value;
 };
 
-const getMetaProperties = (metaProperties) => {
+const getMetaProperties = metaProperties => {
 	return metaProperties.reduce((props, property) => {
 		const metaValueKey = _.get(META_VALUES_KEY_MAP, property.metaKey, 'metaValue');
 

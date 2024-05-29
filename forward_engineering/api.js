@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 const { setDependencies, dependencies } = require('../shared/appDependencies');
 const { SCRIPT_TYPES, SCHEMA_REGISTRIES_KEYS } = require('../shared/constants');
@@ -6,19 +6,19 @@ const { parseJson, prepareName } = require('./helpers/generalHelper');
 const validateAvroScript = require('./helpers/validateAvroScript');
 const { formatAvroSchemaByType, getConfluentSubjectName } = require('./helpers/formatAvroSchemaByType');
 const {
-    resolveUdt,
-    addDefinitions,
-    resetDefinitionsUsage,
-    convertCollectionReferences,
-    resolveNamespaceReferences,
-    clearDefinitions,
+	resolveUdt,
+	addDefinitions,
+	resetDefinitionsUsage,
+	convertCollectionReferences,
+	resolveNamespaceReferences,
+	clearDefinitions,
 } = require('./helpers/udtHelper');
 const convertSchema = require('./helpers/convertJsonSchemaToAvro');
 const {
-    initPluginConfiguration,
-    getCustomProperties,
-    getEntityLevelConfig,
-    getFieldLevelConfig,
+	initPluginConfiguration,
+	getCustomProperties,
+	getEntityLevelConfig,
+	getFieldLevelConfig,
 } = require('../shared/customProperties');
 let _;
 
@@ -35,23 +35,16 @@ const generateModelScript = (data, logger, cb, app) => {
 		const scriptType = getScriptType(data, modelData) || SCRIPT_TYPES.CONFLUENT_SCHEMA_REGISTRY;
 		const needMinify = isMinifyNeeded(options);
 
-		const convertedExternalDefinitions = convertSchemaToUserDefinedTypes(externalDefinitions)
-		const convertedModelDefinitions = convertSchemaToUserDefinedTypes(modelDefinitions)
+		const convertedExternalDefinitions = convertSchemaToUserDefinedTypes(externalDefinitions);
+		const convertedModelDefinitions = convertSchemaToUserDefinedTypes(modelDefinitions);
 
 		const entities = (containers || [])
-			.flatMap(container => container.entities
-			.map(entityId => getEntityData(container, entityId)))
+			.flatMap(container => container.entities.map(entityId => getEntityData(container, entityId)))
 			.map(entity => ({ ...entity, jsonSchema: parseJson(entity.jsonSchema) }));
 
 		const script = handleCollectionReferences(entities, options).map(entity => {
 			try {
-				const {
-					containerData,
-					entityData,
-					jsonSchema,
-					internalDefinitions,
-					references,
-				} = entity;
+				const { containerData, entityData, jsonSchema, internalDefinitions, references } = entity;
 
 				clearDefinitions();
 				addDefinitions(convertedExternalDefinitions);
@@ -61,12 +54,12 @@ const generateModelScript = (data, logger, cb, app) => {
 
 				const settings = getSettings({ containerData, entityData, modelData, references });
 
-				return getScript({ 
+				return getScript({
 					scriptType,
 					needMinify,
 					settings,
 					avroSchema: convertJsonToAvro(jsonSchema, settings.name),
-				})
+				});
 			} catch (err) {
 				logger.log('error', { message: err.message, stack: err.stack }, 'Avro Forward-Engineering Error');
 				return '';
@@ -107,12 +100,13 @@ const generateScript = (data, logger, cb, app) => {
 		} = data;
 
 		setUserDefinedTypes(externalDefinitions);
-		setUserDefinedTypes(modelDefinitions)
+		setUserDefinedTypes(modelDefinitions);
 		setUserDefinedTypes(internalDefinitions);
 		resetDefinitionsUsage();
 		const isFromUi = options.origin === 'ui';
 
-		const { references, jsonSchema: resolvedJsonSchema } = _.first(handleCollectionReferences([{ jsonSchema: parseJson(jsonSchema) }], options)) || {};
+		const { references, jsonSchema: resolvedJsonSchema } =
+			_.first(handleCollectionReferences([{ jsonSchema: parseJson(jsonSchema) }], options)) || {};
 		const settings = getSettings({ containerData, entityData, modelData, references });
 		const script = getScript({
 			scriptType: getEntityScriptType(options, modelData),
@@ -124,11 +118,13 @@ const generateScript = (data, logger, cb, app) => {
 
 		if (!includeSamplesToScript(options)) {
 			const scriptType = options?.targetScriptOptions?.keyword;
-			const isCliSchemaRegistryFormat = !isFromUi && [
-				SCRIPT_TYPES.CONFLUENT_SCHEMA_REGISTRY,
-				SCRIPT_TYPES.AZURE_SCHEMA_REGISTRY,
-				SCRIPT_TYPES.PULSAR_SCHEMA_REGISTRY,
-			].includes(scriptType);
+			const isCliSchemaRegistryFormat =
+				!isFromUi &&
+				[
+					SCRIPT_TYPES.CONFLUENT_SCHEMA_REGISTRY,
+					SCRIPT_TYPES.AZURE_SCHEMA_REGISTRY,
+					SCRIPT_TYPES.PULSAR_SCHEMA_REGISTRY,
+				].includes(scriptType);
 
 			const isSchemaRegistry = scriptType === SCRIPT_TYPES.SCHEMA_REGISTRY || isCliSchemaRegistryFormat;
 			if (!isSchemaRegistry) {
@@ -139,8 +135,9 @@ const generateScript = (data, logger, cb, app) => {
 				{
 					title: 'Avro schemas',
 					fileName: getConfluentSubjectName(settings),
-					script
-				}]);
+					script,
+				},
+			]);
 		}
 
 		return cb(null, getScriptAndSampleResponse(script, data.jsonData));
@@ -155,9 +152,7 @@ const validate = (data, logger, cb, app) => {
 	initPluginConfiguration(data.pluginConfiguration);
 	_ = dependencies.lodash;
 
-	const targetScript = _.isArray(data.script)
-		? _.first(data.script)?.script
-		: data.script;
+	const targetScript = _.isArray(data.script) ? _.first(data.script)?.script : data.script;
 	const modelData = data.modelData[0] || {};
 	let scriptType = getScriptType(data, modelData);
 	if (!scriptType && targetScript.startsWith('POST /')) {
@@ -173,15 +168,19 @@ const getScriptType = (options, modelData) => {
 		return SCRIPT_TYPES[SCHEMA_REGISTRIES_KEYS[modelData?.schemaRegistryType]];
 	}
 
-	return options?.targetScriptOptions?.keyword || options?.targetScriptOptions?.format || SCRIPT_TYPES[SCHEMA_REGISTRIES_KEYS[modelData?.schemaRegistryType]];
-}
+	return (
+		options?.targetScriptOptions?.keyword ||
+		options?.targetScriptOptions?.format ||
+		SCRIPT_TYPES[SCHEMA_REGISTRIES_KEYS[modelData?.schemaRegistryType]]
+	);
+};
 const getEntityScriptType = (options, modelData) => {
 	if (options?.targetScriptOptions?.keyword === SCRIPT_TYPES.SCHEMA_REGISTRY) {
 		return SCRIPT_TYPES[SCHEMA_REGISTRIES_KEYS[modelData?.schemaRegistryType]];
 	}
 
 	return options?.targetScriptOptions?.keyword || SCRIPT_TYPES.COMMON;
-}
+};
 
 const getEntityData = (container, entityId) => {
 	const containerData = _.first(_.get(container, 'containerData', []));
@@ -190,20 +189,20 @@ const getEntityData = (container, entityId) => {
 	const entityData = _.first(container.entityData[entityId]);
 	const internalDefinitions = container.internalDefinitions[entityId];
 
-	return { containerData, jsonSchema, jsonData, entityData, internalDefinitions }
-}
+	return { containerData, jsonSchema, jsonData, entityData, internalDefinitions };
+};
 
 const convertJsonToAvro = (jsonSchema, schemaName) => {
 	jsonSchema = { ...jsonSchema, name: schemaName, type: 'record' };
 	const customProperties = getCustomProperties(getEntityLevelConfig(), jsonSchema);
 	const schema = convertSchema(jsonSchema);
 	if (Array.isArray(schema)) {
-		return schema
+		return schema;
 	}
 	const avroSchema = {
 		...(!_.isString(schema) && schema),
 		name: schemaName,
-		type: (_.isString(schema) ? schema : 'record'),
+		type: _.isString(schema) ? schema : 'record',
 		...customProperties,
 	};
 
@@ -225,22 +224,19 @@ const convertSchemaToUserDefinedTypes = definitionsSchema => {
 			schema: convertSchema(definition),
 			originalSchema: definition,
 			customProperties,
-		}
+		};
 	});
 
-	return definitions.reduce((result, { name, schema, customProperties, originalSchema }) => ({
-		...result,
-		[name]: { schema, customProperties, originalSchema },
-	}), {});
+	return definitions.reduce(
+		(result, { name, schema, customProperties, originalSchema }) => ({
+			...result,
+			[name]: { schema, customProperties, originalSchema },
+		}),
+		{},
+	);
 };
 
-const getScript = ({
-	settings,
-	scriptType,
-	isJsonFormat,
-	needMinify,
-	avroSchema,
-}) => {
+const getScript = ({ settings, scriptType, isJsonFormat, needMinify, avroSchema }) => {
 	return formatAvroSchemaByType({
 		avroSchema,
 		scriptType,
@@ -250,7 +246,7 @@ const getScript = ({
 	});
 };
 
-const getSettings = ({ containerData, entityData, modelData, references, }) => {
+const getSettings = ({ containerData, entityData, modelData, references }) => {
 	return {
 		name: getRootRecordName(entityData),
 		namespace: containerData?.name || '',
@@ -297,22 +293,23 @@ const setPropertyAsLast = key => avroSchema => {
 };
 
 const includeSamplesToScript = (options = {}) =>
-	!options?.targetScriptOptions?.cliOnly && (options.additionalOptions || []).find(option => option.id === 'INCLUDE_SAMPLES')?.value;
+	!options?.targetScriptOptions?.cliOnly &&
+	(options.additionalOptions || []).find(option => option.id === 'INCLUDE_SAMPLES')?.value;
 
 const getScriptAndSampleResponse = (script, sample) => {
 	return [
 		{
 			title: 'Avro schemas',
-			script
+			script,
 		},
 		{
 			title: 'Sample data',
 			script: sample,
 		},
-	]
+	];
 };
 
-const combineJsonData = (containersData) => {
+const combineJsonData = containersData => {
 	const parsedData = containersData.flatMap(containerData => Object.values(containerData.jsonData)).map(JSON.parse);
 	return JSON.stringify(parsedData, null, 4);
 };

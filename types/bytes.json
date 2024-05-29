@@ -22,15 +22,17 @@
 		"sample": "",
 		"metaProps": []
 	},
-	"descriptor": [{
-		"defaultValues": {
-			"precision": 38
-		},
-		"schema": {
-			"subtype": "decimal"
-		},
-		"mode": "decimal"
-	}],
+	"descriptor": [
+		{
+			"defaultValues": {
+				"precision": 38
+			},
+			"schema": {
+				"subtype": "decimal"
+			},
+			"mode": "decimal"
+		}
+	],
 	"subtypes": {
 		"bytes": {
 			"parentType": "string"

@@ -3,7 +3,7 @@
 		"modelName": "New model",
 		"dbVersion": "",
 		"dbVendor": "Avro",
-		"schemaNameStrategy":"TopicNameStrategy"
+		"schemaNameStrategy": "TopicNameStrategy"
 	},
 	"container": {
 		"name": "New_namespace",

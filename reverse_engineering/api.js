@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 const { setDependencies, dependencies } = require('../shared/appDependencies');
 const { adaptJsonSchema } = require('./adaptJsonSchema');
@@ -21,10 +21,16 @@ const reFromFile = async (data, logger, callback, app) => {
 
 		const { schemaRegistryType, schemaRegistryUrl } = _.first(getSchemasData(avroSchema));
 
-		return callback(null, getPackages(avroSchema, jsonSchemas), {
-			schemaRegistryType,
-			schemaRegistryUrl,
-		}, [],  'multipleSchema');
+		return callback(
+			null,
+			getPackages(avroSchema, jsonSchemas),
+			{
+				schemaRegistryType,
+				schemaRegistryUrl,
+			},
+			[],
+			'multipleSchema',
+		);
 	} catch (err) {
 		const errorData = handleErrorObject(err);
 		logger.log('error', errorData, 'Parsing Avro Schema Error');
@@ -33,16 +39,17 @@ const reFromFile = async (data, logger, callback, app) => {
 	}
 };
 
-
-
 const getPackages = (avroSchema, jsonSchemas) => {
 	const schemasData = getSchemasData(avroSchema);
-	const isAvroSchemaSplittedIntoMultipleJsonSchemas = schemasData.length === 1 && jsonSchemas.length > 1
-	const singleNamespaceForOneAvroSchemaSplittedIntoMultipleJsonSchemas = schemasData[0]?.namespace
+	const isAvroSchemaSplittedIntoMultipleJsonSchemas = schemasData.length === 1 && jsonSchemas.length > 1;
+	const singleNamespaceForOneAvroSchemaSplittedIntoMultipleJsonSchemas = schemasData[0]?.namespace;
 
 	return jsonSchemas.map((jsonSchema, index) => {
-		const { namespace, schemaType, schemaGroupName, confluentSubjectName, schemaTopic, confluentVersion } = schemasData[index] || {};
-		const schemaNamespace = isAvroSchemaSplittedIntoMultipleJsonSchemas ? singleNamespaceForOneAvroSchemaSplittedIntoMultipleJsonSchemas : namespace
+		const { namespace, schemaType, schemaGroupName, confluentSubjectName, schemaTopic, confluentVersion } =
+			schemasData[index] || {};
+		const schemaNamespace = isAvroSchemaSplittedIntoMultipleJsonSchemas
+			? singleNamespaceForOneAvroSchemaSplittedIntoMultipleJsonSchemas
+			: namespace;
 
 		const schemaNameStrategy = inferSchemaNameStrategy({
 			name: jsonSchema.title,
@@ -82,7 +89,7 @@ const getPackages = (avroSchema, jsonSchemas) => {
 				schemaGroupName: schemaGroupName,
 				confluentSubjectName: confluentSubjectName,
 				confluentVersion: confluentVersion,
-				...(schemaNameStrategy && { schemaNameStrategy }), 
+				...(schemaNameStrategy && { schemaNameStrategy }),
 			}),
 			references,
 		};
@@ -126,7 +133,7 @@ const inferSchemaNameStrategy = ({ name, namespace, confluentSubjectName, schema
 };
 
 const getSchemasData = avroSchema => {
-	avroSchema = _.isArray(avroSchema) ? avroSchema : [ avroSchema ];
+	avroSchema = _.isArray(avroSchema) ? avroSchema : [avroSchema];
 
 	return avroSchema.map(schema => ({
 		namespace: getNamespace(schema) || '',
@@ -138,6 +145,6 @@ const getSchemasData = avroSchema => {
 		schemaType: schema.schemaType,
 		confluentVersion: schema.version,
 	}));
-}
+};
 
 module.exports = { reFromFile, adaptJsonSchema };

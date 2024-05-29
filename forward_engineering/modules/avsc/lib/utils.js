@@ -19,11 +19,11 @@ var POOL = new BufferPool(4096);
  * @param size {Number} The buffer's size.
  */
 function newBuffer(size) {
-  if (typeof Buffer.alloc == 'function') {
-    return Buffer.alloc(size);
-  } else {
-    return new Buffer(size);
-  }
+	if (typeof Buffer.alloc == 'function') {
+		return Buffer.alloc(size);
+	} else {
+		return new Buffer(size);
+	}
 }
 
 /**
@@ -33,11 +33,11 @@ function newBuffer(size) {
  * @param enc {String} Encoding, used if data is a string.
  */
 function bufferFrom(data, enc) {
-  if (typeof Buffer.from == 'function') {
-    return Buffer.from(data, enc);
-  } else {
-    return new Buffer(data, enc);
-  }
+	if (typeof Buffer.from == 'function') {
+		return Buffer.from(data, enc);
+	} else {
+		return new Buffer(data, enc);
+	}
 }
 
 /**
@@ -45,7 +45,9 @@ function bufferFrom(data, enc) {
  *
  * @param s {String} The string.
  */
-function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+function capitalize(s) {
+	return s.charAt(0).toUpperCase() + s.slice(1);
+}
 
 /**
  * Compare two numbers.
@@ -53,7 +55,9 @@ function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
  * @param n1 {Number} The first one.
  * @param n2 {Number} The second one.
  */
-function compare(n1, n2) { return n1 === n2 ? 0 : (n1 < n2 ? -1 : 1); }
+function compare(n1, n2) {
+	return n1 === n2 ? 0 : n1 < n2 ? -1 : 1;
+}
 
 /**
  * Get option or default if undefined.
@@ -66,8 +70,8 @@ function compare(n1, n2) { return n1 === n2 ? 0 : (n1 < n2 ? -1 : 1); }
  * usual `||` idiom breaks down).
  */
 function getOption(opts, key, def) {
-  var value = opts[key];
-  return value === undefined ? def : value;
+	var value = opts[key];
+	return value === undefined ? def : value;
 }
 
 /**
@@ -77,10 +81,10 @@ function getOption(opts, key, def) {
  * @param algorithm {String} The algorithm used. Defaults to MD5.
  */
 function getHash(str, algorithm) {
-  algorithm = algorithm || 'md5';
-  var hash = crypto.createHash(algorithm);
-  hash.end(str);
-  return hash.read();
+	algorithm = algorithm || 'md5';
+	var hash = crypto.createHash(algorithm);
+	hash.end(str);
+	return hash.read();
 }
 
 /**
@@ -92,20 +96,20 @@ function getHash(str, algorithm) {
  * Returns -1 if not found, -2 if found multiple times.
  */
 function singleIndexOf(arr, v) {
-  var pos = -1;
-  var i, l;
-  if (!arr) {
-    return -1;
-  }
-  for (i = 0, l = arr.length; i < l; i++) {
-    if (arr[i] === v) {
-      if (pos >= 0) {
-        return -2;
-      }
-      pos = i;
-    }
-  }
-  return pos;
+	var pos = -1;
+	var i, l;
+	if (!arr) {
+		return -1;
+	}
+	for (i = 0, l = arr.length; i < l; i++) {
+		if (arr[i] === v) {
+			if (pos >= 0) {
+				return -2;
+			}
+			pos = i;
+		}
+	}
+	return pos;
 }
 
 /**
@@ -115,13 +119,13 @@ function singleIndexOf(arr, v) {
  * @param fn {Function} Function returning an element's key.
  */
 function toMap(arr, fn) {
-  var obj = {};
-  var i, elem;
-  for (i = 0; i < arr.length; i++) {
-    elem = arr[i];
-    obj[fn(elem)] = elem;
-  }
-  return obj;
+	var obj = {};
+	var i, elem;
+	for (i = 0; i < arr.length; i++) {
+		elem = arr[i];
+		obj[fn(elem)] = elem;
+	}
+	return obj;
 }
 
 /**
@@ -130,7 +134,9 @@ function toMap(arr, fn) {
  * @param obj {Object} Map.
  */
 function objectValues(obj) {
-  return Object.keys(obj).map(function (key) { return obj[key]; });
+	return Object.keys(obj).map(function (key) {
+		return obj[key];
+	});
 }
 
 /**
@@ -140,19 +146,19 @@ function objectValues(obj) {
  * @param fn {Function} Optional function to apply to each element.
  */
 function hasDuplicates(arr, fn) {
-  var obj = {};
-  var i, l, elem;
-  for (i = 0, l = arr.length; i < l; i++) {
-    elem = arr[i];
-    if (fn) {
-      elem = fn(elem);
-    }
-    if (obj[elem]) {
-      return true;
-    }
-    obj[elem] = true;
-  }
-  return false;
+	var obj = {};
+	var i, l, elem;
+	for (i = 0, l = arr.length; i < l; i++) {
+		elem = arr[i];
+		if (fn) {
+			elem = fn(elem);
+		}
+		if (obj[elem]) {
+			return true;
+		}
+		obj[elem] = true;
+	}
+	return false;
 }
 
 /**
@@ -164,16 +170,16 @@ function hasDuplicates(arr, fn) {
  * properties. Defaults to false.
  */
 function copyOwnProperties(src, dst, overwrite) {
-  var names = Object.getOwnPropertyNames(src);
-  var i, l, name;
-  for (i = 0, l = names.length; i < l; i++) {
-    name = names[i];
-    if (!dst.hasOwnProperty(name) || overwrite) {
-      var descriptor = Object.getOwnPropertyDescriptor(src, name);
-      Object.defineProperty(dst, name, descriptor);
-    }
-  }
-  return dst;
+	var names = Object.getOwnPropertyNames(src);
+	var i, l, name;
+	for (i = 0, l = names.length; i < l; i++) {
+		name = names[i];
+		if (!dst.hasOwnProperty(name) || overwrite) {
+			var descriptor = Object.getOwnPropertyDescriptor(src, name);
+			Object.defineProperty(dst, name, descriptor);
+		}
+	}
+	return dst;
 }
 
 /**
@@ -188,74 +194,73 @@ function copyOwnProperties(src, dst, overwrite) {
  * @param pos {Number} Starting position.
  */
 function jsonEnd(str, pos) {
-  pos = pos | 0;
+	pos = pos | 0;
 
-  // Handle the case of a simple literal separately.
-  var c = str.charAt(pos++);
-  if (/[\d-]/.test(c)) {
-    while (/[eE\d.+-]/.test(str.charAt(pos))) {
-      pos++;
-    }
-    return pos;
-  } else if (/true|null/.test(str.slice(pos - 1, pos + 3))) {
-    return pos + 3;
-  } else if (/false/.test(str.slice(pos - 1, pos + 4))) {
-    return pos + 4;
-  }
+	// Handle the case of a simple literal separately.
+	var c = str.charAt(pos++);
+	if (/[\d-]/.test(c)) {
+		while (/[eE\d.+-]/.test(str.charAt(pos))) {
+			pos++;
+		}
+		return pos;
+	} else if (/true|null/.test(str.slice(pos - 1, pos + 3))) {
+		return pos + 3;
+	} else if (/false/.test(str.slice(pos - 1, pos + 4))) {
+		return pos + 4;
+	}
 
-  // String, object, or array.
-  var depth = 0;
-  var literal = false;
-  do {
-    switch (c) {
-    case '{':
-    case '[':
-      if (!literal) { depth++; }
-      break;
-    case '}':
-    case ']':
-      if (!literal && !--depth) {
-        return pos;
-      }
-      break;
-    case '"':
-      literal = !literal;
-      if (!depth && !literal) {
-        return pos;
-      }
-      break;
-    case '\\':
-      pos++; // Skip the next character.
-    }
-  } while ((c = str.charAt(pos++)));
+	// String, object, or array.
+	var depth = 0;
+	var literal = false;
+	do {
+		switch (c) {
+			case '{':
+			case '[':
+				if (!literal) {
+					depth++;
+				}
+				break;
+			case '}':
+			case ']':
+				if (!literal && !--depth) {
+					return pos;
+				}
+				break;
+			case '"':
+				literal = !literal;
+				if (!depth && !literal) {
+					return pos;
+				}
+				break;
+			case '\\':
+				pos++; // Skip the next character.
+		}
+	} while ((c = str.charAt(pos++)));
 
-  return -1;
+	return -1;
 }
 
 /** "Abstract" function to help with "subclassing". */
-function abstractFunction() { throw new Error('abstract'); }
+function abstractFunction() {
+	throw new Error('abstract');
+}
 
 /** Batch-deprecate "getters" from an object's prototype. */
 function addDeprecatedGetters(obj, props) {
-  var proto = obj.prototype;
-  var i, l, prop, getter;
-  for (i = 0, l = props.length; i < l; i++) {
-    prop = props[i];
-    getter = 'get' + capitalize(prop);
-    proto[getter] = util.deprecate(
-      createGetter(prop),
-      'use `.' + prop + '` instead of `.' + getter + '()`'
-    );
-  }
+	var proto = obj.prototype;
+	var i, l, prop, getter;
+	for (i = 0, l = props.length; i < l; i++) {
+		prop = props[i];
+		getter = 'get' + capitalize(prop);
+		proto[getter] = util.deprecate(createGetter(prop), 'use `.' + prop + '` instead of `.' + getter + '()`');
+	}
 
-  function createGetter(prop) {
-    return function () {
-      var delegate = this[prop];
-      return typeof delegate == 'function' ?
-        delegate.apply(this, arguments) :
-        delegate;
-    };
-  }
+	function createGetter(prop) {
+		return function () {
+			var delegate = this[prop];
+			return typeof delegate == 'function' ? delegate.apply(this, arguments) : delegate;
+		};
+	}
 }
 
 /**
@@ -264,21 +269,21 @@ function addDeprecatedGetters(obj, props) {
  * This provides significant speedups in recent versions of node (6+).
  */
 function BufferPool(len) {
-  this._len = len | 0;
-  this._pos = 0;
-  this._slab = newBuffer(this._len);
+	this._len = len | 0;
+	this._pos = 0;
+	this._slab = newBuffer(this._len);
 }
 
 BufferPool.prototype.alloc = function (len) {
-  var maxLen = this._len;
-  if (len > maxLen) {
-    return newBuffer(len);
-  }
-  if (this._pos + len > maxLen) {
-    this._slab = newBuffer(maxLen);
-    this._pos = 0;
-  }
-  return this._slab.slice(this._pos, this._pos += len);
+	var maxLen = this._len;
+	if (len > maxLen) {
+		return newBuffer(len);
+	}
+	if (this._pos + len > maxLen) {
+		this._slab = newBuffer(maxLen);
+		this._pos = 0;
+	}
+	return this._slab.slice(this._pos, (this._pos += len));
 };
 
 /**
@@ -287,76 +292,78 @@ BufferPool.prototype.alloc = function (len) {
  * Inspired by: http://stackoverflow.com/a/424445/1062617
  */
 function Lcg(seed) {
-  var a = 1103515245;
-  var c = 12345;
-  var m = Math.pow(2, 31);
-  var state = Math.floor(seed || Math.random() * (m - 1));
+	var a = 1103515245;
+	var c = 12345;
+	var m = Math.pow(2, 31);
+	var state = Math.floor(seed || Math.random() * (m - 1));
 
-  this._max = m;
-  this._nextInt = function () { return state = (a * state + c) % m; };
+	this._max = m;
+	this._nextInt = function () {
+		return (state = (a * state + c) % m);
+	};
 }
 
 Lcg.prototype.nextBoolean = function () {
-  // jshint -W018
-  return !!(this._nextInt() % 2);
+	// jshint -W018
+	return !!(this._nextInt() % 2);
 };
 
 Lcg.prototype.nextInt = function (start, end) {
-  if (end === undefined) {
-    end = start;
-    start = 0;
-  }
-  end = end === undefined ? this._max : end;
-  return start + Math.floor(this.nextFloat() * (end - start));
+	if (end === undefined) {
+		end = start;
+		start = 0;
+	}
+	end = end === undefined ? this._max : end;
+	return start + Math.floor(this.nextFloat() * (end - start));
 };
 
 Lcg.prototype.nextFloat = function (start, end) {
-  if (end === undefined) {
-    end = start;
-    start = 0;
-  }
-  end = end === undefined ? 1 : end;
-  return start + (end - start) * this._nextInt() / this._max;
+	if (end === undefined) {
+		end = start;
+		start = 0;
+	}
+	end = end === undefined ? 1 : end;
+	return start + ((end - start) * this._nextInt()) / this._max;
 };
 
-Lcg.prototype.nextString = function(len, flags) {
-  len |= 0;
-  flags = flags || 'aA';
-  var mask = '';
-  if (flags.indexOf('a') > -1) {
-    mask += 'abcdefghijklmnopqrstuvwxyz';
-  }
-  if (flags.indexOf('A') > -1) {
-    mask += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  }
-  if (flags.indexOf('#') > -1) {
-    mask += '0123456789';
-  }
-  if (flags.indexOf('!') > -1) {
-    mask += '~`!@#$%^&*()_+-={}[]:";\'<>?,./|\\';
-  }
-  var result = [];
-  for (var i = 0; i < len; i++) {
-    result.push(this.choice(mask));
-  }
-  return result.join('');
+Lcg.prototype.nextString = function (len, flags) {
+	len |= 0;
+	flags = flags || 'aA';
+	var mask = '';
+	if (flags.indexOf('a') > -1) {
+		mask += 'abcdefghijklmnopqrstuvwxyz';
+	}
+	if (flags.indexOf('A') > -1) {
+		mask += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	}
+	if (flags.indexOf('#') > -1) {
+		mask += '0123456789';
+	}
+	if (flags.indexOf('!') > -1) {
+		mask += '~`!@#$%^&*()_+-={}[]:";\'<>?,./|\\';
+	}
+	var result = [];
+	for (var i = 0; i < len; i++) {
+		result.push(this.choice(mask));
+	}
+	return result.join('');
 };
 
 Lcg.prototype.nextBuffer = function (len) {
-  var arr = [];
-  var i;
-  for (i = 0; i < len; i++) {
-    arr.push(this.nextInt(256));
-  }
-  return bufferFrom(arr);
+	var arr = [];
+	var i;
+	for (i = 0; i < len; i++) {
+		arr.push(this.nextInt(256));
+	}
+	return bufferFrom(arr);
 };
 
 Lcg.prototype.choice = function (arr) {
-  var len = arr.length;
-  if (!len) {
-    throw new Error('choosing from empty array');
-  }
-  return arr[this.nextInt(len)];
+	var len = arr.length;
+	if (!len) {
+		throw new Error('choosing from empty array');
+	}
+	return arr[this.nextInt(len)];
 };
 
 /**
@@ -366,60 +373,60 @@ Lcg.prototype.choice = function (arr) {
  * can only be retrieved consecutively.
  */
 function OrderedQueue() {
-  this._index = 0;
-  this._items = [];
+	this._index = 0;
+	this._items = [];
 }
 
 OrderedQueue.prototype.push = function (item) {
-  var items = this._items;
-  var i = items.length | 0;
-  var j;
-  items.push(item);
-  while (i > 0 && items[i].index < items[j = ((i - 1) >> 1)].index) {
-    item = items[i];
-    items[i] = items[j];
-    items[j] = item;
-    i = j;
-  }
+	var items = this._items;
+	var i = items.length | 0;
+	var j;
+	items.push(item);
+	while (i > 0 && items[i].index < items[(j = (i - 1) >> 1)].index) {
+		item = items[i];
+		items[i] = items[j];
+		items[j] = item;
+		i = j;
+	}
 };
 
 OrderedQueue.prototype.pop = function () {
-  var items = this._items;
-  var len = (items.length - 1) | 0;
-  var first = items[0];
-  if (!first || first.index > this._index) {
-    return null;
-  }
-  this._index++;
-  if (!len) {
-    items.pop();
-    return first;
-  }
-  items[0] = items.pop();
-  var mid = len >> 1;
-  var i = 0;
-  var i1, i2, j, item, c, c1, c2;
-  while (i < mid) {
-    item = items[i];
-    i1 = (i << 1) + 1;
-    i2 = (i + 1) << 1;
-    c1 = items[i1];
-    c2 = items[i2];
-    if (!c2 || c1.index <= c2.index) {
-      c = c1;
-      j = i1;
-    } else {
-      c = c2;
-      j = i2;
-    }
-    if (c.index >= item.index) {
-      break;
-    }
-    items[j] = item;
-    items[i] = c;
-    i = j;
-  }
-  return first;
+	var items = this._items;
+	var len = (items.length - 1) | 0;
+	var first = items[0];
+	if (!first || first.index > this._index) {
+		return null;
+	}
+	this._index++;
+	if (!len) {
+		items.pop();
+		return first;
+	}
+	items[0] = items.pop();
+	var mid = len >> 1;
+	var i = 0;
+	var i1, i2, j, item, c, c1, c2;
+	while (i < mid) {
+		item = items[i];
+		i1 = (i << 1) + 1;
+		i2 = (i + 1) << 1;
+		c1 = items[i1];
+		c2 = items[i2];
+		if (!c2 || c1.index <= c2.index) {
+			c = c1;
+			j = i1;
+		} else {
+			c = c2;
+			j = i2;
+		}
+		if (c.index >= item.index) {
+			break;
+		}
+		items[j] = item;
+		items[i] = c;
+		i = j;
+	}
+	return first;
 };
 
 /**
@@ -431,11 +438,11 @@ OrderedQueue.prototype.pop = function () {
  * validity. See `isValid` below for more information.
  */
 function Tap(buf, pos) {
-  this.buf = buf;
-  this.pos = pos | 0;
-  if (this.pos < 0) {
-    throw new Error('negative offset');
-  }
+	this.buf = buf;
+	this.pos = pos | 0;
+	if (this.pos < 0) {
+		throw new Error('negative offset');
+	}
 }
 
 /**
@@ -446,7 +453,9 @@ function Tap(buf, pos) {
  * caller to always check that the read, skip, or write was valid by calling
  * this method.
  */
-Tap.prototype.isValid = function () { return this.pos <= this.buf.length; };
+Tap.prototype.isValid = function () {
+	return this.pos <= this.buf.length;
+};
 
 // Read, skip, write methods.
 //
@@ -456,254 +465,263 @@ Tap.prototype.isValid = function () { return this.pos <= this.buf.length; };
 // negative position offset (which will typically cause a failure in
 // `readFixed`).
 
-Tap.prototype.readBoolean = function () { return !!this.buf[this.pos++]; };
+Tap.prototype.readBoolean = function () {
+	return !!this.buf[this.pos++];
+};
 
-Tap.prototype.skipBoolean = function () { this.pos++; };
+Tap.prototype.skipBoolean = function () {
+	this.pos++;
+};
 
-Tap.prototype.writeBoolean = function (b) { this.buf[this.pos++] = !!b; };
+Tap.prototype.writeBoolean = function (b) {
+	this.buf[this.pos++] = !!b;
+};
 
 Tap.prototype.readInt = Tap.prototype.readLong = function () {
-  var n = 0;
-  var k = 0;
-  var buf = this.buf;
-  var b, h, f, fk;
+	var n = 0;
+	var k = 0;
+	var buf = this.buf;
+	var b, h, f, fk;
 
-  do {
-    b = buf[this.pos++];
-    h = b & 0x80;
-    n |= (b & 0x7f) << k;
-    k += 7;
-  } while (h && k < 28);
+	do {
+		b = buf[this.pos++];
+		h = b & 0x80;
+		n |= (b & 0x7f) << k;
+		k += 7;
+	} while (h && k < 28);
 
-  if (h) {
-    // Switch to float arithmetic, otherwise we might overflow.
-    f = n;
-    fk = 268435456; // 2 ** 28.
-    do {
-      b = buf[this.pos++];
-      f += (b & 0x7f) * fk;
-      fk *= 128;
-    } while (b & 0x80);
-    return (f % 2 ? -(f + 1) : f) / 2;
-  }
+	if (h) {
+		// Switch to float arithmetic, otherwise we might overflow.
+		f = n;
+		fk = 268435456; // 2 ** 28.
+		do {
+			b = buf[this.pos++];
+			f += (b & 0x7f) * fk;
+			fk *= 128;
+		} while (b & 0x80);
+		return (f % 2 ? -(f + 1) : f) / 2;
+	}
 
-  return (n >> 1) ^ -(n & 1);
+	return (n >> 1) ^ -(n & 1);
 };
 
 Tap.prototype.skipInt = Tap.prototype.skipLong = function () {
-  var buf = this.buf;
-  while (buf[this.pos++] & 0x80) {}
+	var buf = this.buf;
+	while (buf[this.pos++] & 0x80) {}
 };
 
 Tap.prototype.writeInt = Tap.prototype.writeLong = function (n) {
-  var buf = this.buf;
-  var f, m;
+	var buf = this.buf;
+	var f, m;
 
-  if (n >= -1073741824 && n < 1073741824) {
-    // Won't overflow, we can use integer arithmetic.
-    m = n >= 0 ? n << 1 : (~n << 1) | 1;
-    do {
-      buf[this.pos] = m & 0x7f;
-      m >>= 7;
-    } while (m && (buf[this.pos++] |= 0x80));
-  } else {
-    // We have to use slower floating arithmetic.
-    f = n >= 0 ? n * 2 : (-n * 2) - 1;
-    do {
-      buf[this.pos] = f & 0x7f;
-      f /= 128;
-    } while (f >= 1 && (buf[this.pos++] |= 0x80));
-  }
-  this.pos++;
+	if (n >= -1073741824 && n < 1073741824) {
+		// Won't overflow, we can use integer arithmetic.
+		m = n >= 0 ? n << 1 : (~n << 1) | 1;
+		do {
+			buf[this.pos] = m & 0x7f;
+			m >>= 7;
+		} while (m && (buf[this.pos++] |= 0x80));
+	} else {
+		// We have to use slower floating arithmetic.
+		f = n >= 0 ? n * 2 : -n * 2 - 1;
+		do {
+			buf[this.pos] = f & 0x7f;
+			f /= 128;
+		} while (f >= 1 && (buf[this.pos++] |= 0x80));
+	}
+	this.pos++;
 };
 
 Tap.prototype.readFloat = function () {
-  var buf = this.buf;
-  var pos = this.pos;
-  this.pos += 4;
-  if (this.pos > buf.length) {
-    return;
-  }
-  return this.buf.readFloatLE(pos);
+	var buf = this.buf;
+	var pos = this.pos;
+	this.pos += 4;
+	if (this.pos > buf.length) {
+		return;
+	}
+	return this.buf.readFloatLE(pos);
 };
 
-Tap.prototype.skipFloat = function () { this.pos += 4; };
+Tap.prototype.skipFloat = function () {
+	this.pos += 4;
+};
 
 Tap.prototype.writeFloat = function (f) {
-  var buf = this.buf;
-  var pos = this.pos;
-  this.pos += 4;
-  if (this.pos > buf.length) {
-    return;
-  }
-  return this.buf.writeFloatLE(f, pos);
+	var buf = this.buf;
+	var pos = this.pos;
+	this.pos += 4;
+	if (this.pos > buf.length) {
+		return;
+	}
+	return this.buf.writeFloatLE(f, pos);
 };
 
 Tap.prototype.readDouble = function () {
-  var buf = this.buf;
-  var pos = this.pos;
-  this.pos += 8;
-  if (this.pos > buf.length) {
-    return;
-  }
-  return this.buf.readDoubleLE(pos);
+	var buf = this.buf;
+	var pos = this.pos;
+	this.pos += 8;
+	if (this.pos > buf.length) {
+		return;
+	}
+	return this.buf.readDoubleLE(pos);
 };
 
-Tap.prototype.skipDouble = function () { this.pos += 8; };
+Tap.prototype.skipDouble = function () {
+	this.pos += 8;
+};
 
 Tap.prototype.writeDouble = function (d) {
-  var buf = this.buf;
-  var pos = this.pos;
-  this.pos += 8;
-  if (this.pos > buf.length) {
-    return;
-  }
-  return this.buf.writeDoubleLE(d, pos);
+	var buf = this.buf;
+	var pos = this.pos;
+	this.pos += 8;
+	if (this.pos > buf.length) {
+		return;
+	}
+	return this.buf.writeDoubleLE(d, pos);
 };
 
 Tap.prototype.readFixed = function (len) {
-  var pos = this.pos;
-  this.pos += len;
-  if (this.pos > this.buf.length) {
-    return;
-  }
-  var fixed = POOL.alloc(len);
-  this.buf.copy(fixed, 0, pos, pos + len);
-  return fixed;
+	var pos = this.pos;
+	this.pos += len;
+	if (this.pos > this.buf.length) {
+		return;
+	}
+	var fixed = POOL.alloc(len);
+	this.buf.copy(fixed, 0, pos, pos + len);
+	return fixed;
 };
 
-Tap.prototype.skipFixed = function (len) { this.pos += len; };
+Tap.prototype.skipFixed = function (len) {
+	this.pos += len;
+};
 
 Tap.prototype.writeFixed = function (buf, len) {
-  len = len || buf.length;
-  var pos = this.pos;
-  this.pos += len;
-  if (this.pos > this.buf.length) {
-    return;
-  }
-  buf.copy(this.buf, pos, 0, len);
+	len = len || buf.length;
+	var pos = this.pos;
+	this.pos += len;
+	if (this.pos > this.buf.length) {
+		return;
+	}
+	buf.copy(this.buf, pos, 0, len);
 };
 
 Tap.prototype.readBytes = function () {
-  return this.readFixed(this.readLong());
+	return this.readFixed(this.readLong());
 };
 
 Tap.prototype.skipBytes = function () {
-  var len = this.readLong();
-  this.pos += len;
+	var len = this.readLong();
+	this.pos += len;
 };
 
 Tap.prototype.writeBytes = function (buf) {
-  var len = buf.length;
-  this.writeLong(len);
-  this.writeFixed(buf, len);
+	var len = buf.length;
+	this.writeLong(len);
+	this.writeFixed(buf, len);
 };
 
 /* istanbul ignore else */
 if (typeof Buffer.prototype.utf8Slice == 'function') {
-  // Use this optimized function when available.
-  Tap.prototype.readString = function () {
-    var len = this.readLong();
-    var pos = this.pos;
-    var buf = this.buf;
-    this.pos += len;
-    if (this.pos > buf.length) {
-      return;
-    }
-    return this.buf.utf8Slice(pos, pos + len);
-  };
+	// Use this optimized function when available.
+	Tap.prototype.readString = function () {
+		var len = this.readLong();
+		var pos = this.pos;
+		var buf = this.buf;
+		this.pos += len;
+		if (this.pos > buf.length) {
+			return;
+		}
+		return this.buf.utf8Slice(pos, pos + len);
+	};
 } else {
-  Tap.prototype.readString = function () {
-    var len = this.readLong();
-    var pos = this.pos;
-    var buf = this.buf;
-    this.pos += len;
-    if (this.pos > buf.length) {
-      return;
-    }
-    return this.buf.slice(pos, pos + len).toString();
-  };
+	Tap.prototype.readString = function () {
+		var len = this.readLong();
+		var pos = this.pos;
+		var buf = this.buf;
+		this.pos += len;
+		if (this.pos > buf.length) {
+			return;
+		}
+		return this.buf.slice(pos, pos + len).toString();
+	};
 }
 
 Tap.prototype.skipString = function () {
-  var len = this.readLong();
-  this.pos += len;
+	var len = this.readLong();
+	this.pos += len;
 };
 
 Tap.prototype.writeString = function (s) {
-  var len = Buffer.byteLength(s);
-  var buf = this.buf;
-  this.writeLong(len);
-  var pos = this.pos;
-  this.pos += len;
-  if (this.pos > buf.length) {
-    return;
-  }
-  if (len > 64 && typeof Buffer.prototype.utf8Write == 'function') {
-    // This method is roughly 50% faster than the manual implementation below
-    // for long strings (which is itself faster than the generic `Buffer#write`
-    // at least in most browsers, where `utf8Write` is not available).
-    buf.utf8Write(s, pos, len);
-  } else {
-    var i, l, c1, c2;
-    for (i = 0, l = len; i < l; i++) {
-      c1 = s.charCodeAt(i);
-      if (c1 < 0x80) {
-        buf[pos++] = c1;
-      } else if (c1 < 0x800) {
-        buf[pos++] = c1 >> 6 | 0xc0;
-        buf[pos++] = c1 & 0x3f | 0x80;
-      } else if (
-        (c1 & 0xfc00) === 0xd800 &&
-        ((c2 = s.charCodeAt(i + 1)) & 0xfc00) === 0xdc00
-      ) {
-        c1 = 0x10000 + ((c1 & 0x03ff) << 10) + (c2 & 0x03ff);
-        i++;
-        buf[pos++] = c1 >> 18 | 0xf0;
-        buf[pos++] = c1 >> 12 & 0x3f | 0x80;
-        buf[pos++] = c1 >> 6 & 0x3f | 0x80;
-        buf[pos++] = c1 & 0x3f | 0x80;
-      } else {
-        buf[pos++] = c1 >> 12 | 0xe0;
-        buf[pos++] = c1 >> 6 & 0x3f | 0x80;
-        buf[pos++] = c1 & 0x3f | 0x80;
-      }
-    }
-  }
+	var len = Buffer.byteLength(s);
+	var buf = this.buf;
+	this.writeLong(len);
+	var pos = this.pos;
+	this.pos += len;
+	if (this.pos > buf.length) {
+		return;
+	}
+	if (len > 64 && typeof Buffer.prototype.utf8Write == 'function') {
+		// This method is roughly 50% faster than the manual implementation below
+		// for long strings (which is itself faster than the generic `Buffer#write`
+		// at least in most browsers, where `utf8Write` is not available).
+		buf.utf8Write(s, pos, len);
+	} else {
+		var i, l, c1, c2;
+		for (i = 0, l = len; i < l; i++) {
+			c1 = s.charCodeAt(i);
+			if (c1 < 0x80) {
+				buf[pos++] = c1;
+			} else if (c1 < 0x800) {
+				buf[pos++] = (c1 >> 6) | 0xc0;
+				buf[pos++] = (c1 & 0x3f) | 0x80;
+			} else if ((c1 & 0xfc00) === 0xd800 && ((c2 = s.charCodeAt(i + 1)) & 0xfc00) === 0xdc00) {
+				c1 = 0x10000 + ((c1 & 0x03ff) << 10) + (c2 & 0x03ff);
+				i++;
+				buf[pos++] = (c1 >> 18) | 0xf0;
+				buf[pos++] = ((c1 >> 12) & 0x3f) | 0x80;
+				buf[pos++] = ((c1 >> 6) & 0x3f) | 0x80;
+				buf[pos++] = (c1 & 0x3f) | 0x80;
+			} else {
+				buf[pos++] = (c1 >> 12) | 0xe0;
+				buf[pos++] = ((c1 >> 6) & 0x3f) | 0x80;
+				buf[pos++] = (c1 & 0x3f) | 0x80;
+			}
+		}
+	}
 };
 
 /* istanbul ignore else */
 if (typeof Buffer.prototype.latin1Write == 'function') {
-  // `binaryWrite` has been renamed to `latin1Write` in Node v6.4.0, see
-  // https://github.com/nodejs/node/pull/7111. Note that the `'binary'`
-  // encoding argument still works however.
-  Tap.prototype.writeBinary = function (str, len) {
-    var pos = this.pos;
-    this.pos += len;
-    if (this.pos > this.buf.length) {
-      return;
-    }
-    this.buf.latin1Write(str, pos, len);
-  };
+	// `binaryWrite` has been renamed to `latin1Write` in Node v6.4.0, see
+	// https://github.com/nodejs/node/pull/7111. Note that the `'binary'`
+	// encoding argument still works however.
+	Tap.prototype.writeBinary = function (str, len) {
+		var pos = this.pos;
+		this.pos += len;
+		if (this.pos > this.buf.length) {
+			return;
+		}
+		this.buf.latin1Write(str, pos, len);
+	};
 } else if (typeof Buffer.prototype.binaryWrite == 'function') {
-  Tap.prototype.writeBinary = function (str, len) {
-    var pos = this.pos;
-    this.pos += len;
-    if (this.pos > this.buf.length) {
-      return;
-    }
-    this.buf.binaryWrite(str, pos, len);
-  };
+	Tap.prototype.writeBinary = function (str, len) {
+		var pos = this.pos;
+		this.pos += len;
+		if (this.pos > this.buf.length) {
+			return;
+		}
+		this.buf.binaryWrite(str, pos, len);
+	};
 } else {
-  // Slowest implementation.
-  Tap.prototype.writeBinary = function (s, len) {
-    var pos = this.pos;
-    this.pos += len;
-    if (this.pos > this.buf.length) {
-      return;
-    }
-    this.buf.write(s, pos, len, 'binary');
-  };
+	// Slowest implementation.
+	Tap.prototype.writeBinary = function (s, len) {
+		var pos = this.pos;
+		this.pos += len;
+		if (this.pos > this.buf.length) {
+			return;
+		}
+		this.buf.write(s, pos, len, 'binary');
+	};
 }
 
 // Binary comparison methods.
@@ -716,41 +734,41 @@ if (typeof Buffer.prototype.latin1Write == 'function') {
 // buffers.
 
 Tap.prototype.matchBoolean = function (tap) {
-  return this.buf[this.pos++] - tap.buf[tap.pos++];
+	return this.buf[this.pos++] - tap.buf[tap.pos++];
 };
 
 Tap.prototype.matchInt = Tap.prototype.matchLong = function (tap) {
-  var n1 = this.readLong();
-  var n2 = tap.readLong();
-  return n1 === n2 ? 0 : (n1 < n2 ? -1 : 1);
+	var n1 = this.readLong();
+	var n2 = tap.readLong();
+	return n1 === n2 ? 0 : n1 < n2 ? -1 : 1;
 };
 
 Tap.prototype.matchFloat = function (tap) {
-  var n1 = this.readFloat();
-  var n2 = tap.readFloat();
-  return n1 === n2 ? 0 : (n1 < n2 ? -1 : 1);
+	var n1 = this.readFloat();
+	var n2 = tap.readFloat();
+	return n1 === n2 ? 0 : n1 < n2 ? -1 : 1;
 };
 
 Tap.prototype.matchDouble = function (tap) {
-  var n1 = this.readDouble();
-  var n2 = tap.readDouble();
-  return n1 === n2 ? 0 : (n1 < n2 ? -1 : 1);
+	var n1 = this.readDouble();
+	var n2 = tap.readDouble();
+	return n1 === n2 ? 0 : n1 < n2 ? -1 : 1;
 };
 
 Tap.prototype.matchFixed = function (tap, len) {
-  return this.readFixed(len).compare(tap.readFixed(len));
+	return this.readFixed(len).compare(tap.readFixed(len));
 };
 
 Tap.prototype.matchBytes = Tap.prototype.matchString = function (tap) {
-  var l1 = this.readLong();
-  var p1 = this.pos;
-  this.pos += l1;
-  var l2 = tap.readLong();
-  var p2 = tap.pos;
-  tap.pos += l2;
-  var b1 = this.buf.slice(p1, this.pos);
-  var b2 = tap.buf.slice(p2, tap.pos);
-  return b1.compare(b2);
+	var l1 = this.readLong();
+	var p1 = this.pos;
+	this.pos += l1;
+	var l2 = tap.readLong();
+	var p2 = tap.pos;
+	tap.pos += l2;
+	var b1 = this.buf.slice(p1, this.pos);
+	var b2 = tap.buf.slice(p2, tap.pos);
+	return b1.compare(b2);
 };
 
 // Functions for supporting custom long classes.
@@ -759,87 +777,83 @@ Tap.prototype.matchBytes = Tap.prototype.matchString = function (tap) {
 // worry about Avro's zigzag encoding, we directly expose longs as unpacked.
 
 Tap.prototype.unpackLongBytes = function () {
-  var res = newBuffer(8);
-  var n = 0;
-  var i = 0; // Byte index in target buffer.
-  var j = 6; // Bit offset in current target buffer byte.
-  var buf = this.buf;
-  var b, neg;
+	var res = newBuffer(8);
+	var n = 0;
+	var i = 0; // Byte index in target buffer.
+	var j = 6; // Bit offset in current target buffer byte.
+	var buf = this.buf;
+	var b, neg;
 
-  b = buf[this.pos++];
-  neg = b & 1;
-  res.fill(0);
+	b = buf[this.pos++];
+	neg = b & 1;
+	res.fill(0);
 
-  n |= (b & 0x7f) >> 1;
-  while (b & 0x80) {
-    b = buf[this.pos++];
-    n |= (b & 0x7f) << j;
-    j += 7;
-    if (j >= 8) {
-      // Flush byte.
-      j -= 8;
-      res[i++] = n;
-      n >>= 8;
-    }
-  }
-  res[i] = n;
+	n |= (b & 0x7f) >> 1;
+	while (b & 0x80) {
+		b = buf[this.pos++];
+		n |= (b & 0x7f) << j;
+		j += 7;
+		if (j >= 8) {
+			// Flush byte.
+			j -= 8;
+			res[i++] = n;
+			n >>= 8;
+		}
+	}
+	res[i] = n;
 
-  if (neg) {
-    invert(res, 8);
-  }
+	if (neg) {
+		invert(res, 8);
+	}
 
-  return res;
+	return res;
 };
 
 Tap.prototype.packLongBytes = function (buf) {
-  var neg = (buf[7] & 0x80) >> 7;
-  var res = this.buf;
-  var j = 1;
-  var k = 0;
-  var m = 3;
-  var n;
+	var neg = (buf[7] & 0x80) >> 7;
+	var res = this.buf;
+	var j = 1;
+	var k = 0;
+	var m = 3;
+	var n;
 
-  if (neg) {
-    invert(buf, 8);
-    n = 1;
-  } else {
-    n = 0;
-  }
+	if (neg) {
+		invert(buf, 8);
+		n = 1;
+	} else {
+		n = 0;
+	}
 
-  var parts = [
-    buf.readUIntLE(0, 3),
-    buf.readUIntLE(3, 3),
-    buf.readUIntLE(6, 2)
-  ];
-  // Not reading more than 24 bits because we need to be able to combine the
-  // "carry" bits from the previous part and JavaScript only supports bitwise
-  // operations on 32 bit integers.
-  while (m && !parts[--m]) {} // Skip trailing 0s.
+	var parts = [buf.readUIntLE(0, 3), buf.readUIntLE(3, 3), buf.readUIntLE(6, 2)];
+	// Not reading more than 24 bits because we need to be able to combine the
+	// "carry" bits from the previous part and JavaScript only supports bitwise
+	// operations on 32 bit integers.
+	while (m && !parts[--m]) {} // Skip trailing 0s.
 
-  // Leading parts (if any), we never bail early here since we need the
-  // continuation bit to be set.
-  while (k < m) {
-    n |= parts[k++] << j;
-    j += 24;
-    while (j > 7) {
-      res[this.pos++] = (n & 0x7f) | 0x80;
-      n >>= 7;
-      j -= 7;
-    }
-  }
+	// Leading parts (if any), we never bail early here since we need the
+	// continuation bit to be set.
+	while (k < m) {
+		n |= parts[k++] << j;
+		j += 24;
+		while (j > 7) {
+			res[this.pos++] = (n & 0x7f) | 0x80;
+			n >>= 7;
+			j -= 7;
+		}
+	}
 
-  // Final part, similar to normal packing aside from the initial offset.
-  n |= parts[m] << j;
-  do {
-    res[this.pos] = n & 0x7f;
-    n >>= 7;
-  } while (n && (res[this.pos++] |= 0x80));
-  this.pos++;
+	// Final part, similar to normal packing aside from the initial offset.
+	n |= parts[m] << j;
+	do {
+		res[this.pos] = n & 0x7f;
+		n >>= 7;
+	} while (n && (res[this.pos++] |= 0x80));
+	this.pos++;
 
-  // Restore original buffer (could make this optional?).
-  if (neg) {
-    invert(buf, 8);
-  }
+	// Restore original buffer (could make this optional?).
+	if (neg) {
+		invert(buf, 8);
+	}
 };
 
 // Helpers.
@@ -851,28 +865,27 @@ Tap.prototype.packLongBytes = function (buf) {
  * @param len {Number} Buffer length (must be positive).
  */
 function invert(buf, len) {
-  while (len--) {
-    buf[len] = ~buf[len];
-  }
+	while (len--) {
+		buf[len] = ~buf[len];
+	}
 }
 
-
 module.exports = {
-  abstractFunction: abstractFunction,
-  addDeprecatedGetters: addDeprecatedGetters,
-  bufferFrom: bufferFrom,
-  capitalize: capitalize,
-  copyOwnProperties: copyOwnProperties,
-  getHash: getHash,
-  compare: compare,
-  getOption: getOption,
-  jsonEnd: jsonEnd,
-  newBuffer: newBuffer,
-  objectValues: objectValues,
-  toMap: toMap,
-  singleIndexOf: singleIndexOf,
-  hasDuplicates: hasDuplicates,
-  Lcg: Lcg,
-  OrderedQueue: OrderedQueue,
-  Tap: Tap
+	abstractFunction: abstractFunction,
+	addDeprecatedGetters: addDeprecatedGetters,
+	bufferFrom: bufferFrom,
+	capitalize: capitalize,
+	copyOwnProperties: copyOwnProperties,
+	getHash: getHash,
+	compare: compare,
+	getOption: getOption,
+	jsonEnd: jsonEnd,
+	newBuffer: newBuffer,
+	objectValues: objectValues,
+	toMap: toMap,
+	singleIndexOf: singleIndexOf,
+	hasDuplicates: hasDuplicates,
+	Lcg: Lcg,
+	OrderedQueue: OrderedQueue,
+	Tap: Tap,
 };

@@ -20,17 +20,8 @@ const DECIMAL_ATTRIBUTES = ['precision', 'scale'];
 
 const LOGICAL_TYPES_MAP = {
 	bytes: ['decimal'],
-	int: [
-		'date',
-		'time-millis'
-	],
-	long: [
-		'time-micros',
-		'timestamp-millis',
-		'timestamp-micros',
-		'local-timestamp-millis',
-		'local-timestamp-micros',
-	],
+	int: ['date', 'time-millis'],
+	long: ['time-micros', 'timestamp-millis', 'timestamp-micros', 'local-timestamp-millis', 'local-timestamp-micros'],
 	fixed: ['decimal', 'duration'],
 	string: ['uuid'],
 };
@@ -55,7 +46,8 @@ const filterAttributes = (attributes, type) => {
 	]);
 };
 
-const getLogicalTypeAttributes = (type, logicalType) => ['bytes', 'fixed'].includes(type) && logicalType === 'decimal' ? DECIMAL_ATTRIBUTES : [];
+const getLogicalTypeAttributes = (type, logicalType) =>
+	['bytes', 'fixed'].includes(type) && logicalType === 'decimal' ? DECIMAL_ATTRIBUTES : [];
 
 const isMetaProperty = key => META_PROPERTIES.includes(key);
 

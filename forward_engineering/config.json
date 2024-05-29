@@ -1,118 +1,116 @@
 {
-  "extension": "avsc",
-  "filterName": "Avro schema",
-  "namePrefix": "Avro Schema",
-  "resolvedDefinitions": false,
-  "validation": true,
-  "applyScriptToInstance": true,
-  "splitView": {
-    "byAdditionalOptions": [
-      "INCLUDE_SAMPLES"
-    ]
-  },
-  "options": [
-    {
-      "name": "Avro Schema",
-      "keyword": "avroSchema"
-    },
-    {
-      "name": "Schema Registry",
-      "keyword": "schemaRegistry",
-      "fileExtensions": [
-        {
-          "value": "json",
-          "label": "json"
-        }
-      ]
-    },
-    {
-      "name": "Azure Schema Registry",
-      "keyword": "azureSchemaRegistry",
-      "isApplicationHandler": true,
-      "fileExtensions": [
-        {
-          "value": "json",
-          "label": "json"
-        }
-      ],
-      "cliOnly": true
-    },
-    {
-      "name": "Confluent API Schema",
-      "keyword": "confluentSchemaRegistry",
-      "isApplicationHandler": true,
-      "fileExtensions": [
-        {
-          "value": "json",
-          "label": "json"
-        }
-      ],
-      "cliOnly": true
-    },
-    {
-      "name": "Pulsar Schema Registry",
-      "keyword": "pulsarSchemaRegistry",
-      "isApplicationHandler": true,
-      "fileExtensions": [
-        {
-          "value": "json",
-          "label": "json"
-        }
-      ],
-      "cliOnly": true
-    }
-  ],
-  "additionalOptions": [
-    {
-      "id": "resolveEntityReferences",
-      "value": false,
-      "name": "Resolve entity refs",
-      "level": {
-        "model": false
-      }
-    },
-    {
-      "id": "minify",
-      "value": false,
-      "name": "Minify"
-    },
-    {
-      "id": "INCLUDE_SAMPLES",
-      "value": false,
-      "name": "Display sample data",
-      "align": "right",
-      "level": {
-        "entity": true
-      }
-    }
-  ],
-  "level": {
-    "entity": true,
-    "model": {
-      "file": false,
-      "options": [
-        {
-          "name": "Confluent API Schema",
-          "keyword": "confluentSchemaRegistry",
-          "mode": "json",
-          "isApplicationHandler": true,
-          "cliOnly": true
-        },
-        {
-          "name": "Azure Schema Registry",
-          "keyword": "azureSchemaRegistry",
-          "mode": "json",
-          "isApplicationHandler": true,
-          "cliOnly": true
-        },
-        {
-          "name": "Pulsar Schema Registry",
-          "keyword": "pulsarSchemaRegistry",
-          "mode": "json",
-          "isApplicationHandler": true,
-          "cliOnly": true
-        }
-      ]
-    }
-  }
+	"extension": "avsc",
+	"filterName": "Avro schema",
+	"namePrefix": "Avro Schema",
+	"resolvedDefinitions": false,
+	"validation": true,
+	"applyScriptToInstance": true,
+	"splitView": {
+		"byAdditionalOptions": ["INCLUDE_SAMPLES"]
+	},
+	"options": [
+		{
+			"name": "Avro Schema",
+			"keyword": "avroSchema"
+		},
+		{
+			"name": "Schema Registry",
+			"keyword": "schemaRegistry",
+			"fileExtensions": [
+				{
+					"value": "json",
+					"label": "json"
+				}
+			]
+		},
+		{
+			"name": "Azure Schema Registry",
+			"keyword": "azureSchemaRegistry",
+			"isApplicationHandler": true,
+			"fileExtensions": [
+				{
+					"value": "json",
+					"label": "json"
+				}
+			],
+			"cliOnly": true
+		},
+		{
+			"name": "Confluent API Schema",
+			"keyword": "confluentSchemaRegistry",
+			"isApplicationHandler": true,
+			"fileExtensions": [
+				{
+					"value": "json",
+					"label": "json"
+				}
+			],
+			"cliOnly": true
+		},
+		{
+			"name": "Pulsar Schema Registry",
+			"keyword": "pulsarSchemaRegistry",
+			"isApplicationHandler": true,
+			"fileExtensions": [
+				{
+					"value": "json",
+					"label": "json"
+				}
+			],
+			"cliOnly": true
+		}
+	],
+	"additionalOptions": [
+		{
+			"id": "resolveEntityReferences",
+			"value": false,
+			"name": "Resolve entity refs",
+			"level": {
+				"model": false
+			}
+		},
+		{
+			"id": "minify",
+			"value": false,
+			"name": "Minify"
+		},
+		{
+			"id": "INCLUDE_SAMPLES",
+			"value": false,
+			"name": "Display sample data",
+			"align": "right",
+			"level": {
+				"entity": true
+			}
+		}
+	],
+	"level": {
+		"entity": true,
+		"model": {
+			"file": false,
+			"options": [
+				{
+					"name": "Confluent API Schema",
+					"keyword": "confluentSchemaRegistry",
+					"mode": "json",
+					"isApplicationHandler": true,
+					"cliOnly": true
+				},
+				{
+					"name": "Azure Schema Registry",
+					"keyword": "azureSchemaRegistry",
+					"mode": "json",
+					"isApplicationHandler": true,
+					"cliOnly": true
+				},
+				{
+					"name": "Pulsar Schema Registry",
+					"keyword": "pulsarSchemaRegistry",
+					"mode": "json",
+					"isApplicationHandler": true,
+					"cliOnly": true
+				}
+			]
+		}
+	}
 }

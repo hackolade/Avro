@@ -10,11 +10,11 @@
  */
 
 var avroServices = require('./avsc-services'),
-    utils = require('../../lib/utils');
+	utils = require('../../lib/utils');
 
 module.exports = {
-  Protocol: avroServices.Service,
-  assemble: avroServices.assembleProtocol
+	Protocol: avroServices.Service,
+	assemble: avroServices.assembleProtocol,
 };
 
 utils.copyOwnProperties(avroServices, module.exports);

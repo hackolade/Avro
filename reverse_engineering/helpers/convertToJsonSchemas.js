@@ -2,7 +2,14 @@ const { dependencies } = require('../../shared/appDependencies');
 const { isNamedType } = require('../../shared/typeHelper');
 const getFieldAttributes = require('./getFieldAttributes');
 const { getNamespace, getName, EMPTY_NAMESPACE } = require('./generalHelper');
-const { addDefinition, resolveRootReference, getDefinitions, filterUnusedDefinitions, updateRefs, isBareUnionSchema} = require('./referencesHelper');
+const {
+	addDefinition,
+	resolveRootReference,
+	getDefinitions,
+	filterUnusedDefinitions,
+	updateRefs,
+	isBareUnionSchema,
+} = require('./referencesHelper');
 const { getEntityLevelConfig, getFieldLevelConfig, getCustomProperties } = require('../../shared/customProperties');
 
 const DEFAULT_FIELD_NAME = 'New_field';
@@ -17,7 +24,7 @@ const convertToJsonSchemas = avroSchema => {
 
 	collectionReferences = avroSchema.references || [];
 	const convertedSchema = convertSchema({ schema: avroSchema });
-	const normalizedConvertedSchema = _.isArray(convertedSchema) ? convertedSchema : [ convertedSchema ]
+	const normalizedConvertedSchema = _.isArray(convertedSchema) ? convertedSchema : [convertedSchema];
 	const jsonSchemas = _.isArray(convertedSchema.type) ? convertedSchema.type : normalizedConvertedSchema;
 
 	return jsonSchemas.map((schema, index) => {
@@ -103,7 +110,7 @@ const convertType = (parentNamespace, type, attributes) => {
 		return convertPrimitive(type, attributes);
 	}
 
-	switch(type) {
+	switch (type) {
 		case 'fixed':
 			return convertFixed(attributes);
 		case 'map':
@@ -118,14 +125,18 @@ const convertType = (parentNamespace, type, attributes) => {
 };
 
 const convertBareUnionSchemaWithReferences = (namespace, schema) => {
-	const bareUnionSchemaType = 'record'
-	const schemaFullNameComponents = (schema?.schemaTopic || schema?.confluentSubjectName || '').split('.')
-	const [schemaName] = schemaFullNameComponents.slice(-1)
-	const parsedSchemaNamespace = schemaFullNameComponents.slice(0, -1).join('.')
-	
-	const schemaNamespace = parsedSchemaNamespace || namespace || EMPTY_NAMESPACE
-	const schemaWithoutUnionOptions = Object.fromEntries(Object.entries(schema).filter(([name, _]) => isNaN(parseInt(name))))
-	const bareUnionSchemaUsedTypes = schema.references.map(({name}) => convertUserDefinedType(schemaNamespace, name, {}))
+	const bareUnionSchemaType = 'record';
+	const schemaFullNameComponents = (schema?.schemaTopic || schema?.confluentSubjectName || '').split('.');
+	const [schemaName] = schemaFullNameComponents.slice(-1);
+	const parsedSchemaNamespace = schemaFullNameComponents.slice(0, -1).join('.');
+
+	const schemaNamespace = parsedSchemaNamespace || namespace || EMPTY_NAMESPACE;
+	const schemaWithoutUnionOptions = Object.fromEntries(
+		Object.entries(schema).filter(([name, _]) => isNaN(parseInt(name))),
+	);
+	const bareUnionSchemaUsedTypes = schema.references.map(({ name }) =>
+		convertUserDefinedType(schemaNamespace, name, {}),
+	);
 
 	const bareUnionSchema = {
 		...schemaWithoutUnionOptions,
@@ -134,13 +145,13 @@ const convertBareUnionSchemaWithReferences = (namespace, schema) => {
 		namespace: schemaNamespace,
 		fields: [
 			{
-				type: bareUnionSchemaUsedTypes
-			}
-		]
-	}
+				type: bareUnionSchemaUsedTypes,
+			},
+		],
+	};
 
-	const attributes = getFieldAttributes({ attributes: bareUnionSchema, type: bareUnionSchemaType })
-	const schemaFields = (attributes.fields || []).map(item => getBareUnionSchemaOneOf(item))
+	const attributes = getFieldAttributes({ attributes: bareUnionSchema, type: bareUnionSchemaType });
+	const schemaFields = (attributes.fields || []).map(item => getBareUnionSchemaOneOf(item));
 
 	const convertedBareUnionSchema = {
 		..._.omit(attributes, 'fields'),
@@ -150,36 +161,43 @@ const convertBareUnionSchemaWithReferences = (namespace, schema) => {
 	};
 
 	return addDefinition(schemaNamespace, setDefaultValue(convertedBareUnionSchema, {}));
-}
+};
 
 const convertBareUnionSchemaWithRecordDefinitions = (namespace, schema) => {
-	const recordDefinitionType = 'record'
-	const parsedSchemaNamespace = (schema?.schemaTopic || schema?.confluentSubjectName || '').split('.').slice(0, -1).join('.')
-	
-	const schemaNamespace = parsedSchemaNamespace ?? namespace
-	const unionOptionsKeysInSchema = Object.keys(schema).filter(key => !isNaN(parseInt(key)))
+	const recordDefinitionType = 'record';
+	const parsedSchemaNamespace = (schema?.schemaTopic || schema?.confluentSubjectName || '')
+		.split('.')
+		.slice(0, -1)
+		.join('.');
+
+	const schemaNamespace = parsedSchemaNamespace ?? namespace;
+	const unionOptionsKeysInSchema = Object.keys(schema).filter(key => !isNaN(parseInt(key)));
 	return unionOptionsKeysInSchema.map(key => {
-		const attributes = getFieldAttributes({ attributes: schema[key], type: recordDefinitionType })
-		const field = convertType(namespace, recordDefinitionType, getFieldAttributes({ attributes, type: recordDefinitionType }));
+		const attributes = getFieldAttributes({ attributes: schema[key], type: recordDefinitionType });
+		const field = convertType(
+			namespace,
+			recordDefinitionType,
+			getFieldAttributes({ attributes, type: recordDefinitionType }),
+		);
 
 		return addDefinition(schemaNamespace, field);
-	})
-}
+	});
+};
 
-const isReferenceUnionOption = option => _.isString(option) && isCollectionReference(option)
-const isRecordDefinitionUnionOption = option => _.isObject(option) && option.type === 'record'
+const isReferenceUnionOption = option => _.isString(option) && isCollectionReference(option);
+const isRecordDefinitionUnionOption = option => _.isObject(option) && option.type === 'record';
 
 const bareUnionSchemaIncludesOnlyReferences = schema => {
-	const unionOptionsKeysInSchema = Object.keys(schema).filter(key => !isNaN(parseInt(key)))
+	const unionOptionsKeysInSchema = Object.keys(schema).filter(key => !isNaN(parseInt(key)));
 
-	return unionOptionsKeysInSchema.every(optionKey => isReferenceUnionOption(schema[optionKey]))
-}
+	return unionOptionsKeysInSchema.every(optionKey => isReferenceUnionOption(schema[optionKey]));
+};
 
 const bareUnionSchemaIncludesOnlyDefinitionRecords = schema => {
-	const unionOptionsKeysInSchema = Object.keys(schema).filter(key => !isNaN(parseInt(key)))
+	const unionOptionsKeysInSchema = Object.keys(schema).filter(key => !isNaN(parseInt(key)));
 
-	return unionOptionsKeysInSchema.every(optionKey => isRecordDefinitionUnionOption(schema[optionKey]))
-}
+	return unionOptionsKeysInSchema.every(optionKey => isRecordDefinitionUnionOption(schema[optionKey]));
+};
 
 const convertUnion = (namespace, types) => {
 	if (types.length === 1) {
@@ -193,7 +211,7 @@ const convertUnion = (namespace, types) => {
 		return { ...schema, nullable: true };
 	}
 
-	return { type: types.map(schema => convertSchema({ schema, namespace })) }
+	return { type: types.map(schema => convertSchema({ schema, namespace })) };
 };
 
 const convertNumeric = (type, attributes) => ({ ...attributes, type: 'number', mode: type });
@@ -203,7 +221,9 @@ const convertEnum = attributes => ({ ...attributes, type: 'enum' });
 const convertPrimitive = (type, attributes) => ({ ...attributes, type });
 
 const convertMap = (namespace, attributes) => {
-	const valuesSchema = handleMultipleFields([{ ...convertSchema({ schema: attributes.values, namespace }), name: 'schema' }]);
+	const valuesSchema = handleMultipleFields([
+		{ ...convertSchema({ schema: attributes.values, namespace }), name: 'schema' },
+	]);
 
 	return {
 		..._.omit(attributes, 'values'),
@@ -229,11 +249,12 @@ const convertRecord = (namespace, attributes) => {
 
 const convertField = namespace => field => {
 	const fieldTypeProperties = convertSchema({ schema: field.type, namespace, avroFieldAttributes: field });
-	const type = _.isArray(fieldTypeProperties.type) ?
-		fieldTypeProperties.type.map(({ type }) => type) : fieldTypeProperties.type;
+	const type = _.isArray(fieldTypeProperties.type)
+		? fieldTypeProperties.type.map(({ type }) => type)
+		: fieldTypeProperties.type;
 	const customProperties = getCustomProperties(getFieldLevelConfig(type), field);
 	let fieldAttributes = getFieldAttributes({ attributes: field });
-	fieldAttributes = fieldTypeProperties.nullable ?  _.omit(fieldAttributes, 'default') : fieldAttributes;
+	fieldAttributes = fieldTypeProperties.nullable ? _.omit(fieldAttributes, 'default') : fieldAttributes;
 
 	return {
 		..._.omit(fieldAttributes, 'type'),
@@ -246,7 +267,7 @@ const convertField = namespace => field => {
 const convertArray = (namespace, attributes) => {
 	const items = convertSchema({ schema: attributes.items, namespace }) || [];
 	const multipleTypes = handleMultipleFields(_.isArray(items) ? items : [items]);
-	const [ choices, fields ] = _.partition(multipleTypes, field => field.type === 'choice');
+	const [choices, fields] = _.partition(multipleTypes, field => field.type === 'choice');
 
 	return {
 		...attributes,
@@ -260,7 +281,7 @@ const convertArray = (namespace, attributes) => {
 const convertUserDefinedType = (namespace, type, attributes) => {
 	const name = getName({ name: type });
 	const hasNamespaceSpecified = (type || '').split('.').length > 1;
-	const ref = (isCollectionReference(name) || hasNamespaceSpecified) ? `#collection/definitions/${name}` : type;
+	const ref = isCollectionReference(name) || hasNamespaceSpecified ? `#collection/definitions/${name}` : type;
 
 	return {
 		...attributes,
@@ -271,24 +292,29 @@ const convertUserDefinedType = (namespace, type, attributes) => {
 	};
 };
 
-const isCollectionReference = name => _.isString(name)
-	&& (!!collectionReferences.find(reference => reference.name === name) || (name || '').split('.').length > 1);
+const isCollectionReference = name =>
+	_.isString(name) &&
+	(!!collectionReferences.find(reference => reference.name === name) || (name || '').split('.').length > 1);
 const isNullableCollectionReference = unionSchema => unionSchema[0] === 'null' && isCollectionReference(unionSchema[1]);
 
-const handleMultipleFields = items => items.map(item => {
-	if (!_.isArray(item.type)) {
-		return item;
-	}
+const handleMultipleFields = items =>
+	items.map(item => {
+		if (!_.isArray(item.type)) {
+			return item;
+		}
 
-	return hasComplexType(item.type) ? getOneOf(item) : mergeMultipleFieldProperties(item);
-});
+		return hasComplexType(item.type) ? getOneOf(item) : mergeMultipleFieldProperties(item);
+	});
 
 const mergeMultipleFieldProperties = field => {
-	const multipleField = field.type.reduce((multipleField, schema) => ({
-		...multipleField,
-		...schema,
-		type: [ ...(multipleField.type || []), schema.type ],
-	}), {});
+	const multipleField = field.type.reduce(
+		(multipleField, schema) => ({
+			...multipleField,
+			...schema,
+			type: [...(multipleField.type || []), schema.type],
+		}),
+		{},
+	);
 
 	return { ...field, ...multipleField, name: field.name };
 };
@@ -319,21 +345,29 @@ const getBareUnionSchemaOneOf = field => ({
 	type: 'choice',
 	choice: 'oneOf',
 	items: field.type.map(typeData => ({
-		...typeData, 
+		...typeData,
 		type: 'record',
 		subschema: true,
 	})),
 });
 
-const getMapSubtype = values => _.isString(values) ? `map<${values}>` : ''
-const getRequired = properties => properties.filter(isRequired).map(field => field.name).filter(Boolean);
+const getMapSubtype = values => (_.isString(values) ? `map<${values}>` : '');
+const getRequired = properties =>
+	properties
+		.filter(isRequired)
+		.map(field => field.name)
+		.filter(Boolean);
 const isRequired = field => _.isUndefined(field.default);
 const isPrimitiveType = type => PRIMITIVE_TYPES.includes(type);
 const isNumericType = type => NUMERIC_TYPES.includes(type);
 const hasComplexType = schemas => schemas.some(schema => !isPrimitiveType(schema.mode || schema.type));
-const convertArrayToJsonSchemaObject = array => array.reduce((object, item) => ({
-	...object,
-	[item.name || DEFAULT_FIELD_NAME]: item,
-}), {});
+const convertArrayToJsonSchemaObject = array =>
+	array.reduce(
+		(object, item) => ({
+			...object,
+			[item.name || DEFAULT_FIELD_NAME]: item,
+		}),
+		{},
+	);
 
 module.exports = convertToJsonSchemas;

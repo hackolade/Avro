@@ -2,10 +2,10 @@ const mapAvroSchema = (avroSchema, iteratee) => {
 	if (Array.isArray(avroSchema)) {
 		return avroSchema.map(item => mapAvroSchema(item, iteratee));
 	}
-	
+
 	avroSchema = iteratee(avroSchema);
 
-	if (typeof avroSchema === 'string' ) {
+	if (typeof avroSchema === 'string') {
 		return avroSchema;
 	}
 
@@ -21,7 +21,7 @@ const mapAvroSchema = (avroSchema, iteratee) => {
 
 			return {
 				...field,
-				type: typeSchema
+				type: typeSchema,
 			};
 		});
 
@@ -29,11 +29,11 @@ const mapAvroSchema = (avroSchema, iteratee) => {
 	}
 
 	if (avroSchema.values) {
-		avroSchema = { ...avroSchema, values: mapAvroSchema(avroSchema.values, iteratee)  };
+		avroSchema = { ...avroSchema, values: mapAvroSchema(avroSchema.values, iteratee) };
 	}
 
 	if (avroSchema.items) {
-		avroSchema = { ...avroSchema, items: mapAvroSchema(avroSchema.items, iteratee)  };
+		avroSchema = { ...avroSchema, items: mapAvroSchema(avroSchema.items, iteratee) };
 	}
 
 	return avroSchema;
