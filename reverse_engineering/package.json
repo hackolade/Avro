@@ -1,5 +1,5 @@
 {
 	"name": "Avro",
 	"type": "file",
-	"installed": true
+	"description": "custom attributes to drive application behavior"
 }
