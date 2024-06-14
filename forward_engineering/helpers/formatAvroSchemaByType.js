@@ -13,11 +13,13 @@ const formatAvroSchemaByType = ({ scriptType, settings, needMinify, isJsonFormat
 		settings,
 		needMinify,
 		isJsonFormat,
-		avroSchema: _.isArray(avroSchema) ? avroSchema : reorderAttributes({
-			...avroSchema,
-			name: settings.name,
-			namespace: settings.namespace || avroSchema.namespace
-		}),
+		avroSchema: _.isArray(avroSchema)
+			? avroSchema
+			: reorderAttributes({
+					...avroSchema,
+					name: settings.name,
+					namespace: settings.namespace || avroSchema.namespace,
+				}),
 	});
 };
 
@@ -63,7 +65,14 @@ const formatConfluentSchema = ({ settings, needMinify, isJsonFormat, avroSchema 
 	});
 };
 
-const getConfluentSubjectName = ({ name, namespace, schemaType, schemaTopic, schemaNameStrategy, confluentSubjectName }) => {
+const getConfluentSubjectName = ({
+	name,
+	namespace,
+	schemaType,
+	schemaTopic,
+	schemaNameStrategy,
+	confluentSubjectName,
+}) => {
 	const RECORD_NAME_STRATEGY = 'RecordNameStrategy';
 	const TOPIC_NAME_STRATEGY = 'TopicNameStrategy';
 	const TOPIC_RECORD_NAME_STRATEGY = 'TopicRecordNameStrategy';
@@ -76,7 +85,7 @@ const getConfluentSubjectName = ({ name, namespace, schemaType, schemaTopic, sch
 	const typePostfix = schemaType || '';
 	const topicPrefix = schemaTopic || '';
 
-	switch(schemaNameStrategy){
+	switch (schemaNameStrategy) {
 		case RECORD_NAME_STRATEGY:
 			return [fullName, typePostfix].filter(Boolean).join('-');
 		case TOPIC_NAME_STRATEGY:
@@ -85,12 +94,12 @@ const getConfluentSubjectName = ({ name, namespace, schemaType, schemaTopic, sch
 			return [topicPrefix, fullName, typePostfix].filter(Boolean).join('-');
 		default:
 			return [name, typePostfix].filter(Boolean).join('-');
-	};
+	}
 };
 
 const getConfluentPostQuery = ({
 	name,
-	namespace, 
+	namespace,
 	schemaType,
 	schemaTopic,
 	schemaNameStrategy,
@@ -101,9 +110,22 @@ const getConfluentPostQuery = ({
 	references,
 	schema,
 }) => {
-	const subjectName = getConfluentSubjectName({ name, namespace, schemaType, schemaTopic, schemaNameStrategy, confluentSubjectName });
-	const compatibilityRequest = confluentCompatibility ? `PUT /config/${subjectName} HTTP/1.1\n{ "compatibility": "${confluentCompatibility}" }\n\n` : '';
-	const requestBody = { schema, schemaType: 'AVRO', ...(!_.isEmpty(references) && { references: _.uniqBy(references, 'name') }) };
+	const subjectName = getConfluentSubjectName({
+		name,
+		namespace,
+		schemaType,
+		schemaTopic,
+		schemaNameStrategy,
+		confluentSubjectName,
+	});
+	const compatibilityRequest = confluentCompatibility
+		? `PUT /config/${subjectName} HTTP/1.1\n{ "compatibility": "${confluentCompatibility}" }\n\n`
+		: '';
+	const requestBody = {
+		schema,
+		schemaType: 'AVRO',
+		...(!_.isEmpty(references) && { references: _.uniqBy(references, 'name') }),
+	};
 
 	if (isJsonFormat) {
 		return stringifyCommon(needMinify, {
@@ -132,7 +154,7 @@ const formatPulsarSchemaRegistry = ({ settings, needMinify, isJsonFormat, avroSc
 	const bodyObject = {
 		type: 'AVRO',
 		data: avroSchema,
-		properties: {}
+		properties: {},
 	};
 	const requestBody = stringifyCommon(needMinify, bodyObject);
 

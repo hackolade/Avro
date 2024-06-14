@@ -32,10 +32,10 @@ const useUdt = type => {
 		return;
 	}
 
-	udt[type].used = true
+	udt[type].used = true;
 };
 
-const prepareTypeFromUDT = (typeFromUdt) => {
+const prepareTypeFromUDT = typeFromUdt => {
 	if (_.isString(typeFromUdt)) {
 		return { type: typeFromUdt };
 	}
@@ -55,7 +55,7 @@ const isDefinitionTypeValidForAvroDefinition = definition => {
 	} else {
 		return isNamedType(definition?.type);
 	}
-}
+};
 
 const resolveSchemaUdt = schema => {
 	const type = _.isString(schema) || _.isArray(schema) ? schema : schema.type;
@@ -97,7 +97,7 @@ const isNativeType = type => {
 
 const getTypeFromUdt = type => {
 	if (isUdtUsed(type)) {
-	    return getTypeWithNamespace(type);
+		return getTypeWithNamespace(type);
 	}
 
 	const { schema } = getUdtItem(type) || {};
@@ -167,7 +167,7 @@ const addDefinitions = definitions => {
 
 const clearDefinitions = () => {
 	udt = {};
-}
+};
 
 const resetDefinitionsUsage = () => {
 	_ = dependencies.lodash;
@@ -200,7 +200,9 @@ const convertCollectionReferences = (entities, options) => {
 			} else {
 				definition = entities.find(entity => entity.jsonSchema.GUID === field.ref).jsonSchema;
 			}
-			const definitionName = prepareName(definition.code || definition.collectionName || definition.name || field.parentCollectionName);
+			const definitionName = prepareName(
+				definition.code || definition.collectionName || definition.name || field.parentCollectionName,
+			);
 			const namespace = definition.bucketName || field.parentBucketName;
 
 			const subject = getConfluentSubjectName({
@@ -212,13 +214,16 @@ const convertCollectionReferences = (entities, options) => {
 				confluentSubjectName: definition.confluentSubjectName,
 			});
 
-			references = [...references, {
-				name: definitionName,
-				namespace,
-				subject,
-				path,
-				version: getConfluentSchemaVersion(definition.confluentVersion),
-			}];
+			references = [
+				...references,
+				{
+					name: definitionName,
+					namespace,
+					subject,
+					path,
+					version: getConfluentSchemaVersion(definition.confluentVersion),
+				},
+			];
 
 			return {
 				...field,
@@ -230,44 +235,55 @@ const convertCollectionReferences = (entities, options) => {
 
 		const jsonSchema = mapper(entity.jsonSchema);
 
-		addDefinitions(references.reduce((definitions, reference) => ({
-			...definitions,
-			[reference.name]: {
-				isCollectionReference: true,
-				schema: {},
-				originalSchema: {},
-			}
-		}), {}));
+		addDefinitions(
+			references.reduce(
+				(definitions, reference) => ({
+					...definitions,
+					[reference.name]: {
+						isCollectionReference: true,
+						schema: {},
+						originalSchema: {},
+					},
+				}),
+				{},
+			),
+		);
 
 		return {
 			...entity,
 			jsonSchema,
-			references: filterReferencesByPath(entity, references).map(reference => _.omit({
-				...reference,
-				name: [reference.namespace, reference.name].filter(Boolean).join('.'),
-			}, ['path', 'namespace'])),
+			references: filterReferencesByPath(entity, references).map(reference =>
+				_.omit(
+					{
+						...reference,
+						name: [reference.namespace, reference.name].filter(Boolean).join('.'),
+					},
+					['path', 'namespace'],
+				),
+			),
 		};
 	});
 
 	return topologicalSort(entitiesWithReferences);
 };
 
-const filterReferencesByPath = (entity, references) => references.filter(currentReference => {
-	const isRecursive = _.last(currentReference.path) === entity?.jsonSchema?.GUID;
-	if (isRecursive) {
-		return false;
-	}
-
-	const rootReference = references.find(reference => {
-		if (!reference.path || (reference.path.length >= currentReference.path?.length)) {
+const filterReferencesByPath = (entity, references) =>
+	references.filter(currentReference => {
+		const isRecursive = _.last(currentReference.path) === entity?.jsonSchema?.GUID;
+		if (isRecursive) {
 			return false;
 		}
 
-		return reference.path.every((path, index) => path === currentReference.path?.[index]);
-	});
+		const rootReference = references.find(reference => {
+			if (!reference.path || reference.path.length >= currentReference.path?.length) {
+				return false;
+			}
 
-	return !rootReference;
-});
+			return reference.path.every((path, index) => path === currentReference.path?.[index]);
+		});
+
+		return !rootReference;
+	});
 
 const resolveNamespaceReferences = entities => {
 	_ = dependencies.lodash;
@@ -329,7 +345,8 @@ const topologicalSort = allEntities => {
 	return sortedEntities;
 };
 
-const getSchemaNameFromEntity = entity => prepareName(entity.entityData?.code || entity.entityData?.name || entity.entityData?.collectionName);
+const getSchemaNameFromEntity = entity =>
+	prepareName(entity.entityData?.code || entity.entityData?.name || entity.entityData?.collectionName);
 
 const getConfluentSchemaVersion = version => {
 	if (!version) {
@@ -344,12 +361,12 @@ const getConfluentSchemaVersion = version => {
 };
 
 module.exports = {
-   resolveUdt,
-   getUdtItem,
-   addDefinitions,
-   clearDefinitions,
-   convertSchemaToReference,
-   resetDefinitionsUsage,
-   convertCollectionReferences,
-   resolveNamespaceReferences,
+	resolveUdt,
+	getUdtItem,
+	addDefinitions,
+	clearDefinitions,
+	convertSchemaToReference,
+	resetDefinitionsUsage,
+	convertCollectionReferences,
+	resolveNamespaceReferences,
 };

@@ -18,10 +18,10 @@ const reorderAttributes = avroSchema => {
 	_ = dependencies.lodash;
 
 	return _.flow([
-	    setPropertyAsFirst('type'),
-	    setPropertyAsFirst('doc'),
-	    setPropertyAsFirst('namespace'),
-	    setPropertyAsFirst('name'),
+		setPropertyAsFirst('type'),
+		setPropertyAsFirst('doc'),
+		setPropertyAsFirst('namespace'),
+		setPropertyAsFirst('name'),
 	])(avroSchema);
 };
 
@@ -33,9 +33,13 @@ const setPropertyAsFirst = key => avroSchema => {
 
 	const reorderedKeys = [key, ...objKeys.filter(item => item !== key)];
 
-	return reorderedKeys.reduce((avroSchema, key) => ({
-		..._.omit(avroSchema, key), [key]: avroSchema[key]
-	}), avroSchema);
+	return reorderedKeys.reduce(
+		(avroSchema, key) => ({
+			..._.omit(avroSchema, key),
+			[key]: avroSchema[key],
+		}),
+		avroSchema,
+	);
 };
 
 const filterMultipleTypes = schemaTypes => {
@@ -53,9 +57,7 @@ const prepareName = name => {
 	const VALID_FULL_NAME_REGEX = /[^A-Za-z0-9_]/g;
 	const VALID_FIRST_NAME_LETTER_REGEX = /^[0-9]/;
 
-	return (name || '')
-		.replace(VALID_FULL_NAME_REGEX, '_')
-		.replace(VALID_FIRST_NAME_LETTER_REGEX, '_');
+	return (name || '').replace(VALID_FULL_NAME_REGEX, '_').replace(VALID_FIRST_NAME_LETTER_REGEX, '_');
 };
 
 const simplifySchema = schema => {
@@ -93,12 +95,12 @@ const convertName = schema => {
 		return schema;
 	}
 
-	return { ..._.omit(schema, nameProperties), name: prepareName(schema[nameKey])};
+	return { ..._.omit(schema, nameProperties), name: prepareName(schema[nameKey]) };
 };
 
 /**
  * Compares two schemas by their structure. Equality is determined by comparing critical type properties and fields names (for records).
- * 
+ *
  * @param {Object} schema1
  * @param {Object} schema2
  * @returns {Boolean}
@@ -108,7 +110,10 @@ const compareSchemasByStructure = (schema1, schema2) => {
 	schema2 = filterAttributes(schema2, schema2.type);
 	const scalarPropertiesToCompare = ['type', 'name', 'logicalType', 'precision', 'scale', 'size'];
 
-	const isEqualByProperties = _.isEqual(_.pick(schema1, scalarPropertiesToCompare), _.pick(schema2, scalarPropertiesToCompare));
+	const isEqualByProperties = _.isEqual(
+		_.pick(schema1, scalarPropertiesToCompare),
+		_.pick(schema2, scalarPropertiesToCompare),
+	);
 	if (!isEqualByProperties) {
 		return false;
 	}

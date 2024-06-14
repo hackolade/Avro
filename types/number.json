@@ -27,81 +27,94 @@
 		"sample": "",
 		"metaProps": []
 	},
-	"descriptor": [{
-		"schema": {
-			"mode": "float"
+	"descriptor": [
+		{
+			"schema": {
+				"mode": "float"
+			},
+			"capacity": 4,
+			"mode": "floating"
 		},
-		"capacity": 4,
-		"mode": "floating"
-	},
-	{
-		"schema": {
-			"mode": "double"
+		{
+			"schema": {
+				"mode": "double"
+			},
+			"capacity": 8,
+			"mode": "floating"
 		},
-		"capacity": 8,
-		"mode": "floating"
-	}, {
-		"schema": {
-			"mode": "int"
+		{
+			"schema": {
+				"mode": "int"
+			},
+			"capacity": 3
 		},
-		"capacity": 3
-	}, {
-		"schema": {
-			"mode": "int"
+		{
+			"schema": {
+				"mode": "int"
+			},
+			"capacity": 4
 		},
-		"capacity": 4
-	}, {
-		"schema": {
-			"mode": "long"
+		{
+			"schema": {
+				"mode": "long"
+			},
+			"capacity": 8
 		},
-		"capacity": 8
-	},{
-		"schema": {
-			"mode": "int",
-			"logicalType": "date"
+		{
+			"schema": {
+				"mode": "int",
+				"logicalType": "date"
+			},
+			"format": "YYYY-MM-DD"
 		},
-		"format": "YYYY-MM-DD"
-	}, {
-		"schema": {
-			"mode": "int",
-			"logicalType": "time-millis"
+		{
+			"schema": {
+				"mode": "int",
+				"logicalType": "time-millis"
+			},
+			"format": "hh:mm:ss.nnn"
 		},
-		"format": "hh:mm:ss.nnn"
-	}, {
-		"schema": {
-			"mode": "long",
-			"logicalType": "time-micros"
+		{
+			"schema": {
+				"mode": "long",
+				"logicalType": "time-micros"
+			},
+			"format": "hh:mm:ss.nnnnnn"
 		},
-		"format": "hh:mm:ss.nnnnnn"
-	}, {
-		"schema": {
-			"mode": "long",
-			"logicalType": "time-micros"
+		{
+			"schema": {
+				"mode": "long",
+				"logicalType": "time-micros"
+			},
+			"format": "hh:mm:ss.nnnnnnnnn"
 		},
-		"format": "hh:mm:ss.nnnnnnnnn"
-	}, {
-		"schema": {
-			"mode": "long",
-			"logicalType": "timestamp-millis"
+		{
+			"schema": {
+				"mode": "long",
+				"logicalType": "timestamp-millis"
+			},
+			"format": "YYYY-MM-DD hh:mm:ss.nnn"
 		},
-		"format": "YYYY-MM-DD hh:mm:ss.nnn"
-	}, {
-		"schema": {
-			"mode": "long",
-			"logicalType": "timestamp-micros"
+		{
+			"schema": {
+				"mode": "long",
+				"logicalType": "timestamp-micros"
+			},
+			"format": "YYYY-MM-DD hh:mm:ss.nnnnnn"
 		},
-		"format": "YYYY-MM-DD hh:mm:ss.nnnnnn"
-	}, {
-		"schema": {
-			"mode": "long",
-			"logicalType": "local-timestamp-millis"
+		{
+			"schema": {
+				"mode": "long",
+				"logicalType": "local-timestamp-millis"
+			},
+			"format": "YYYY-MM-DD hh:mm:ss.nnnZ"
 		},
-		"format": "YYYY-MM-DD hh:mm:ss.nnnZ"
-	}, {
-		"schema": {
-			"mode": "long",
-			"logicalType": "local-timestamp-micros"
-		},
-		"format": "YYYY-MM-DD hh:mm:ss.nnnnnnZ"
-	}]
+		{
+			"schema": {
+				"mode": "long",
+				"logicalType": "local-timestamp-micros"
+			},
+			"format": "YYYY-MM-DD hh:mm:ss.nnnnnnZ"
+		}
+	]
 }

@@ -8,11 +8,9 @@ let _;
 const adaptJsonSchema = jsonSchema => {
 	_ = dependencies.lodash;
 
-	return mapJsonSchema(_.flow([
-		adaptType,
-		populateDefaultNullValuesForMultiple,
-		handleEmptyDefaultInProperties
-	]))(adaptNames(jsonSchema))
+	return mapJsonSchema(_.flow([adaptType, populateDefaultNullValuesForMultiple, handleEmptyDefaultInProperties]))(
+		adaptNames(jsonSchema),
+	);
 };
 
 const adaptJsonSchemaName = name => {
@@ -40,7 +38,7 @@ const adaptType = field => {
 };
 
 const populateDefaultNullValuesForMultiple = field => {
-	if (!_.isArray(field.type))	{
+	if (!_.isArray(field.type)) {
 		return field;
 	}
 	if (_.first(field.type) !== 'null') {
@@ -86,7 +84,7 @@ const handleEmptyDefaultInProperties = field => {
 		return {
 			...properties,
 			[key]: {
-				..._.omit(property, [ ...COMPLEX_PROPERTIES, 'type' ]),
+				..._.omit(property, [...COMPLEX_PROPERTIES, 'type']),
 				name: key,
 				type: 'choice',
 				choice: 'oneOf',
@@ -103,7 +101,9 @@ const handleEmptyDefaultInProperties = field => {
 };
 
 const getOneOfSubschema = (property, name) => type => {
-	const itemData = isComplexType(type) ? _.omit(property, type === 'array' ? ['patternProperties', 'properties'] : 'items') : _.omit(property, COMPLEX_PROPERTIES);
+	const itemData = isComplexType(type)
+		? _.omit(property, type === 'array' ? ['patternProperties', 'properties'] : 'items')
+		: _.omit(property, COMPLEX_PROPERTIES);
 
 	return {
 		type: 'subschema',
@@ -111,10 +111,10 @@ const getOneOfSubschema = (property, name) => type => {
 		properties: {
 			[name]: {
 				...itemData,
-				type
-			}
+				type,
+			},
 		},
-	}
+	};
 };
 
 const handleNumber = field => {
@@ -132,20 +132,23 @@ const handleNumber = field => {
 const handleInt = field => ({
 	...field,
 	type: 'number',
-	mode: 'int'
+	mode: 'int',
 });
 
 const adaptMultiple = field => {
-	const { fieldData, types } = field.type.reduce(({ fieldData, types }, type, index) => {
-		const typeField = { ...fieldData, type };
-		const updatedData = adaptType(typeField);
-		types[index] = updatedData.type;
+	const { fieldData, types } = field.type.reduce(
+		({ fieldData, types }, type, index) => {
+			const typeField = { ...fieldData, type };
+			const updatedData = adaptType(typeField);
+			types[index] = updatedData.type;
 
-		return {
-			fieldData: updatedData,
-			types
-		};
-	}, { fieldData: field, types: field.type });
+			return {
+				fieldData: updatedData,
+				types,
+			};
+		},
+		{ fieldData: field, types: field.type },
+	);
 
 	const uniqTypes = _.uniq(types);
 	if (uniqTypes.length === 1) {
@@ -158,7 +161,7 @@ const adaptMultiple = field => {
 const handleEmptyDefault = field => {
 	const hasDefault = !_.isUndefined(field.default) && field.default !== '';
 	const isMultiple = _.isArray(field.type);
-	const types = isMultiple ? field.type : [ field.type ];
+	const types = isMultiple ? field.type : [field.type];
 
 	if (hasDefault || _.first(types) === 'null') {
 		return field;
@@ -167,11 +170,11 @@ const handleEmptyDefault = field => {
 	return {
 		...field,
 		default: null,
-		type: _.uniq([ 'null', ...types ]),
+		type: _.uniq(['null', ...types]),
 	};
 };
 
-const isComplexType = type => ['object', 'record', 'array', 'map'].includes(type)
+const isComplexType = type => ['object', 'record', 'array', 'map'].includes(type);
 
 const adaptTitle = jsonSchema => {
 	if (!jsonSchema.title) {
@@ -200,8 +203,8 @@ const adaptPropertiesNames = jsonSchema => {
 		return jsonSchema;
 	}
 
-	const propertiesKeys = [ 'properties', 'definitions', 'patternProperties' ];
-	
+	const propertiesKeys = ['properties', 'definitions', 'patternProperties'];
+
 	const adaptedSchema = adaptRequiredNames(jsonSchema);
 
 	return propertiesKeys.reduce((schema, propertyKey) => {
@@ -231,10 +234,7 @@ const adaptPropertiesNames = jsonSchema => {
 	}, adaptedSchema);
 };
 
-const adaptNames = schema => _.flow([
-	adaptTitle,
-	adaptPropertiesNames
-])(schema);
+const adaptNames = schema => _.flow([adaptTitle, adaptPropertiesNames])(schema);
 
 const convertReferenceName = ref => {
 	if (!_.isString(ref)) {

@@ -36,8 +36,8 @@ const detectScriptType = script => {
 	}
 };
 
-const parseScript = (script, scriptType) =>{
-	switch(scriptType){
+const parseScript = (script, scriptType) => {
+	switch (scriptType) {
 		case SCRIPT_TYPES.CONFLUENT_SCHEMA_REGISTRY:
 			return parseConfluentScript(script);
 		case SCRIPT_TYPES.AZURE_SCHEMA_REGISTRY:
@@ -45,9 +45,9 @@ const parseScript = (script, scriptType) =>{
 		case SCRIPT_TYPES.PULSAR_SCHEMA_REGISTRY:
 			return parsePulsarScript(script);
 		default:
-			return [{ script }]
+			return [{ script }];
 	}
-}
+};
 
 const parseConfluentScript = script => {
 	const scripts = [...script.matchAll(/^POST \/(.*)$\n(^\{[\s\S]*?^\})/gm)];
@@ -55,10 +55,10 @@ const parseConfluentScript = script => {
 	return scripts.map(([data, queryPath, stringifiedBody]) => {
 		const { schema } = parseJson(stringifiedBody);
 		if (_.isPlainObject(schema)) {
-			return { script: JSON.stringify(schema) }
+			return { script: JSON.stringify(schema) };
 		}
 
-		return { script: schema }
+		return { script: schema };
 	});
 };
 
@@ -77,11 +77,11 @@ const parsePulsarScript = script => {
 };
 
 const getScriptValidator = scriptType => {
-	if (scriptType === SCRIPT_TYPES.AZURE_SCHEMA_REGISTRY){
+	if (scriptType === SCRIPT_TYPES.AZURE_SCHEMA_REGISTRY) {
 		return validateAzureScript;
 	}
 
-	if (scriptType === SCRIPT_TYPES.PULSAR_SCHEMA_REGISTRY){
+	if (scriptType === SCRIPT_TYPES.PULSAR_SCHEMA_REGISTRY) {
 		return validatePulsarScript;
 	}
 
@@ -91,18 +91,18 @@ const getScriptValidator = scriptType => {
 const validateAzureScript = ({ script, query }, logger) => {
 	const schemaGroupExists = /.+\/schemas/.test(query);
 	if (schemaGroupExists) {
-		return validateScript(script, logger)
+		return validateScript(script, logger);
 	}
 
 	const { namespace } = parseJson(script);
 
-	return [getErrorMessage(namespace)({ message: AZURE_MISSING_SCHEMA_GROUP_ERROR })]
-}
+	return [getErrorMessage(namespace)({ message: AZURE_MISSING_SCHEMA_GROUP_ERROR })];
+};
 
 const validatePulsarScript = ({ script, query }, logger) => {
 	const queryIsCorrect = PULSAR_CORRECT_QUERY_REGEX.test(query);
 	if (queryIsCorrect) {
-		return validateScript(script, logger)
+		return validateScript(script, logger);
 	}
 
 	const namespaceExists = PULSAR_NAMESPACE_EXISTS_REGEX.test(query);
@@ -154,7 +154,7 @@ const validate = script => {
 	}
 };
 
-const getMessageForMultipleSchemaValidation = (validationMessages)=> {
+const getMessageForMultipleSchemaValidation = validationMessages => {
 	const isErrorMessage = message => message?.type !== 'success';
 	const isError = validationMessages.some(isErrorMessage);
 
@@ -169,12 +169,14 @@ const clearErrorsCollector = () => {
 	avsc.errorsCollector.splice(0);
 };
 
-const getErrorMessage = (entityName = '') => err => ({
-	label: err.fieldName || entityName || err.name || '',
-	title: err.message,
-	type: 'error',
-	context: '',
-});
+const getErrorMessage =
+	(entityName = '') =>
+	err => ({
+		label: err.fieldName || entityName || err.name || '',
+		title: err.message,
+		type: 'error',
+		context: '',
+	});
 
 const getSuccessMessage = title => ({
 	type: 'success',

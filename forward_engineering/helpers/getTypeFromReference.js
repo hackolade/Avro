@@ -1,13 +1,12 @@
-
 const { dependencies } = require('../../shared/appDependencies');
 const { prepareName } = require('./generalHelper');
 
-const getTypeFromReference = (schema) => {
-	if (!schema.$ref) {		
-        return;
+const getTypeFromReference = schema => {
+	if (!schema.$ref) {
+		return;
 	}
 
-	if(dependencies.lodash.includes(schema.$ref, '#')) {
+	if (dependencies.lodash.includes(schema.$ref, '#')) {
 		const namespace = schema.namespace || '';
 		const name = prepareName(dependencies.lodash.last(schema.$ref.split('/')) || '');
 
@@ -17,4 +16,4 @@ const getTypeFromReference = (schema) => {
 	return schema.$ref;
 };
 
-module.exports = getTypeFromReference
+module.exports = getTypeFromReference;

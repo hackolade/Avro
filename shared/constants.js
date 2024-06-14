@@ -3,7 +3,7 @@ const META_VALUES_KEY_MAP = {
 	'java-element': 'metaValueElement',
 	'java-element-class': 'metaValueElementClass',
 	'java-class': 'metaValueClass',
-	'java-key-class': 'metaValueKeyClass'
+	'java-key-class': 'metaValueKeyClass',
 };
 
 const SCHEMA_REGISTRIES_KEYS = {

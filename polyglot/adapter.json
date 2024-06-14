@@ -40,16 +40,16 @@
  * }
  */
 {
-    "modify": {
-        "field": [
-            {
-                "from": { "type": "enum" },
-                "to": { "symbols": { "type": "Source", "path": "enum" } }
-            },
-            {
-                "from": { "type": "enum" },
-                "to": { "symbolDefault": { "type": "Source", "path": "enumDefault" } }
-            }
-        ]
-    }
+	"modify": {
+		"field": [
+			{
+				"from": { "type": "enum" },
+				"to": { "symbols": { "type": "Source", "path": "enum" } }
+			},
+			{
+				"from": { "type": "enum" },
+				"to": { "symbolDefault": { "type": "Source", "path": "enumDefault" } }
+			}
+		]
+	}
 }

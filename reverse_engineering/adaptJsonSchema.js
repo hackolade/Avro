@@ -1,10 +1,10 @@
+const _ = require('lodash');
 const { setDependencies, dependencies } = require('../shared/appDependencies');
 const jsonSchemaAdapter = require('./helpers/adaptJsonSchema');
 const { handleErrorObject } = require('./helpers/generalHelper');
 
 const adaptJsonSchema = (data, logger, callback, app) => {
 	setDependencies(app);
-	_ = dependencies.lodash;
 
 	logger.log('info', 'Adaptation of JSON Schema started...', 'Adapt JSON Schema');
 	try {

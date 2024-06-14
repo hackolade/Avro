@@ -1,4 +1,3 @@
-
 const { dependencies } = require('../../shared/appDependencies');
 const { META_VALUES_KEY_MAP } = require('../../shared/constants');
 const { isNamedType, filterAttributes, isMetaProperty } = require('../../shared/typeHelper');
@@ -34,7 +33,7 @@ const setNamespace = (properties, type) => {
 
 const setSubtype = (properties, type) => {
 	if (!properties.logicalType || !['fixed', 'bytes'].includes(type)) {
-		return properties
+		return properties;
 	}
 
 	return { ...properties, subtype: properties.logicalType };
@@ -73,21 +72,26 @@ const setDurationSize = properties => {
 	};
 };
 
-const addMetaProperties = properties => Object.keys(properties).reduce((updatedProperties, key) => {
-	if (!isMetaProperty(key)) {
+const addMetaProperties = properties =>
+	Object.keys(properties).reduce((updatedProperties, key) => {
+		if (!isMetaProperty(key)) {
+			return {
+				...updatedProperties,
+				[key]: properties[key],
+			};
+		}
+		const metaValueKey = _.get(META_VALUES_KEY_MAP, key, 'metaValue');
+
 		return {
 			...updatedProperties,
-			[key]: properties[key],
+			metaProps: [
+				...(updatedProperties.metaProps || []),
+				{
+					metaKey: key,
+					[metaValueKey]: properties[key],
+				},
+			],
 		};
-	}
-	const metaValueKey = _.get(META_VALUES_KEY_MAP, key, 'metaValue');
-
-	return {
-		...updatedProperties,
-		metaProps: [...(updatedProperties.metaProps || []), {
-			metaKey: key, [metaValueKey]: properties[key]
-		}],
-	};
-}, {});
+	}, {});
 
 module.exports = getFieldAttributes;

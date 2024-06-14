@@ -1,12 +1,12 @@
 {
-  "menu_label": "Avro schema or data file",
-  "name": "avro",
-  "extensions": ["avsc", "avro", "confluent-avro", "azureSchemaRegistry-avro", "pulsarSchemaRegistry-avro"],
-  "connectionList": ["name", "connectionType", "path"],
-  "widestColumn": "path",
-  "useCloudStorage": true,
-  "useMultipleFileReverse": true,
-  "useConfluent": true,
-  "useAzureSchemaRegistry": true,
-  "usePulsarSchemaRegistry": true
+	"menu_label": "Avro schema or data file",
+	"name": "avro",
+	"extensions": ["avsc", "avro", "confluent-avro", "azureSchemaRegistry-avro", "pulsarSchemaRegistry-avro"],
+	"connectionList": ["name", "connectionType", "path"],
+	"widestColumn": "path",
+	"useCloudStorage": true,
+	"useMultipleFileReverse": true,
+	"useConfluent": true,
+	"useAzureSchemaRegistry": true,
+	"usePulsarSchemaRegistry": true
 }
