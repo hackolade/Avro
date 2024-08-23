@@ -124,9 +124,7 @@ making sure that you maintain a proper JSON format.
 				"shouldValidate": false,
 				"propertyTooltip": "DB vendor",
 				"propertyType": "select",
-				"options": [
-					"Avro"
-				],
+				"options": ["Avro"],
 				"disabledOption": true
 			},
 			{
@@ -135,8 +133,7 @@ making sure that you maintain a proper JSON format.
 				"shouldValidate": false,
 				"propertyTooltip": "DB version",
 				"propertyType": "select",
-				"options": [
-				],
+				"options": [],
 				"disabled": true
 			},
 			{
@@ -144,12 +141,7 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "schemaRegistryType",
 				"propertyTooltip": "Select from list of options",
 				"propertyType": "select",
-				"options": [
-					"",
-					"Confluent Schema Registry",
-					"Azure Schema Registry",
-					"Pulsar Schema Registry"
-      			]
+				"options": ["", "Confluent Schema Registry", "Azure Schema Registry", "Pulsar Schema Registry"]
 			},
 			{
 				"propertyName": "Schema registry URL",
@@ -157,16 +149,20 @@ making sure that you maintain a proper JSON format.
 				"shouldValidate": false,
 				"propertyTooltip": "",
 				"propertyType": "text",
-				"dependency": [{
-					"key": "schemaRegistryType",
-					"value": "Confluent Schema Registry"
-				},{
-					"key": "schemaRegistryType",
-					"value": "Azure Schema Registry"
-				},{
-					"key": "schemaRegistryType",
-					"value": "Pulsar Schema Registry"
-				}]
+				"dependency": [
+					{
+						"key": "schemaRegistryType",
+						"value": "Confluent Schema Registry"
+					},
+					{
+						"key": "schemaRegistryType",
+						"value": "Azure Schema Registry"
+					},
+					{
+						"key": "schemaRegistryType",
+						"value": "Pulsar Schema Registry"
+					}
+				]
 			},
 			{
 				"propertyName": "Comments",

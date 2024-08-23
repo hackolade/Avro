@@ -34,10 +34,12 @@
 			"parentType": "string"
 		}
 	},
-	"descriptor": [{
-		"schema": {
-			"subtype": "duration"
-		},
-		"format": "PnYnMnDTnHnMnS"
-	}]
+	"descriptor": [
+		{
+			"schema": {
+				"subtype": "duration"
+			},
+			"format": "PnYnMnDTnHnMnS"
+		}
+	]
 }
