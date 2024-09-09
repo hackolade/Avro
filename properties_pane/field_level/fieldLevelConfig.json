@@ -931,11 +931,17 @@ making sure that you maintain a proper JSON format.
 							}
 						},
 						{
-							"type": "not",
-							"values": {
-								"key": "subschema",
-								"value": true
-							}
+							"type": "or",
+							"values": [
+								{
+									"key": "subschema",
+									"value": false
+								},
+								{
+									"key": "subschema",
+									"exist": false
+								}
+							]
 						}
 					]
 				}
