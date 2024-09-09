@@ -929,6 +929,13 @@ making sure that you maintain a proper JSON format.
 								"key": "childType",
 								"value": "array"
 							}
+						},
+						{
+							"type": "not",
+							"values": {
+								"key": "subschema",
+								"value": true
+							}
 						}
 					]
 				}
