@@ -929,6 +929,19 @@ making sure that you maintain a proper JSON format.
 								"key": "childType",
 								"value": "array"
 							}
+						},
+						{
+							"type": "or",
+							"values": [
+								{
+									"key": "subschema",
+									"value": false
+								},
+								{
+									"key": "subschema",
+									"exist": false
+								}
+							]
 						}
 					]
 				}
