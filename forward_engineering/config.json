@@ -63,7 +63,7 @@
 	"additionalOptions": [
 		{
 			"id": "resolveEntityReferences",
-			"value": false,
+			"value": true,
 			"name": "Resolve entity refs",
 			"level": {
 				"model": false
