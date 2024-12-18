@@ -322,13 +322,25 @@ const handleField = (name, field) => {
 			name: prepareName(name),
 			type: _.isArray(typeSchema.type) ? typeSchema.type : typeSchema,
 			default: getEnumDefaultValue(field, udt, typeSchema),
-			doc: field.$ref ? refDescription : description,
+			doc: getDoc({ field, refDescription, description }),
 			order,
 			aliases,
 			...customProperties,
 		},
 		typeSchema,
 	);
+};
+
+const getDoc = ({ field, refDescription, description }) => {
+	if (!field.$ref) {
+		return description;
+	}
+
+	if (field.choice) {
+		return description;
+	}
+
+	return refDescription;
 };
 
 const getEnumDefaultValue = (field, udt, typeSchema) => {
