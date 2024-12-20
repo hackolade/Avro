@@ -55,6 +55,7 @@ const convertChoiceToProperties = (schema, choice) => {
 
 	const multipleFieldsHash = allSubSchemaFields.reduce((multipleFieldsHash, field, index) => {
 		const fieldName = choiceMeta.code || choiceMeta.name || field.name || getDefaultName();
+		const fieldDescription = choiceMeta.description || field.description || field.refDescription;
 		const multipleField = multipleFieldsHash[fieldName] || {
 			...choiceMeta,
 			default: convertDefaultMetaFieldType(field.type, choiceMeta.default),
@@ -64,6 +65,7 @@ const convertChoiceToProperties = (schema, choice) => {
 		};
 		const multipleTypeAttributes = {
 			...field,
+			...(fieldDescription && { description: fieldDescription }),
 			type: field.$ref ? getTypeFromReference(field) : field.type,
 			name: prepareName(field.name || fieldName),
 		};
