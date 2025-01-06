@@ -143,7 +143,9 @@ const getSchemasData = avroSchema => {
 		confluentSubjectName: schema.confluentSubjectName,
 		schemaTopic: schema.schemaTopic,
 		schemaType: schema.schemaType,
-		confluentVersion: schema.version,
+		...((typeof schema.version === 'number' || typeof schema.version === 'string') && {
+			confluentVersion: String(schema.version),
+		}),
 	}));
 };
 
