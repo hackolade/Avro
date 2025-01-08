@@ -1,4 +1,4 @@
-const { dependencies } = require('../../shared/appDependencies');
+const _ = require('lodash');
 const { isNamedType, filterAttributes } = require('../../shared/typeHelper');
 const { AVRO_TYPES, SCRIPT_TYPES } = require('../../shared/constants');
 const mapJsonSchema = require('../../shared/mapJsonSchema');
@@ -7,11 +7,9 @@ const mapAvroSchema = require('./mapAvroSchema');
 const { getConfluentSubjectName } = require('./formatAvroSchemaByType');
 const { prepareName } = require('./generalHelper');
 
-let _;
 let udt = {};
 
 const getUdtItem = type => {
-	_ = dependencies.lodash;
 	if (!_.isString(type)) {
 		return;
 	}
@@ -22,8 +20,6 @@ const getUdtItem = type => {
 };
 
 const resolveUdt = avroSchema => {
-	_ = dependencies.lodash;
-
 	return mapAvroSchema(avroSchema, resolveSchemaUdt);
 };
 
@@ -154,8 +150,6 @@ const convertNamedTypesToReferences = schema => {
 };
 
 const convertSchemaToReference = schema => {
-	_ = dependencies.lodash;
-
 	const referenceAttributes = filterAttributes(_.omit(schema, 'type'));
 
 	return reorderAttributes({ ...referenceAttributes, type: schema.name });
@@ -170,8 +164,6 @@ const clearDefinitions = () => {
 };
 
 const resetDefinitionsUsage = () => {
-	_ = dependencies.lodash;
-
 	udt = Object.keys(udt || {}).reduce((updatedUdt, key) => {
 		const definition = udt[key];
 
@@ -180,8 +172,6 @@ const resetDefinitionsUsage = () => {
 };
 
 const convertCollectionReferences = (entities, options) => {
-	_ = dependencies.lodash;
-
 	const entitiesIds = entities.map(entity => entity.jsonSchema.GUID);
 	const entitiesWithReferences = entities.map(entity => {
 		let references = [];
@@ -286,8 +276,6 @@ const filterReferencesByPath = (entity, references) =>
 	});
 
 const resolveNamespaceReferences = entities => {
-	_ = dependencies.lodash;
-
 	const entitiesWithReferences = entities.map(entity => {
 		const mapper = mapJsonSchema(field => {
 			if (!field.ref) {
@@ -362,6 +350,7 @@ const getConfluentSchemaVersion = version => {
 
 module.exports = {
 	resolveUdt,
+	resolveSchemaUdt,
 	getUdtItem,
 	addDefinitions,
 	clearDefinitions,

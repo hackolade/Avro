@@ -12,6 +12,7 @@ const {
 	convertCollectionReferences,
 	resolveNamespaceReferences,
 	clearDefinitions,
+	resolveSchemaUdt,
 } = require('./helpers/udtHelper');
 const convertSchema = require('./helpers/convertJsonSchemaToAvro');
 const {
@@ -49,7 +50,7 @@ const generateModelScript = (data, logger, cb, app) => {
 				clearDefinitions();
 				addDefinitions(convertedExternalDefinitions);
 				addDefinitions(convertedModelDefinitions);
-				setUserDefinedTypes(internalDefinitions);
+				setUserDefinedTypes(internalDefinitions, true);
 				resetDefinitionsUsage();
 
 				const settings = getSettings({ containerData, entityData, modelData, references });
@@ -101,7 +102,7 @@ const generateScript = (data, logger, cb, app) => {
 
 		setUserDefinedTypes(externalDefinitions);
 		setUserDefinedTypes(modelDefinitions);
-		setUserDefinedTypes(internalDefinitions);
+		setUserDefinedTypes(internalDefinitions, true);
 		resetDefinitionsUsage();
 		const isFromUi = options.origin === 'ui';
 
@@ -209,11 +210,19 @@ const convertJsonToAvro = (jsonSchema, schemaName) => {
 	return resolveUdt(reorderAvroSchema(avroSchema));
 };
 
-const setUserDefinedTypes = definitions => {
-	addDefinitions(convertSchemaToUserDefinedTypes(definitions));
+/**
+ * When we have a reference in the internal definitions that leads to a definition
+ * in the model definitions we need to resolve them to avoid creation of a UDT that references
+ * itself. It may happen when the definition have the same name as the reference.
+ *
+ * @param {Array<object>} definitions
+ * @param {boolean} [resolveReferences]
+ */
+const setUserDefinedTypes = (definitions, resolveReferences = false) => {
+	addDefinitions(convertSchemaToUserDefinedTypes(definitions, resolveReferences));
 };
 
-const convertSchemaToUserDefinedTypes = definitionsSchema => {
+const convertSchemaToUserDefinedTypes = (definitionsSchema, resolveReferences) => {
 	definitionsSchema = parseJson(definitionsSchema);
 	const definitions = Object.keys(definitionsSchema.properties || {}).map(key => {
 		const definition = definitionsSchema.properties[key];
@@ -230,7 +239,7 @@ const convertSchemaToUserDefinedTypes = definitionsSchema => {
 	return definitions.reduce(
 		(result, { name, schema, customProperties, originalSchema }) => ({
 			...result,
-			[name]: { schema, customProperties, originalSchema },
+			[name]: { schema: resolveReferences ? resolveSchemaUdt(schema) : schema, customProperties, originalSchema },
 		}),
 		{},
 	);
