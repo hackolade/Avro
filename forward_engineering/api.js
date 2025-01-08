@@ -211,7 +211,7 @@ const convertJsonToAvro = (jsonSchema, schemaName) => {
 };
 
 /**
- * When we have a reference in the internal definitions that leads ot a definition
+ * When we have a reference in the internal definitions that leads to a definition
  * in the model definitions we need to resolve them to avoid creation of a UDT that references
  * itself. It may happen when the definition have the same name as the reference.
  *
