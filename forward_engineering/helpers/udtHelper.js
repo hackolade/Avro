@@ -58,6 +58,8 @@ const isDefinitionTypeValidForAvroDefinition = definition => {
 };
 
 const resolveSchemaUdt = schema => {
+	_ = dependencies.lodash;
+
 	const type = _.isString(schema) || _.isArray(schema) ? schema : schema.type;
 	if (isNativeType(type)) {
 		return schema;
@@ -362,6 +364,7 @@ const getConfluentSchemaVersion = version => {
 
 module.exports = {
 	resolveUdt,
+	resolveSchemaUdt,
 	getUdtItem,
 	addDefinitions,
 	clearDefinitions,
