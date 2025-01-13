@@ -1,6 +1,4 @@
-const { dependencies } = require('./appDependencies');
-
-let _;
+const _ = require('lodash');
 
 const PROPERTIES_LIKE = ['properties', 'definitions', 'patternProperties'];
 const ITEMS_LIKE = ['items', 'oneOf', 'allOf', 'anyOf', 'not'];
@@ -8,7 +6,6 @@ const ITEMS_LIKE = ['items', 'oneOf', 'allOf', 'anyOf', 'not'];
 const mapJsonSchema =
 	(callback, path = []) =>
 	jsonSchema => {
-		_ = dependencies.lodash;
 		if (!_.isPlainObject(jsonSchema)) {
 			return jsonSchema;
 		}

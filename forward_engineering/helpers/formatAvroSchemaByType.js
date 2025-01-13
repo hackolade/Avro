@@ -1,12 +1,8 @@
-const { dependencies } = require('../../shared/appDependencies');
+const _ = require('lodash');
 const { SCRIPT_TYPES } = require('../../shared/constants');
 const { reorderAttributes } = require('./generalHelper');
 
-let _;
-
 const formatAvroSchemaByType = ({ scriptType, settings, needMinify, isJsonFormat, avroSchema }) => {
-	_ = dependencies.lodash;
-
 	const formatter = getFormatter(scriptType);
 
 	return formatter({

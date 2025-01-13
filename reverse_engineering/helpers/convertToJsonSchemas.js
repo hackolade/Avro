@@ -1,4 +1,4 @@
-const { dependencies } = require('../../shared/appDependencies');
+const _ = require('lodash');
 const { isNamedType } = require('../../shared/typeHelper');
 const getFieldAttributes = require('./getFieldAttributes');
 const { getNamespace, getName, EMPTY_NAMESPACE } = require('./generalHelper');
@@ -16,12 +16,9 @@ const DEFAULT_FIELD_NAME = 'New_field';
 const PRIMITIVE_TYPES = ['string', 'bytes', 'boolean', 'null', 'enum', 'fixed', 'int', 'long', 'float', 'double'];
 const NUMERIC_TYPES = ['int', 'long', 'float', 'double'];
 
-let _;
 let collectionReferences = [];
 
 const convertToJsonSchemas = avroSchema => {
-	_ = dependencies.lodash;
-
 	collectionReferences = avroSchema.references || [];
 	const convertedSchema = convertSchema({ schema: avroSchema });
 	const normalizedConvertedSchema = _.isArray(convertedSchema) ? convertedSchema : [convertedSchema];

@@ -1,5 +1,5 @@
+const _ = require('lodash');
 const { AVRO_TYPES } = require('./constants');
-const { dependencies } = require('./appDependencies');
 
 let pluginConfiguration = {};
 let logger = {};
@@ -65,7 +65,7 @@ const getCustomPropertiesKeywords = (config, attributes = {}) => {
 };
 
 const getCustomProperties = (config, attributes = {}) => {
-	return dependencies.lodash.pick(attributes, getCustomPropertiesKeywords(config, attributes));
+	return _.pick(attributes, getCustomPropertiesKeywords(config, attributes));
 };
 
 const getFieldLevelConfig = type => {

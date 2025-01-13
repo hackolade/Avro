@@ -1,7 +1,6 @@
-const { dependencies } = require('../../shared/appDependencies');
+const _ = require('lodash');
 const { filterAttributes } = require('../../shared/typeHelper');
 
-let _;
 let nameIndex = 0;
 
 const DEFAULT_NAME = 'New_field';
@@ -15,8 +14,6 @@ const parseJson = str => {
 };
 
 const reorderAttributes = avroSchema => {
-	_ = dependencies.lodash;
-
 	return _.flow([
 		setPropertyAsFirst('type'),
 		setPropertyAsFirst('doc'),
@@ -43,8 +40,6 @@ const setPropertyAsFirst = key => avroSchema => {
 };
 
 const filterMultipleTypes = schemaTypes => {
-	_ = dependencies.lodash;
-
 	const types = _.uniqBy(schemaTypes, type => type?.type || type);
 	if (types.length === 1) {
 		return _.first(types);
@@ -87,8 +82,6 @@ const getDefaultName = () => {
 };
 
 const convertName = schema => {
-	_ = dependencies.lodash;
-
 	const nameProperties = ['typeName', 'code', 'name', 'displayName'];
 	const nameKey = nameProperties.find(key => schema[key]);
 	if (!nameKey) {

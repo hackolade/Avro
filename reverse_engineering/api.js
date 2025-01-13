@@ -1,6 +1,4 @@
-'use strict';
-
-const { setDependencies, dependencies } = require('../shared/appDependencies');
+const _ = require('lodash');
 const { adaptJsonSchema } = require('./adaptJsonSchema');
 const { initPluginConfiguration } = require('../shared/customProperties');
 const mapJsonSchema = require('../shared/mapJsonSchema');
@@ -8,12 +6,9 @@ const convertToJsonSchemas = require('./helpers/convertToJsonSchemas');
 const { openAvroFile } = require('./helpers/fileHelper');
 const { getNamespace, handleErrorObject } = require('./helpers/generalHelper');
 
-let _;
-
 const reFromFile = async (data, logger, callback, app) => {
-	setDependencies(app);
 	initPluginConfiguration(data.pluginConfiguration, logger);
-	_ = dependencies.lodash;
+
 	try {
 		const { filePath } = data;
 		const avroSchema = await openAvroFile(filePath);

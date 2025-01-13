@@ -1,4 +1,4 @@
-const { dependencies } = require('../../shared/appDependencies');
+const _ = require('lodash');
 const { filterAttributes, isNamedType } = require('../../shared/typeHelper');
 const { getUdtItem, convertSchemaToReference, addDefinitions } = require('./udtHelper');
 const {
@@ -17,11 +17,7 @@ const getTypeFromReference = require('./getTypeFromReference');
 
 const DEFAULT_TYPE = 'string';
 
-let _;
-
 const convertSchema = schema => {
-	_ = dependencies.lodash;
-
 	if (isBareUnionSchema(schema)) {
 		return convertBareUnionSchema(schema);
 	}

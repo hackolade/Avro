@@ -1,6 +1,4 @@
-'use strict';
-
-const { setDependencies, dependencies } = require('../shared/appDependencies');
+const _ = require('lodash');
 const { SCRIPT_TYPES, SCHEMA_REGISTRIES_KEYS } = require('../shared/constants');
 const { parseJson, prepareName } = require('./helpers/generalHelper');
 const validateAvroScript = require('./helpers/validateAvroScript');
@@ -21,14 +19,11 @@ const {
 	getEntityLevelConfig,
 	getFieldLevelConfig,
 } = require('../shared/customProperties');
-let _;
 
 const generateModelScript = (data, logger, cb, app) => {
 	logger.clear();
 	try {
-		setDependencies(app);
 		initPluginConfiguration(data.pluginConfiguration, logger);
-		_ = dependencies.lodash;
 
 		const { containers, externalDefinitions, modelDefinitions, options } = data;
 
@@ -84,9 +79,7 @@ const generateModelScript = (data, logger, cb, app) => {
 const generateScript = (data, logger, cb, app) => {
 	logger.clear();
 	try {
-		setDependencies(app);
 		initPluginConfiguration(data.pluginConfiguration, logger);
-		_ = dependencies.lodash;
 
 		const {
 			containerData,
@@ -149,9 +142,7 @@ const generateScript = (data, logger, cb, app) => {
 };
 
 const validate = (data, logger, cb, app) => {
-	setDependencies(app);
 	initPluginConfiguration(data.pluginConfiguration);
-	_ = dependencies.lodash;
 
 	const targetScript = _.isArray(data.script) ? _.first(data.script)?.script : data.script;
 	const modelData = data.modelData[0] || {};

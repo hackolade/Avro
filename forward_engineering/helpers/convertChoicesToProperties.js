@@ -1,15 +1,11 @@
-const { dependencies } = require('../../shared/appDependencies');
+const _ = require('lodash');
 const { filterMultipleTypes, prepareName, getDefaultName, convertName } = require('./generalHelper');
 const getTypeFromReference = require('./getTypeFromReference');
 const { AVRO_TYPES } = require('../../shared/constants');
 
-let _;
-
 const CHOICES = ['oneOf', 'anyOf', 'allOf'];
 
 const convertChoicesToProperties = schema => {
-	_ = dependencies.lodash;
-
 	return CHOICES.reduce((schema, choice) => convertChoiceToProperties(schema, choice), schema);
 };
 

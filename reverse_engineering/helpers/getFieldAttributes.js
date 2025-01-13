@@ -1,13 +1,9 @@
-const { dependencies } = require('../../shared/appDependencies');
+const _ = require('lodash');
 const { META_VALUES_KEY_MAP } = require('../../shared/constants');
 const { isNamedType, filterAttributes, isMetaProperty } = require('../../shared/typeHelper');
 const { getNamespace, getName } = require('./generalHelper');
 
-let _;
-
 const getFieldAttributes = ({ attributes = {}, type = '' }) => {
-	_ = dependencies.lodash;
-
 	let fieldAttributes = filterAttributes(attributes, type);
 	fieldAttributes = setNamespace(fieldAttributes, type);
 	fieldAttributes = setSubtype(fieldAttributes, type);

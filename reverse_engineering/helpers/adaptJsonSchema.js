@@ -1,21 +1,15 @@
-const { dependencies } = require('../../shared/appDependencies');
+const _ = require('lodash');
 const mapJsonSchema = require('../../shared/mapJsonSchema');
 
 const COMPLEX_PROPERTIES = ['patternProperties', 'properties', 'items', 'allOf', 'oneOf', 'anyOf', 'not'];
 
-let _;
-
 const adaptJsonSchema = jsonSchema => {
-	_ = dependencies.lodash;
-
 	return mapJsonSchema(_.flow([adaptType, populateDefaultNullValuesForMultiple, handleEmptyDefaultInProperties]))(
 		adaptNames(jsonSchema),
 	);
 };
 
 const adaptJsonSchemaName = name => {
-	_ = dependencies.lodash;
-
 	return convertToValidAvroName(name);
 };
 
