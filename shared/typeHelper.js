@@ -1,7 +1,5 @@
-const { dependencies } = require('./appDependencies');
+const _ = require('lodash');
 const { GENERAL_ATTRIBUTES } = require('./constants');
-
-let _;
 
 const META_PROPERTIES = ['avro.java.string', 'java-element', 'java-element-class', 'java-class', 'java-key-class'];
 const NAMED_TYPES = ['record', 'fixed', 'enum'];
@@ -29,7 +27,6 @@ const LOGICAL_TYPES_MAP = {
 const isNamedType = type => NAMED_TYPES.includes(type);
 
 const filterAttributes = (attributes, type) => {
-	_ = dependencies.lodash;
 	if (_.isArray(attributes)) {
 		return attributes;
 	}

@@ -16,6 +16,7 @@ const mapAvroSchema = (avroSchema, iteratee) => {
 				return {
 					...field,
 					...typeSchema,
+					doc: field.doc ?? typeSchema.doc,
 				};
 			}
 

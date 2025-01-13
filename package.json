@@ -119,6 +119,7 @@
     "disabled": false,
     "dependencies": {
         "avsc": "5.4.6",
+        "esbuild-plugin-copy": "2.1.1",
         "lodash": "4.17.21",
         "snappyjs": "0.6.0"
     },

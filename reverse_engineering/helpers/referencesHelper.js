@@ -1,4 +1,4 @@
-const { dependencies } = require('../../shared/appDependencies');
+const _ = require('lodash');
 const mapJsonSchema = require('../../shared/mapJsonSchema');
 const { getNamespace, getName, EMPTY_NAMESPACE } = require('./generalHelper');
 
@@ -23,20 +23,20 @@ const getDefinitions = () =>
 
 const addDefinition = (namespace, definition) => {
 	const name = definition.name;
-	dependencies.lodash.set(definitions, [namespace, name], definition);
+	_.set(definitions, [namespace, name], definition);
 
 	return {
 		definitionName: name,
 		$ref: name,
 		name,
 		namespace,
-		...(!dependencies.lodash.isUndefined(definition.default) && { default: definition.default }),
+		...(!_.isUndefined(definition.default) && { default: definition.default }),
 	};
 };
 
 const filterUnusedDefinitions = schema => ({
 	...schema,
-	definitions: dependencies.lodash.pick(schema.definitions, sortDefinitionsNames(schema, getUsedDefinitions(schema))),
+	definitions: _.pick(schema.definitions, sortDefinitionsNames(schema, getUsedDefinitions(schema))),
 });
 
 const getUsedDefinitions = (schema, parentDefinitions = []) => {

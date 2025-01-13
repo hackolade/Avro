@@ -1,4 +1,4 @@
-const { dependencies } = require('../../shared/appDependencies');
+const _ = require('lodash');
 const avsc = require('../modules/avsc');
 const { parseJson } = require('./generalHelper');
 const { SCRIPT_TYPES } = require('../../shared/constants');
@@ -13,11 +13,7 @@ const AZURE_MISSING_SCHEMA_GROUP_ERROR = 'Schema Group is missing';
 const SCHEMA_IS_VALID_MESSAGE = 'Avro schema is valid';
 const SCHEMAS_ARE_VALID_MESSAGE = 'Avro schemas are valid';
 
-let _;
-
 const validateAvroScript = (script, scriptType, logger) => {
-	_ = dependencies.lodash;
-
 	scriptType = detectScriptType(script) || scriptType;
 	const scripts = parseScript(script, scriptType);
 	const validator = getScriptValidator(scriptType);
