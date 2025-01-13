@@ -311,7 +311,8 @@ const handleField = (name, field) => {
 	const { description, refDescription, default: __defaultValue, order, aliases, ...schema } = field;
 	const typeSchema = convertSchema(schema);
 	const udt = getUdtItem(typeSchema);
-	const customProperties = udt?.customProperties || getCustomProperties(getFieldLevelConfig(schema.type), schema);
+	const customProperties =
+		getCustomProperties(getFieldLevelConfig(udt?.schema?.type || schema.type), schema) || udt?.customProperties;
 
 	return resolveFieldDefaultValue(
 		{
