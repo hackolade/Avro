@@ -332,14 +332,12 @@ const handleField = (name, field) => {
 };
 
 const getDoc = ({ field, refDescription, description }) => {
-	if (!field.$ref) {
-		return description;
-	}
-
 	if (field.choice) {
 		return description;
 	}
-
+	if (!field.$ref && !refDescription) {
+		return description;
+	}
 	return refDescription;
 };
 
