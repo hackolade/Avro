@@ -12,7 +12,7 @@ const {
 } = require('./generalHelper');
 const convertChoicesToProperties = require('./convertChoicesToProperties');
 const { GENERAL_ATTRIBUTES, META_VALUES_KEY_MAP } = require('../../shared/constants');
-const { getFieldLevelConfig, getCustomProperties } = require('../../shared/customProperties');
+const { getFieldLevelConfig, getCustomProperties, getFieldCustomProperties } = require('../../shared/customProperties');
 const getTypeFromReference = require('./getTypeFromReference');
 
 const DEFAULT_TYPE = 'string';
@@ -311,8 +311,7 @@ const handleField = (name, field) => {
 	const { description, refDescription, default: __defaultValue, order, aliases, ...schema } = field;
 	const typeSchema = convertSchema(schema);
 	const udt = getUdtItem(typeSchema);
-	const customProperties =
-		getCustomProperties(getFieldLevelConfig(udt?.schema?.type || schema.type), schema) || udt?.customProperties;
+	const customProperties = getFieldCustomProperties({ schema, udt });
 
 	return resolveFieldDefaultValue(
 		{

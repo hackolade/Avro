@@ -1,3 +1,6 @@
+const _ = require('lodash');
+const { GENERAL_ATTRIBUTES } = require('../../shared/constants');
+
 const mapAvroSchema = (avroSchema, iteratee) => {
 	if (Array.isArray(avroSchema)) {
 		return avroSchema.map(item => mapAvroSchema(item, iteratee));
@@ -13,9 +16,15 @@ const mapAvroSchema = (avroSchema, iteratee) => {
 		const fields = avroSchema.fields.map(field => {
 			const typeSchema = mapAvroSchema(field.type, iteratee);
 			if (Array.isArray(typeSchema.type)) {
+				// properties of a reference (field) have higher priority except of some
+				// Avro-related properties like `default` or `type`. Although, it is not possible to define these
+				// properties on the reference, I made such merge to be sure that we don't overwrite
+				// some definition properties that are necessary because I'm not aware of whole scope and impact
+				// of the change.
 				return {
-					...field,
+					..._.pick(field, GENERAL_ATTRIBUTES),
 					...typeSchema,
+					..._.omit(field, GENERAL_ATTRIBUTES),
 					doc: field.doc ?? typeSchema.doc,
 				};
 			}

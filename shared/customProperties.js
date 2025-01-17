@@ -83,9 +83,38 @@ const getFieldLevelConfig = type => {
 
 const getEntityLevelConfig = () => pluginConfiguration.entityLevelConfig?.flatMap(tab => tab?.structure || []) || [];
 
+const getFieldCustomProperties = ({ schema, udt }) => {
+	const customProperties = getCustomProperties(getFieldLevelConfig(getFieldType({ schema, udt })), schema);
+
+	if (
+		typeof udt?.schema === 'string' ||
+		(Array.isArray(udt?.schema) && udt?.schema.every(type => typeof type === 'string'))
+	) {
+		return { ...(udt?.customProperties || {}), ...(customProperties || {}) };
+	}
+
+	return customProperties || {};
+};
+
+const getFieldType = ({ schema, udt }) => {
+	if (udt?.schema?.type) {
+		return udt.schema.type;
+	}
+
+	if (
+		typeof udt?.schema === 'string' ||
+		(Array.isArray(udt?.schema) && udt?.schema.every(type => typeof type === 'string'))
+	) {
+		return udt.schema;
+	}
+
+	return schema?.type;
+};
+
 module.exports = {
 	initPluginConfiguration,
 	getCustomProperties,
 	getFieldLevelConfig,
 	getEntityLevelConfig,
+	getFieldCustomProperties,
 };
