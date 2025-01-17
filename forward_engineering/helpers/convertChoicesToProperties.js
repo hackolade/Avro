@@ -2,6 +2,7 @@ const _ = require('lodash');
 const { filterMultipleTypes, prepareName, getDefaultName, convertName } = require('./generalHelper');
 const getTypeFromReference = require('./getTypeFromReference');
 const { AVRO_TYPES } = require('../../shared/constants');
+const { getFieldCustomProperties } = require('../../shared/customProperties');
 
 const CHOICES = ['oneOf', 'anyOf', 'allOf'];
 
@@ -49,6 +50,9 @@ const convertChoiceToProperties = (schema, choice) => {
 		};
 	}
 
+	// custom properties of choice have higher priority than custom properties of fields in subschemas
+	const choiceCustomProperties = getFieldCustomProperties({ schema: { ...choiceMeta, type: 'choice' } });
+
 	const multipleFieldsHash = allSubSchemaFields.reduce((multipleFieldsHash, field, index) => {
 		const fieldName = choiceMeta.code || choiceMeta.name || field.name || getDefaultName();
 		const fieldDescription = choiceMeta.description || field.description || field.refDescription;
@@ -77,6 +81,7 @@ const convertChoiceToProperties = (schema, choice) => {
 			[fieldName]: {
 				...convertName(multipleField),
 				...convertName(multipleTypeAttributes),
+				...choiceCustomProperties,
 				default: defaultValue,
 				type,
 			},
