@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const { GENERAL_ATTRIBUTES } = require('../../shared/constants');
+const { reorderAttributes } = require('./generalHelper');
 
 const mapAvroSchema = (avroSchema, iteratee) => {
 	if (Array.isArray(avroSchema)) {
@@ -21,12 +22,12 @@ const mapAvroSchema = (avroSchema, iteratee) => {
 				// properties on the reference, I made such merge to be sure that we don't overwrite
 				// some definition properties that are necessary because I'm not aware of whole scope and impact
 				// of the change.
-				return {
+				return reorderAttributes({
 					..._.pick(field, GENERAL_ATTRIBUTES),
 					...typeSchema,
 					..._.omit(field, GENERAL_ATTRIBUTES),
 					doc: field.doc ?? typeSchema.doc,
-				};
+				});
 			}
 
 			return {
