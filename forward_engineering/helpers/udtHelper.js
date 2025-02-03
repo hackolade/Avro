@@ -98,7 +98,7 @@ const getTypeFromUdt = type => {
 
 	const { schema, customProperties } = getUdtItem(type) || {};
 	let udtItem = resolveSymbolDefaultValue(schema);
-	udtItem = typeof schema === 'object' ? { ...udtItem, ...customProperties } : schema;
+	udtItem = typeof schema === 'object' && !Array.isArray(schema) ? { ...udtItem, ...customProperties } : schema;
 
 	if (isDefinitionTypeValidForAvroDefinition(udtItem)) {
 		useUdt(type);
