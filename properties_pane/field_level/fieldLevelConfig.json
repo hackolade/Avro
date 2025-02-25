@@ -129,6 +129,24 @@ making sure that you maintain a proper JSON format.
 				"template": "textarea"
 			},
 			"type",
+			{
+				"propertyName": "Logical type",
+				"propertyKeyword": "logicalType",
+				"typeDecorator": {
+					"useAsTypeName": true
+				},
+				"shouldValidate": false,
+				"propertyType": "select",
+				"options": ["", "uuid"]
+			},
+			{
+				"propertyName": "Order",
+				"propertyKeyword": "order",
+				"shouldValidate": false,
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": ["ascending", "descending", "ignore"]
+			},
 			"format",
 			"required",
 			{
@@ -178,24 +196,6 @@ making sure that you maintain a proper JSON format.
 						"value": "array"
 					}
 				]
-			},
-			{
-				"propertyName": "Logical type",
-				"propertyKeyword": "logicalType",
-				"typeDecorator": {
-					"useAsTypeName": true
-				},
-				"shouldValidate": false,
-				"propertyType": "select",
-				"options": ["", "uuid"]
-			},
-			{
-				"propertyName": "Order",
-				"propertyKeyword": "order",
-				"shouldValidate": false,
-				"propertyTooltip": "Select from list of options",
-				"propertyType": "select",
-				"options": ["ascending", "descending", "ignore"]
 			},
 			{
 				"propertyName": "Aliases",
