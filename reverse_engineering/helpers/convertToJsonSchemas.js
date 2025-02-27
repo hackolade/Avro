@@ -278,7 +278,8 @@ const convertArray = (namespace, attributes) => {
 const convertUserDefinedType = (namespace, type, attributes) => {
 	const name = getName({ name: type });
 	const hasNamespaceSpecified = (type || '').split('.').length > 1;
-	const ref = isCollectionReference(name) || hasNamespaceSpecified ? `#collection/definitions/${name}` : type;
+	const isCollectionReferenceType = isCollectionReference(name) || isCollectionReference(namespace + '.' + name);
+	const ref = isCollectionReferenceType || hasNamespaceSpecified ? `#collection/definitions/${name}` : type;
 
 	return {
 		...attributes,
