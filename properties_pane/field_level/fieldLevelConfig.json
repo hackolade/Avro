@@ -1729,6 +1729,10 @@ making sure that you maintain a proper JSON format.
 			"comments"
 		],
 		"multiple": [
+			"name",
+			"code",
+			"isActivated",
+			"type",
 			{
 				"propertyName": "Required",
 				"propertyKeyword": "required",
@@ -1762,6 +1766,14 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "details",
 				"template": "textarea"
 			},
+			"dependencies",
+			"primaryKey",
+			"foreignEntity",
+			"foreignField",
+			"relationshipType",
+			"relationshipName",
+			"cardinality",
+			"comments",
 			"dynamic"
 		],
 		"reference": [
