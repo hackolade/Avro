@@ -1732,7 +1732,6 @@ making sure that you maintain a proper JSON format.
 			"name",
 			"code",
 			"isActivated",
-			"type",
 			{
 				"propertyName": "Required",
 				"propertyKeyword": "required",
