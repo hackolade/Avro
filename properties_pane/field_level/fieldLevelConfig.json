@@ -1733,6 +1733,24 @@ making sure that you maintain a proper JSON format.
 			"code",
 			"isActivated",
 			{
+				"propertyName": "Doc",
+				"propertyKeyword": "description",
+				"propertyValidate": false,
+				"propertyTooltip": "Popup for multi-line text entry",
+				"propertyType": "details",
+				"template": "textarea"
+			},
+			{
+				"propertyName": "Type",
+				"propertyKeyword": "type",
+				"dependency": [
+					{
+						"key": "multiType",
+						"exist": false
+					}
+				]
+			},
+			{
 				"propertyName": "Required",
 				"propertyKeyword": "required",
 				"propertyType": "checkbox",
@@ -1756,14 +1774,6 @@ making sure that you maintain a proper JSON format.
 						"exist": false
 					}
 				]
-			},
-			{
-				"propertyName": "Doc",
-				"propertyKeyword": "description",
-				"propertyValidate": false,
-				"propertyTooltip": "Popup for multi-line text entry",
-				"propertyType": "details",
-				"template": "textarea"
 			},
 			"dependencies",
 			"primaryKey",
