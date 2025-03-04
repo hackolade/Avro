@@ -913,6 +913,15 @@ making sure that you maintain a proper JSON format.
 							"type": "or",
 							"values": [
 								{
+									"key": "nullable",
+									"value": true
+								}
+							]
+						},
+						{
+							"type": "or",
+							"values": [
+								{
 									"key": "required",
 									"value": false
 								},
