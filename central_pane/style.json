@@ -27,4 +27,58 @@
 }
  */
 
-{}
+{
+	"field": {
+		"erd": [
+			"keys",
+			"type",
+			{
+				"value": "#",
+				"title": "Pattern field",
+				"dependency": {
+					"key": "isPatternField",
+					"value": true
+				},
+				"width": 20
+			},
+			{
+				"value": "*",
+				"dependency": {
+					"type": "or",
+					"values": [
+						{
+							"key": "required",
+							"value": true
+						},
+						{
+							"type": "or",
+							"values": [
+								{
+									"key": "nullable",
+									"value": false
+								},
+								{
+									"type": "and",
+									"values": [
+										{
+											"value": "collectionReference",
+											"key": "refType"
+										},
+										{
+											"key": "nullable",
+											"exists": false
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				"override": {
+					"value": "*"
+				},
+				"width": 20
+			}
+		]
+	}
+}

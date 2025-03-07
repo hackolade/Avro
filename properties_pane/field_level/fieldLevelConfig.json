@@ -913,6 +913,15 @@ making sure that you maintain a proper JSON format.
 							"type": "or",
 							"values": [
 								{
+									"key": "nullable",
+									"value": true
+								}
+							]
+						},
+						{
+							"type": "or",
+							"values": [
+								{
 									"key": "required",
 									"value": false
 								},
@@ -1729,6 +1738,27 @@ making sure that you maintain a proper JSON format.
 			"comments"
 		],
 		"multiple": [
+			"name",
+			"code",
+			"isActivated",
+			{
+				"propertyName": "Doc",
+				"propertyKeyword": "description",
+				"propertyValidate": false,
+				"propertyTooltip": "Popup for multi-line text entry",
+				"propertyType": "details",
+				"template": "textarea"
+			},
+			{
+				"propertyName": "Type",
+				"propertyKeyword": "type",
+				"dependency": [
+					{
+						"key": "multiType",
+						"exist": false
+					}
+				]
+			},
 			{
 				"propertyName": "Required",
 				"propertyKeyword": "required",
@@ -1754,14 +1784,14 @@ making sure that you maintain a proper JSON format.
 					}
 				]
 			},
-			{
-				"propertyName": "Doc",
-				"propertyKeyword": "description",
-				"propertyValidate": false,
-				"propertyTooltip": "Popup for multi-line text entry",
-				"propertyType": "details",
-				"template": "textarea"
-			},
+			"dependencies",
+			"primaryKey",
+			"foreignEntity",
+			"foreignField",
+			"relationshipType",
+			"relationshipName",
+			"cardinality",
+			"comments",
 			"dynamic"
 		],
 		"reference": [

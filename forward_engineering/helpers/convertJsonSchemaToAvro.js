@@ -317,7 +317,7 @@ const handleField = (name, field) => {
 		{
 			name: prepareName(name),
 			type: _.isArray(typeSchema.type) ? typeSchema.type : typeSchema,
-			default: getEnumDefaultValue(field, udt, typeSchema),
+			default: getDefaultValue(field, udt, typeSchema),
 			doc: getDoc({ field, refDescription, description }),
 			order,
 			aliases,
@@ -337,6 +337,12 @@ const getDoc = ({ field, refDescription, description }) => {
 	return refDescription;
 };
 
+const getDefaultValue = (field, udt, typeSchema) => {
+	const defaultValue = getEnumDefaultValue(field, udt, typeSchema);
+
+	return convertDefaultValueToTypeOfField(field, defaultValue);
+};
+
 const getEnumDefaultValue = (field, udt, typeSchema) => {
 	if (!_.isUndefined(field?.default) || typeSchema?.type === 'enum') {
 		return field?.default;
@@ -347,6 +353,18 @@ const getEnumDefaultValue = (field, udt, typeSchema) => {
 	}
 
 	return typeSchema?.default;
+};
+
+const convertDefaultValueToTypeOfField = (field, defaultValue) => {
+	if (!defaultValue) {
+		return defaultValue;
+	}
+
+	if (field.type === 'number') {
+		return _.toNumber(defaultValue);
+	}
+
+	return defaultValue;
 };
 
 const resolveFieldDefaultValue = (field, type) => {
