@@ -39,16 +39,28 @@ const readAvroData = (filePath, cb) => {
 		null: (buf, cb) => cb(null, buf),
 	};
 
-	avro.createFileDecoder(filePath, { codecs })
-		.on('metadata', type => {
-			try {
-				const schema = JSON.stringify(type);
-				return cb(null, schema);
-			} catch (error) {
-				return cb(error);
-			}
-		})
-		.on('error', cb);
+	const processMetadata = metadata => {
+		try {
+			const schema = JSON.stringify(metadata);
+			return cb(null, schema);
+		} catch (error) {
+			return cb(error);
+		}
+	};
+
+	try {
+		avro.createFileDecoder(filePath, { codecs }).on('metadata', processMetadata).on('error', cb);
+	} catch (err) {
+		// In browser environment file decoder is unavailable, need to use a fallback strategy
+		if (err.toString().includes('createFileDecoder is not a function')) {
+			const avroBuffer = fs.readFileSync(filePath);
+			const avroBlob = new Blob([avroBuffer]);
+
+			avro.createBlobDecoder(avroBlob).on('metadata', processMetadata).on('error', cb);
+		} else {
+			cb(err);
+		}
+	}
 };
 
 const getExtension = filePath => path.extname(filePath);
