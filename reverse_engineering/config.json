@@ -7,7 +7,7 @@
 	"useCloudStorage": true,
 	"useMultipleFileReverse": true,
 	"useConfluent": true,
-	"useConfluentFromBrowser": true,
+	"enableCloudREFromBrowser": true,
 	"useAzureSchemaRegistry": true,
 	"usePulsarSchemaRegistry": true
 }
