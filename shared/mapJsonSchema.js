@@ -1,6 +1,6 @@
 const _ = require('lodash');
 
-const PROPERTIES_LIKE = ['properties', 'definitions', 'patternProperties'];
+const PROPERTIES_LIKE = ['properties', 'definitions', 'patternProperties', '$defs'];
 const ITEMS_LIKE = ['items', 'oneOf', 'allOf', 'anyOf', 'not'];
 
 const mapJsonSchema =

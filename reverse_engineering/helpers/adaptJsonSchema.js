@@ -57,12 +57,15 @@ const handleEmptyDefaultInProperties = field => {
 
 	const properties = propertiesKeys.reduce((properties, key) => {
 		const propertyValue = field.properties[key];
-		if (required.includes(key)) {
+		const isMultiple = Array.isArray(propertyValue.type);
+		const isMultipleWithComplexType = isMultiple && propertyValue.type.find(isComplexType);
+
+		if (required.includes(key) && !isMultipleWithComplexType) {
 			return { ...properties, [key]: propertyValue };
 		}
 
 		const property = handleEmptyDefault(propertyValue);
-		if (propertyValue === property || !_.isArray(property.type)) {
+		if (propertyValue === property || !Array.isArray(property.type)) {
 			return { ...properties, [key]: propertyValue };
 		}
 
