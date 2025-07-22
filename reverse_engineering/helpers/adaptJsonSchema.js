@@ -20,6 +20,10 @@ const adaptType = field => {
 		return adaptMultiple(field);
 	}
 
+	if (type === 'string') {
+		return handleString(field);
+	}
+
 	if (type === 'number') {
 		return handleNumber(field);
 	}
@@ -251,6 +255,18 @@ const convertToValidAvroName = name => {
 	}
 
 	return name.replace(/[^A-Za-z0-9_]/g, '_');
+};
+
+const handleString = field => {
+	if (Array.isArray(field.enum) && field.enum.length > 0) {
+		return {
+			...field,
+			type: 'enum',
+			symbols: field.enum,
+		};
+	}
+
+	return field;
 };
 
 module.exports = { adaptJsonSchema, adaptJsonSchemaName };
