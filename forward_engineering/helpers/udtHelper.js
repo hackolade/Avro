@@ -132,10 +132,10 @@ const getTypeWithNamespace = type => {
 	}
 
 	if (!udtItem.schema.namespace) {
-		return type;
+		return udtItem.schema.name || type;
 	}
 
-	return udtItem.schema.namespace + '.' + type;
+	return udtItem.schema.namespace + '.' + udtItem.schema.name || type;
 };
 
 const convertNamedTypesToReferences = schema => {
