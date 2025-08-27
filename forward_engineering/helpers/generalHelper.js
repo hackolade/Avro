@@ -120,6 +120,12 @@ const compareSchemasByStructure = (schema1, schema2) => {
 	return _.isEqual(_.map(schema1.fields, 'name'), _.map(schema2.fields, 'name'));
 };
 
+const getExternalDefinitionBucketName = definition => {
+	const [, definitionBucketName] = (definition.fieldRelativePath ?? '').split('/');
+
+	return definitionBucketName;
+};
+
 module.exports = {
 	parseJson,
 	reorderAttributes,
@@ -129,4 +135,5 @@ module.exports = {
 	getDefaultName,
 	convertName,
 	compareSchemasByStructure,
+	getExternalDefinitionBucketName,
 };

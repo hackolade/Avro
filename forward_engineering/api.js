@@ -36,7 +36,11 @@ const generateModelScript = (data, logger, cb, app) => {
 
 		const entities = (containers || [])
 			.flatMap(container => container.entities.map(entityId => getEntityData(container, entityId)))
-			.map(entity => ({ ...entity, jsonSchema: parseJson(entity.jsonSchema) }));
+			.map(entity => ({
+				...entity,
+				jsonSchema: parseJson(entity.jsonSchema),
+				externalDefinitions: parseJson(externalDefinitions),
+			}));
 
 		const script = handleCollectionReferences(entities, options).map(entity => {
 			try {
@@ -100,7 +104,12 @@ const generateScript = (data, logger, cb, app) => {
 		const isFromUi = options.origin === 'ui';
 
 		const { references, jsonSchema: resolvedJsonSchema } =
-			_.first(handleCollectionReferences([{ jsonSchema: parseJson(jsonSchema) }], options)) || {};
+			_.first(
+				handleCollectionReferences(
+					[{ jsonSchema: parseJson(jsonSchema), externalDefinitions: parseJson(externalDefinitions) }],
+					options,
+				),
+			) || {};
 		const settings = getSettings({ containerData, entityData, modelData, references });
 		const script = getScript({
 			scriptType: getEntityScriptType(options, modelData),
