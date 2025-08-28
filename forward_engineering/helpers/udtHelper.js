@@ -362,7 +362,10 @@ const getConfluentSchemaVersion = version => {
 
 const getExternalReferenceDefinition = (field, externalDefinitions = { properties: {} }) => {
 	return Object.values(externalDefinitions.properties).find(definition => {
-		return (definition.definitionRefs ?? []).some(refPath => _.last(refPath) === field.GUID);
+		const isFieldDefinition = definition.definitionRefs?.some?.(refPath => _.last(refPath) === field.GUID);
+		const isRootCollection = !definition.fieldRelativePath?.includes?.('/properties/');
+
+		return isFieldDefinition && isRootCollection;
 	});
 };
 
