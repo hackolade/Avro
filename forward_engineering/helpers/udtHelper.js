@@ -2,7 +2,7 @@ const _ = require('lodash');
 const { isNamedType, filterAttributes } = require('../../shared/typeHelper');
 const { AVRO_TYPES, SCRIPT_TYPES } = require('../../shared/constants');
 const mapJsonSchema = require('../../shared/mapJsonSchema');
-const { reorderAttributes, simplifySchema } = require('./generalHelper');
+const { reorderAttributes, simplifySchema, getExternalDefinitionBucketName } = require('./generalHelper');
 const mapAvroSchema = require('./mapAvroSchema');
 const { getConfluentSubjectName } = require('./formatAvroSchemaByType');
 const { prepareName } = require('./generalHelper');
@@ -176,18 +176,29 @@ const convertCollectionReferences = (entities, options) => {
 	const entitiesIds = entities.map(entity => entity.jsonSchema.GUID);
 	const entitiesWithReferences = entities.map(entity => {
 		let references = [];
+
+		const externalDefinitions = entity.externalDefinitions;
 		const mapper = mapJsonSchema((field, path) => {
-			if (!field.ref) {
+			const externalDefinition = getExternalReferenceDefinition(field, externalDefinitions);
+
+			if (!field.ref && !externalDefinition) {
 				return field;
 			}
 
 			const isCollectionRef = !!field.parentCollectionName;
+
 			let definition;
 			if (!entitiesIds.includes(field.ref)) {
-				if (!isCollectionRef) {
+				if (!isCollectionRef && !externalDefinition) {
 					return field;
+				} else if (externalDefinition) {
+					definition = {
+						...externalDefinition,
+						bucketName: getExternalDefinitionBucketName(externalDefinition),
+					};
+				} else {
+					definition = field.parentCollection || {};
 				}
-				definition = field.parentCollection || {};
 			} else {
 				definition = entities.find(entity => entity.jsonSchema.GUID === field.ref).jsonSchema;
 			}
@@ -219,7 +230,7 @@ const convertCollectionReferences = (entities, options) => {
 			return {
 				...field,
 				$ref: `#/definitions/${definitionName}`,
-				namespace: field.namespace || field.parentBucketName,
+				namespace: field.namespace || field.parentBucketName || namespace,
 				default: field.nullable ? null : field.default,
 			};
 		});
@@ -347,6 +358,15 @@ const getConfluentSchemaVersion = version => {
 	}
 
 	return Number(version);
+};
+
+const getExternalReferenceDefinition = (field, externalDefinitions) => {
+	return Object.values(externalDefinitions?.properties ?? {}).find(definition => {
+		const isFieldDefinition = definition.definitionRefs?.some?.(refPath => _.last(refPath) === field.GUID);
+		const isRootCollection = !definition.fieldRelativePath?.includes?.('/properties/');
+
+		return isFieldDefinition && isRootCollection;
+	});
 };
 
 module.exports = {
