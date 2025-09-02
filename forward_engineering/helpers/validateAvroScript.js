@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const avsc = require('../modules/avsc');
+const avsc = require('avsc');
 const { parseJson } = require('./generalHelper');
 const { SCRIPT_TYPES } = require('../../shared/constants');
 
