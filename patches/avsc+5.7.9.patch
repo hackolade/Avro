@@ -1,3 +1,44 @@
+diff --git a/node_modules/avsc/lib/index.js b/node_modules/avsc/lib/index.js
+index 003f7ce..4d509b3 100644
+--- a/node_modules/avsc/lib/index.js
++++ b/node_modules/avsc/lib/index.js
+@@ -29,6 +29,20 @@ function parse(any, opts) {
+     types.Type.forSchema(schemaOrProtocol, opts);
+ }
+ 
++// Align with studio patch of the avsc library
++function validateFileHeader(data) {
++  try {
++    const tap = new utils.Tap(data);
++    const header = containers.HEADER_TYPE._read(tap);
++    const schema = JSON.parse(header.meta['avro.schema'].toString());
++    console.log("Validating Avro file header", schema && tap.isValid());
++    return schema && tap.isValid();
++  } catch(e) {
++    console.error("Error validating Avro file header", e);
++    return false;
++  }
++}
++
+ /** Extract a container file's header synchronously. */
+ function extractFileHeader(path, opts) {
+   opts = opts || {};
+@@ -96,6 +110,7 @@ module.exports = {
+   createFileEncoder: createFileEncoder,
+   discoverProtocol: services.discoverProtocol,
+   extractFileHeader: extractFileHeader,
++  validateFileHeader,
+   parse: parse,
+   readProtocol: specs.readProtocol,
+   readSchema: specs.readSchema,
+@@ -114,5 +129,6 @@ module.exports = {
+   infer: util.deprecate(
+     types.Type.forValue,
+     'use `Type.forValue` instead'
+-  )
++  ),
++  errorsCollector: types.errorsCollector
+ };
 diff --git a/node_modules/avsc/lib/types.js b/node_modules/avsc/lib/types.js
 index dc7c69c..e399f82 100644
 --- a/node_modules/avsc/lib/types.js
