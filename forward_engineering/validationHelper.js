@@ -1,4 +1,4 @@
-const avsc = require('./modules/avsc');
+const avsc = require('avsc');
 
 const toMessage = entityName => err => ({
 	type: 'error',
