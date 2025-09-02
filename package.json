@@ -118,7 +118,7 @@
     "description": "Hackolade plugin for Apache Avro Schema",
     "disabled": false,
     "dependencies": {
-        "avsc": "5.4.11",
+        "avsc": "5.7.9",
         "lodash": "4.17.21",
         "snappyjs": "0.7.0"
     },
