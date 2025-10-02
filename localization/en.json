@@ -144,5 +144,20 @@
 	"CONTEXT_MENU___CONVERT_PATTERN_TO_REGULAR_FIELD": "Convert to Regular Field",
 	"MODAL_WINDOW___DB_CONNECTION_PROCESS": "Avro Reverse-Engineering Process",
 	"MODAL_WINDOW___DB_CONNECTIONS_LIST_TITLE": "Avro Connections",
-	"COLLECTION_SCHEMA_ROOT_TYPE": "record"
+	"COLLECTION_SCHEMA_ROOT_TYPE": "record",
+
+	"MAIN_MENU___ATTRIBUTES": "Field in Record Boxes",
+	"MAIN_MENU___DESCRIPTIONS": "Description in Record Boxes",
+	"MAIN_MENU___HIDE_ALL_ATTRIBUTES": "Empty Record Boxes",
+	"MAIN_MENU___REQUIRED_ATTRIBUTES": "Required Fields",
+	"MAIN_MENU___NULLABLE_ATTRIBUTES": "Nullable Fields",
+	"TOOLBAR___ATTRIBUTES": "Field in record boxes",
+	"TOOLBAR___DESCRIPTIONS": "Description in record boxes",
+	"TOOLBAR___HIDE_ALL_ATTRIBUTES": "Empty record boxes",
+	"TOOLBAR___REQUIRED_ATTRIBUTES": "Required fields",
+	"TOOLBAR___NULLABLE_ATTRIBUTES": "Nullable fields",
+	"MODAL_WINDOW___OPTIONS_DISPLAY_ERD_V_ENTITY_BOX_CONTENT": "Display of record box content",
+	"MODAL_WINDOW___OPTIONS_DISPLAY_ERD_V_FIELDS": "Fields",
+	"MODAL_WINDOW___OPTIONS_DISPLAY_REQUIRED_ATTRIBUTES": "Required fields",
+	"MODAL_WINDOW___OPTIONS_DISPLAY_NULLABLE_ATTRIBUTES": "Nullable fields"
 }
