@@ -53,35 +53,55 @@ const convertChoiceToProperties = (schema, choice) => {
 	// custom properties of choice have higher priority than custom properties of fields in subschemas
 	const choiceCustomProperties = getFieldCustomProperties({ schema: { ...choiceMeta, type: 'choice' } });
 
+	const choiceName =
+		choiceMeta.code ||
+		choiceMeta.name ||
+		allSubSchemaFields[0]?.code ||
+		allSubSchemaFields[0]?.name ||
+		getDefaultName();
+
+	const fieldWithDescription = allSubSchemaFields.findLast(field => field.description || field.refDescription);
+	const choiceDescription =
+		choiceMeta.description || fieldWithDescription?.description || fieldWithDescription?.refDescription;
+
 	const multipleFieldsHash = allSubSchemaFields.reduce((multipleFieldsHash, field, index) => {
-		const fieldName = choiceMeta.code || choiceMeta.name || field.name || getDefaultName();
-		const fieldDescription = choiceMeta.description || field.description || field.refDescription;
-		const multipleField = multipleFieldsHash[fieldName] || {
+		const multipleField = multipleFieldsHash[choiceName] || {
 			...choiceMeta,
 			default: convertDefaultMetaFieldType(field.type, choiceMeta.default),
-			name: prepareName(fieldName),
+			name: prepareName(choiceName),
 			type: [],
 			choiceMeta,
 		};
 		const multipleTypeAttributes = {
 			...field,
-			...(fieldDescription && { description: fieldDescription }),
+			// When the choice have the description property, we show it and ignore the property in the fields
+			// when the field is not a reference. If it is a reference, the field can have the description of the
+			// but it will come from the definition and its not handled here.
+			//
+			// When the choice have no description we take the description of a field and put it into choice, at the same
+			// time removing it from field.
+			description: undefined,
 			type: field.$ref ? getTypeFromReference(field) : field.type,
-			name: prepareName(field.name || fieldName),
+			name: prepareName(field.code || field.name || choiceName),
 		};
-		const multipleTypes = filterMultipleTypes(ensureArray(multipleField.type).concat(multipleTypeAttributes));
+		const multipleTypes = ensureArray(multipleField.type).concat(multipleTypeAttributes);
 		const type = _.isArray(multipleTypes)
-			? multipleTypes.map(typeSchema => typeSchema?.type || typeSchema)
+			? multipleTypes.map(typeSchema =>
+					['fixed', 'enum', 'record'].includes(typeSchema?.type)
+						? typeSchema
+						: typeSchema?.type || typeSchema,
+				)
 			: multipleTypes?.type || multipleTypes;
 		const defaultFromSubschema = index === 0 ? multipleTypeAttributes.default : undefined;
 		const defaultValue = !_.isUndefined(multipleField.default) ? multipleField.default : defaultFromSubschema;
 
 		return {
 			...multipleFieldsHash,
-			[fieldName]: {
+			[choiceName]: {
 				...convertName(multipleField),
 				...convertName(multipleTypeAttributes),
 				...choiceCustomProperties,
+				...(choiceDescription && { description: choiceDescription }),
 				default: defaultValue,
 				type,
 			},

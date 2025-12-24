@@ -40,7 +40,7 @@ const setPropertyAsFirst = key => avroSchema => {
 };
 
 const filterMultipleTypes = schemaTypes => {
-	const types = _.uniqBy(schemaTypes, type => type?.type || type);
+	const types = _.uniqBy(schemaTypes, type => type);
 	if (types.length === 1) {
 		return _.first(types);
 	}
