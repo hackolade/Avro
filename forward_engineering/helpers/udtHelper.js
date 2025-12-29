@@ -369,6 +369,10 @@ const getExternalReferenceDefinition = (field, externalDefinitions) => {
 	});
 };
 
+const getDefinitionsOfCollectionReferences = () => {
+	return Object.fromEntries(Object.entries(udt).filter(([key, value]) => value?.isCollectionReference));
+};
+
 module.exports = {
 	resolveUdt,
 	resolveSchemaUdt,
@@ -379,4 +383,5 @@ module.exports = {
 	resetDefinitionsUsage,
 	convertCollectionReferences,
 	resolveNamespaceReferences,
+	getDefinitionsOfCollectionReferences,
 };

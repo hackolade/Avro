@@ -11,6 +11,7 @@ const {
 	resolveNamespaceReferences,
 	clearDefinitions,
 	resolveSchemaUdt,
+	getDefinitionsOfCollectionReferences,
 } = require('./helpers/udtHelper');
 const convertSchema = require('./helpers/convertJsonSchemaToAvro');
 const {
@@ -42,7 +43,10 @@ const generateModelScript = (data, logger, cb, app) => {
 				externalDefinitions: parseJson(externalDefinitions),
 			}));
 
-		const script = handleCollectionReferences(entities, options).map(entity => {
+		const entitiesWithHandledCollectionReferences = handleCollectionReferences(entities, options);
+		const collectionDefinitions = getDefinitionsOfCollectionReferences();
+
+		const script = entitiesWithHandledCollectionReferences.map(entity => {
 			try {
 				const { containerData, entityData, jsonSchema, internalDefinitions, references } = entity;
 
@@ -50,6 +54,7 @@ const generateModelScript = (data, logger, cb, app) => {
 				addDefinitions(convertedExternalDefinitions);
 				addDefinitions(convertedModelDefinitions);
 				setUserDefinedTypes(internalDefinitions, true);
+				addDefinitions(collectionDefinitions);
 				resetDefinitionsUsage();
 
 				const settings = getSettings({ containerData, entityData, modelData, references });
