@@ -119,7 +119,7 @@
     "disabled": false,
     "dependencies": {
         "avsc": "5.7.9",
-        "lodash": "4.17.21",
+        "lodash": "4.17.23",
         "snappyjs": "0.7.0"
     },
     "lint-staged": {
