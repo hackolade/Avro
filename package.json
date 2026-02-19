@@ -122,11 +122,8 @@
         "lodash": "4.17.23",
         "snappyjs": "0.7.0"
     },
-    "lint-staged": {
-        "*.{js,json}": "prettier --write"
-    },
     "simple-git-hooks": {
-        "pre-commit": "npm run package && npx lint-staged",
+        "pre-commit": "npm run package && npx lint-staged --config lint-staged.config.js",
         "pre-push": "npm run lint"
     },
     "scripts": {
@@ -134,7 +131,8 @@
         "lint:check": "oxlint --type-aware --type-check . || true",
         "package": "node esbuild.package.js",
         "install": "npx patch-package",
-        "postinstall": "npx simple-git-hooks"
+        "postinstall": "npx simple-git-hooks",
+        "format": "prettier --write ."
     },
     "devDependencies": {
         "@hackolade/hck-esbuild-plugins-pack": "0.0.1",
