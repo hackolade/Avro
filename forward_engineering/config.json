@@ -6,6 +6,7 @@
 	"validation": true,
 	"applyScriptToInstance": true,
 	"applyScriptToInstanceInBrowser": true,
+	"resolvedEntityReference": false,
 	"splitView": {
 		"byAdditionalOptions": ["INCLUDE_SAMPLES"]
 	},
